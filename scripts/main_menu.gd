@@ -14,16 +14,17 @@ func _ready() -> void:
 	music.play()
 	$Home/Difficulty.select(Preferences.difficulty)
 	$Home/Difficulty.item_selected.connect(set_difficulty)
-	$Home/PlayAI.pressed.connect(func() -> void: start_game(false))
+	$Home/PlayAI.pressed.connect(select_ai_mode)
+	$Home/StartAI.pressed.connect(func() -> void: start_game(false))
 	$Home/PlayLocal.pressed.connect(func() -> void: start_game(true))
-	$Home/SettingsButton.pressed.connect(func() -> void: show_page(options))
+	$Toolbar/SettingsButton.pressed.connect(func() -> void: show_page(options))
 	$Home/CharactersButton.pressed.connect(func() -> void: show_page(character_page))
 	$Characters/Back.pressed.connect(func() -> void: show_page(home))
 	configure_characters()
-	$Home/ControlsButton.pressed.connect(func() -> void: show_page(controls))
-	$Home/Quit.pressed.connect(func() -> void: get_tree().quit())
+	$Settings/ControlsButton.pressed.connect(func() -> void: show_page(controls))
+	$Toolbar/Quit.pressed.connect(func() -> void: get_tree().quit())
 	$Settings/Back.pressed.connect(func() -> void: show_page(home))
-	$Controls/Back.pressed.connect(func() -> void: show_page(home))
+	$Controls/Back.pressed.connect(func() -> void: show_page(options))
 	for kind in ["Music", "Effects", "Voice"]:
 		var slider: HSlider = options.get_node(kind + "Slider")
 		slider.value = Preferences.get(kind.to_lower() + "_volume") * 100
@@ -73,6 +74,8 @@ func start_game(local: bool) -> void:
 	Preferences.local_mode = local
 	for button in home.find_children("*", "Button", false, false):
 		button.disabled = true
+	$Toolbar/SettingsButton.disabled = true
+	$Toolbar/Quit.disabled = true
 	music.stop()
 	start_sound.play()
 	# A brief transition plays the supplied cue without delaying the fight too long.
@@ -81,7 +84,7 @@ func start_game(local: bool) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and not starting:
-		show_page(home)
+		show_page(options if controls.visible else home)
 
 func _exit_tree() -> void:
 	music.stop()
@@ -133,3 +136,8 @@ func choose_hat(slot: int, index: int) -> void:
 	Preferences.hats[slot] = index
 	Preferences.save_settings()
 	update_preview(slot)
+
+func select_ai_mode() -> void:
+	$Home/Difficulty.show()
+	$Home/StartAI.show()
+	$Home/Difficulty.grab_focus()

@@ -39,3 +39,11 @@ MainMenu/Background uses the pack's original Sample.png via a full-size TextureR
 R, H, and Tab practice controls are ignored in matches launched with Local Two Players. AI practice matches allow them, including toggling the practice opponent temporarily to manual control and back. The match mode is captured at launch, so a local match cannot be converted to AI using Tab. Escape and result-screen Play Again/Main Menu remain available in either mode. Quit is removed from results and remains on the main menu.
 
 Menu styling uses solid cream cards, dark text, navy buttons, teal hover states, and gold keyboard-focus borders. The sample background has no full-screen transparency wash and remains visible at full contrast around the cards.
+
+## Updated home layout and title font
+
+Only the title retains a solid cream card. Home uses a StyleBoxEmpty, leaving the sample image visible behind individual menu buttons. The upper-right toolbar is anchored 40 pixels from the top/right viewport edges with 64-pixel icon buttons and a 15-pixel gap: Kenney tile_cog for Settings and ui_numXlarge for Quit. Controls is reached from Settings; Back returns to Settings. Customize opens characters, weapons, and hats.
+
+Selecting Player vs AI reveals the difficulty dropdown to its right plus an explicit Play button; selection alone does not start the match. Player vs Player starts local play directly.
+
+The title uses Balsamiq Sans Bold from Google Fonts' official repository, downloaded into assets/fonts/BalsamiqSans-Bold.ttf. It is bundled for offline use under the included SIL Open Font License (assets/fonts/OFL.txt), separate from the CC0 artwork. Source: https://github.com/google/fonts/tree/main/ofl/balsamiqsans. Other text retains its readable standard font. Edit Title's font/size in main_menu.tscn.

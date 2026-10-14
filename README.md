@@ -1,55 +1,173 @@
-# Scribble Fighters — Godot fighting game prototype
+# Scribble Fighters
 
-A self-contained Godot 4.6 project demonstrating finite state machines, frame-timed combat collision, and buffered combo input. Graphics use the included Kenney Scribble Platformer assets (CC0), with procedural poses synchronized to combat frames. No external downloads or plugins are required.
+A local 2D fighting game built with **Godot 4.6 and GDScript**, using Kenney's hand-drawn Scribble Platformer artwork. Play against a configurable AI or a second player on the same keyboard, customize both fighters, and compete in a single 60-second match.
 
-## Run
+The project demonstrates three core technical systems: an explicit finite state machine, frame-timed hitbox/hurtbox detection, and buffered input for responsive combos. Artwork, menu layouts, and audio are included in the repository; no plugins or external downloads are required to play.
 
-Import `project.godot` in Godot 4.6 and press **F6** on the arena scene or **F5** to play the project. Alternatively run `godot --path .` from this directory on a machine with a display.
+## Quick start
+
+1. Install [Godot 4.6](https://godotengine.org/download/) — the standard build is sufficient; .NET is not required.
+2. Clone the repository:
+
+   ```sh
+   git clone https://github.com/fiveft55/BIX322-FigntinGame.git
+   cd BIX322-FigntinGame
+   ```
+
+3. In Godot's Project Manager, choose **Import** and select `project.godot`.
+4. Let Godot import the assets, then press **F5** to open the main menu.
+
+From a terminal with Godot on your PATH and a graphical display:
+
+```sh
+godot --path .
+```
+
+The viewport is 1152 × 648 with canvas stretching. The compatibility renderer is used. Development checks have been run with Godot **4.6.3**.
+
+## Playing a match
+
+- **Player vs AI:** select this option to reveal the difficulty dropdown, choose Easy, Normal, or Hard, then press **Play**.
+- **Player vs Player:** starts local two-player play.
+- **Customize:** choose each player's body/color, weapon, and hat before playing.
+- **Settings cog:** adjust music, effects, and voice volume; open **Controls** from this page.
+- **Cross icon:** quit the game from the main menu.
+
+Each match begins with a fading, voiced **3 → 2 → 1 → FIGHT!** countdown. Fighters and the match clock stay paused during the three-second count. A knockout ends the match early. At timeout, the player with more health wins; equal health is a draw. There is no best-of-three scoring.
+
+The result screen shows the winner/draw and **Knockout** or **Time Up**, without health numbers. **Play Again** starts a fresh countdown; **Main Menu** returns to the menu. Press **Esc** during a fight to return to the menu.
+
+### Controls
 
 | Action | Player 1 | Player 2 |
 | --- | --- | --- |
-| Move | A / D | Left / Right |
+| Move left/right | A / D | Left / Right |
 | Jump | W | Up |
-| Attack / combo | F | K |
-| Hold guard | G | L |
+| Melee attack / combo | F | K |
+| Hold shield guard | G | L |
 
-Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles collision visualization, and **R** restarts. Close the window to exit. Approach your opponent, then press attack repeatedly with short pauses to chain three strikes. An input entered during late recovery is retained until the cancel window opens. Guard protects the front and applies reduced damage and stun.
+Hold movement while attacking or guarding. Movement, jump, and attack can combine into an aerial strike. Rapid attack taps can queue the three-strike combo; holding attack does not auto-fire. There is no double jump or airborne guard. Opposite movement directions cancel each other.
 
-## Architecture for your project report
+These shortcuts are available **only in matches launched as Player vs AI**:
 
-- `scripts/fighter.gd`: explicit `IDLE`, `WALKING`, `ATTACKING`, `HIT_STUN`, `BLOCKING`, and `JUMPING` states. `change_state()` centralizes transitions and destroys attack hitboxes when interrupted. Idle/walking/blocking can start an attack; attacks finish or chain into the next strike; incoming hits interrupt with timed stun. Block stun uses the same stun state with a shorter duration.
-- `scripts/input_buffer.gd`: a bounded queue of timestamped commands, expiring after 220 ms for jump and 750 ms for attack. Consumption removes a command exactly once. Up to eight presses are retained; hits clear pending commands. This tolerates early presses without indefinite delayed attacks.
-- Attacks use a fixed 60 Hz simulation timeline. Startup has no hitbox; active frames instantiate an `Area2D` with a separate rectangle; recovery destroys it. Persistent hurtboxes are separate `Area2D` nodes. Combat uses immediate rectangle intersection with identical dimensions, avoiding stale overlap lists when Godot defers physics updates. A per-attack victim list prevents repeated damage across active frames.
-- `scripts/arena.gd`: input mapping, both fighters' simulation, body separation, simultaneous hit collection, health UI, round outcome, and restart. Both attacks are collected before damage is applied so trades can occur.
+| Key | Action |
+| --- | --- |
+| R | Restart the match |
+| H | Toggle collision visualization |
+| Tab | Toggle the practice opponent between AI and manual control |
 
-| Strike | Startup frames | Active frames | Recovery frames | Damage | Hit stun frames |
+Local PvP ignores these shortcuts. AI practice retains them even when Tab temporarily switches its opponent to manual control. Gameplay state transitions and control information print in Godot's **Output** panel or the launch terminal, rather than on-screen diagnostic labels.
+
+### Combat and hit reactions
+
+- Attacks have startup, active, and recovery phases. Damage occurs only during active hitbox frames.
+- Each attack can damage a target once, even if its active hitbox overlaps for multiple ticks.
+- A successful front-facing shield block acts as a **parry**: it cancels the attack and pushes the attacker back. Rear hits bypass guard.
+- Unblocked hits launch the victim upward and backward. Defaults are **180 pixels** of travel over **0.3 seconds**, with **0.4 seconds** of hit stun.
+- Parry defaults are **120 pixels** of attacker recoil and **0.4 seconds** of stun. Guard still applies chip damage and a shorter defender guard stun.
+- Walls limit actual knockback distance. A new hit replaces the previous knockback and restarts stun.
+
+## Customization and settings
+
+Both players can select eight body/color combinations: round or square characters in green, purple, red, and yellow. Health bars match the selected colors. Hats include No Hat, Cap, Top Hat, Helmet, and Modern Helmet.
+
+Weapons include Sword, Spear, Rod, and Pencil. These are **melee visual variants sharing the same attack rules and hitboxes**; they do not introduce projectile attacks or different weapon statistics. Hats are decorative.
+
+Difficulty, character/weapon/hat selections, and audio volumes persist in `user://settings.cfg`. This is Godot's application-data directory, not a tracked repository file. Music, effects, and announcer voice have independent volume controls; zero mutes the corresponding bus.
+
+### Where to edit things
+
+| Change | Location |
+| --- | --- |
+| Keys, speeds, jump/gravity, health, round length, buffering, attack data | `scripts/game_settings.gd` |
+| AI difficulty profiles and character/weapon/hat catalogs | `scripts/game_settings.gd` |
+| Per-character knockback, hit launch, stun, and parry distance | Fighter root Inspector in `scenes/fighter_green.tscn` / `fighter_purple.tscn` |
+| Shield-hand raise and recoil pose | Visuals Inspector in either fighter scene |
+| Body, hand, weapon, shield, and hat placement | Sprite nodes in either fighter scene |
+| Arena scenery and starting player X positions | `scenes/arena.tscn` |
+| Main menu arrangement, title font, cog/cross icons | `scenes/main_menu.tscn` |
+| Solid cards, button colors, keyboard focus styling | `scenes/menu_theme.tres` |
+| Countdown and translucent result panel | `scenes/match_overlay.tscn` |
+| Battle sounds, announcer clips, base mix volumes | `scenes/match_audio.tscn` |
+| Independent audio buses | `default_bus_layout.tres` |
+
+Saved menu selections override default fighter texture choices at runtime; scene-authored transforms remain editable. Keep the fighter node hierarchy intact because the pose script references those nodes. The ground is a mathematical floor plane: decorative tiles do not supply platform collisions.
+
+## Technical architecture
+
+| Component | Responsibility |
+| --- | --- |
+| `fighter.gd` | FSM, input capture, movement/jumping, attack phases, damage, guard/parry, knockback |
+| `input_buffer.gd` | Bounded timestamped command queue with expiration and single consumption |
+| `fighter_visual.gd` | Scene-authored sprite poses synchronized with combat state and attack frames |
+| `arena.gd` | Fighter updates, body separation, simultaneous hit collection, timer/countdown/results |
+| `match_audio.gd` | Looping music, overlapping effects, queued announcer playback |
+| `main_menu.gd` | Navigation, difficulty, settings, customization previews, scene transitions |
+| `preferences.gd` | Autoload for validated, persistent choices and audio bus gains |
+
+The FSM has `IDLE`, `WALKING`, `JUMPING`, `ATTACKING`, `HIT_STUN`, and `BLOCKING` states. State transitions clean up interrupted hitboxes. Gravity continues during airborne hit stun, and landing clamps the fighter's feet to the floor.
+
+Persistent hurtboxes and temporary attack hitboxes are separate `Area2D` rectangles. Combat resolves immediate world-rectangle intersections using the same dimensions as those collision nodes, avoiding delayed overlap queries after hitbox creation. The arena collects both attacks before applying damage, permitting simultaneous trades.
+
+Human input events are captured individually, including multiple presses between physics ticks; keyboard auto-repeat is ignored. The queue holds up to eight commands. Jump commands expire after **220 ms**, attack commands after **750 ms**. Hits, restart, and AI toggles clear pending input.
+
+Physics runs at **60 Hz**. `ATTACK_SPEED = 1.25` advances the attack timeline 25% faster than its base frame data. Threshold-crossing checks keep hitbox activation correct when a tick advances more than one attack frame. Sprite poses and sword audio follow the same timeline; stun, gravity, and match-clock timing are independent.
+
+| Strike | Base startup | Base active | Base recovery | Damage | Base stun frames |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 6 | 4 | 13 | 8 | 18 |
 | 2 | 7 | 4 | 14 | 10 | 21 |
 | 3 | 10 | 5 | 22 | 16 | 24 |
 
-The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking or a full competitive fighting-game ruleset.
+Startup/active/recovery values are attack-timeline frames, accelerated by `ATTACK_SPEED`; actual durations are quantized to physics ticks. The final six recovery frames permit combo chaining. Hit stun is the larger of the attack's base stun and the per-character minimum: by default **24 physics ticks / 0.4 seconds**.
 
-## Validation
+AI is deterministic and rule-based. Difficulty changes movement speed, attack decision cadence, and guard reaction/availability; it does not change damage or health.
 
-Run from the project directory:
+## Project layout
+
+```text
+assets/
+  scribble/              Kenney textures, original sample, and license
+  audio/                 Battle, menu, and voice files with license notes
+  fonts/                 Bundled Google Font and SIL Open Font License
+scenes/
+  main_menu.tscn         Entry scene and menu pages
+  arena.tscn             Editable scenery and fighter instances
+  fighter_*.tscn         Editable fighter rigs
+  match_overlay.tscn     Timer, countdown, and result screen
+  match_audio.tscn       Sound assignments and players
+  menu_theme.tres        Shared UI styles
+scripts/                 Gameplay, presentation, menus, and preferences
+tests/                   Eight headless regression suites
+project.godot            Godot project configuration
+```
+
+## Testing
+
+From the repository root, import resources before running the suites:
 
 ```sh
 godot --headless --path . --editor --import --quit
-godot --headless --path . --script tests/combat_test.gd
-godot --headless --path . --script tests/arena_test.gd
-godot --headless --path . --script tests/jump_test.gd
-godot --headless --path . --script tests/assets_test.gd
-godot --headless --path . --script tests/knockback_test.gd
-godot --headless --path . --script tests/match_test.gd
-godot --headless --path . --script tests/audio_test.gd
-godot --headless --path . --script tests/menu_test.gd
-godot --headless --path . --quit-after 180
+
+for suite in combat arena jump assets knockback match audio menu; do
+  godot --headless --path . --script "tests/${suite}_test.gd" || exit 1
+done
 ```
 
-The combat test checks input expiration and single consumption, startup/active/recovery hitbox timing, damage, stun, single-hit protection, buffered combo cancellation, and front/rear blocking. The last command smoke-tests the main scene. Interactive controls and appearance still need a visual playtest on a desktop.
+| Suite | Coverage |
+| --- | --- |
+| Combat | Input expiration/consumption, hitbox phases, damage, combos, guard, simultaneous input, speeds |
+| Arena | AI damage, KO freezing, restart |
+| Jump | Launch/steering, no double jump, landing, aerial evasion/stun, reset |
+| Assets | Texture loading, scene poses, sword timing, shield attachment/raise/recoil |
+| Knockback | Travel, direction, walls, stun duration, guard/parry reactions |
+| Match | Full timer, countdown/fade, timeout/KO/draw, result display, rematch |
+| Audio | Countdown routing, music looping/start/stop, effects, voice ordering, cleanup |
+| Menu | Navigation/layout, font fit, settings persistence, previews, selections, health colors, AI behavior, PvP shortcut restrictions |
 
-In the cloud sandbox, set writable runtime directories before these commands:
+All eight suites have passed in the cloud environment. Headless checks validate mechanics and configuration; they do not replace desktop playtesting for visual layout, controller feel, audio levels, or the music loop boundary.
+
+For a restricted cloud sandbox, redirect Godot's writable runtime directories before running commands:
 
 ```sh
 export XDG_DATA_HOME=/workspace/godot-runtime/data
@@ -58,60 +176,24 @@ export XDG_CACHE_HOME=/workspace/godot-runtime/cache
 mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
 ```
 
-For a Bachelor's submission, supplement the prototype with your own design rationale, FSM diagram, frame-data experiments, test results, evaluation, and disclosure of AI assistance according to your institution's rules. This project is a technical foundation, not a guarantee of an academic grade.
+## Detailed guides
 
-## Customization
+- [Code guide](CODE_GUIDE.md): functions, variables, FSM behavior, and tuning.
+- [Scene guide](SCENE_GUIDE.md): placing artwork, weapon pivots, shield poses, and collision alignment.
+- [Menu guide](MENU_GUIDE.md): menu layout, AI profiles, customization, and saved preferences.
+- [Audio guide](AUDIO_GUIDE.md): sound mappings, volumes, buses, and playback flow.
+- [Asset guide](ASSET_GUIDE.md): original artwork and replacement instructions.
 
-Edit `scripts/game_settings.gd` for movement keys, speed, gravity, jump height, health, attack data, and buffering. See [CODE_GUIDE.md](CODE_GUIDE.md) for every script and function, variable units, examples, and jump rules. W/Up jumps; steer in the air with movement keys. Attacks work on the ground and in the air; blocking is ground-only.
+## Credits and licenses
 
-## Simultaneous inputs and attack mashing
+- Project license: [CC0 1.0](LICENSE).
+- **Kenney Scribble Platformer** artwork, including the sample background: [original CC0 license](assets/scribble/License.txt), by [Kenney](https://kenney.nl/).
+- **Kenney Voiceover Pack: Fighter**: [original CC0 license](assets/audio/voice/License.txt).
+- Uploaded battle/menu sounds: the project owner confirmed CC0; original creator handles/filenames and [battle](assets/audio/battle/License.txt) / [menu](assets/audio/menu/License.txt) declaration notes are retained.
+- **Balsamiq Sans Bold**, bundled from [Google Fonts](https://github.com/google/fonts/tree/main/ofl/balsamiqsans): [SIL Open Font License](assets/fonts/OFL.txt). The font has its own license rather than the project's CC0 license.
 
-Input events are collected individually in `Fighter._input()`, including presses arriving between physics ticks. Keyboard auto-repeat is ignored. Hold movement while attacking or blocking; attack movement uses `ATTACK_MOVE_SPEED` and guard movement uses `BLOCK_MOVE_SPEED`. Jump + attack + movement can execute together, and airborne attacks use air steering. Attack takes priority over guard: pressing attack while holding guard starts a strike, and guard resumes after recovery. You cannot guard an attack while striking or airborne. Left + right cancel to zero horizontal input.
+## Scope and academic use
 
-Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.
+This is a local fighting-game prototype with one arena and one melee combo chain. Online multiplayer, gamepad bindings, runtime key rebinding, weapon-specific abilities, and a full competitive ruleset are not implemented. AI does not use machine learning.
 
-## Included artwork
-
-The uploaded Kenney Scribble Platformer pack provides green/purple fighters, hands, shields, punch effects, trees, clouds, and ground tiles. See [ASSET_GUIDE.md](ASSET_GUIDE.md) for file mappings and replacement instructions. The pack has static PNGs, not animation sheets or audio; poses are animated in code. Original CC0 license: [assets/scribble/License.txt](assets/scribble/License.txt).
-
-## Edit artwork in the scene editor
-
-Open scenes/arena.tscn for organized scenery and fighter instances. Open scenes/fighter_green.tscn or scenes/fighter_purple.tscn to edit body, hands, swords, shields, and effects directly in the Inspector. Both fighters now swing swords using the timed attack hitboxes. See [SCENE_GUIDE.md](SCENE_GUIDE.md) for step-by-step placement and replacement instructions.
-
-Unblocked hits now launch fighters upward and backward. Select the Fighter root in either fighter scene to edit **Hit Push Distance** (pixels) and **Hit Jump Speed** (pixels/second). See SCENE_GUIDE.md for tuning and scene overrides.
-
-Default unblocked hits now push 180 pixels over 0.3 seconds and stun for 0.4 seconds. **Hit Stun Seconds** joins the editable Fighter Inspector settings. Attack frame-data stun values are lower bounds; the per-character 24-frame default minimum takes precedence. Blocking keeps its short guard stun.
-
-Collision outlines are hidden by default. Press H to toggle green hurtboxes and red attack hitboxes for debugging.
-
-Both fighters hold shields in their free hands. Guard raises that hand; a blocked hit briefly recoils it. Tune the guard hand pose on the Visuals node in either fighter scene.
-
-## Shield size and block parries
-
-Shield scale is now reduced by 20% (80% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
-
-Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.4). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.4 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.
-
-## Single-round match
-
-Each match lasts 60 seconds. A knockout ends it early; timeout awards the win to the player with more remaining health. Equal health (including a double knockout) is a draw. A result screen shows the winner and match-ending reason, with Play Again and Main Menu buttons. R restarts the whole match. There is no best-of-three scoring. Set ROUND_SECONDS in game_settings.gd to change duration; the clock counts 60 Hz simulation ticks.
-
-## Pre-fight countdown
-
-Every new match and rematch starts with centered 3, 2, 1 text over three seconds. Each number fades, then FIGHT! appears and fades away over 0.5 seconds while combat begins. Controls and the 60-second match clock remain paused during the numeric countdown. Pre-fight attack/jump presses are ignored. Edit the Countdown label in scenes/match_overlay.tscn to change placement, font, outline, and size. Game-end results show only winner/draw and Knockout/Time Up, without remaining-health numbers.
-
-## Audio
-
-Countdown and fight/result voiceovers, sword/block/hit/jump effects, and looping battle music are included. Open scenes/match_audio.tscn to swap audio and change player volumes, or use the Music/Voice/SFX buses. See [AUDIO_GUIDE.md](AUDIO_GUIDE.md) for the complete mapping and CC0 attribution notes. Desktop listening is recommended for final mix tuning.
-
-## Console diagnostics and faster combat
-
-Controls print once at startup in Godot's Output panel (or the terminal when launched from CLI). Player states print on transitions; AI/local mode changes also print. The on-screen state and control labels are removed, while health bars, match timer, countdown, and result screen remain.
-
-Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
-
-## Main menu and customization
-
-F5 now opens the main menu with looping uploaded menu music. Choose AI difficulty (Easy/Normal/Hard) or local two-player play, customize both players' characters/weapons, adjust music/effects/voice volume, or read Controls before starting. Selections and settings persist between launches. Character colors match health bars. Esc returns to the menu from battle. See [MENU_GUIDE.md](MENU_GUIDE.md) for editing scenes, AI profiles, saved settings, and weapon limitations.
-
-Local two-player matches ignore R/reset, H/collision overlays, and Tab/AI toggle. These practice shortcuts are available only when a match was launched via Play vs AI. The menu now uses the original Kenney Sample.png background. Each player can select No Hat, Cap, Top Hat, Helmet, or Modern Helmet; choices are saved and appear in the preview and battle. The result screen offers Play Again and Main Menu, with Quit available only on the main menu.
+For an academic report, document your design decisions, state transitions, frame-data experiments, test results, and evaluation. Disclose AI-assisted work according to your institution's requirements. The guides explain the implementation so you can adapt it and justify your own changes.

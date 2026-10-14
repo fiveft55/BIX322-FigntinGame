@@ -98,3 +98,5 @@ The game now starts at main_menu.tscn. Edit its Home/Settings/Controls/Character
 Hats are editable Body/Hat Sprite2D nodes in each fighter scene, populated by the character menu selection. The menu Background TextureRect references Kenney Sample.png. Result buttons are now Play Again and Main Menu; Quit is only in the main menu.
 
 Arena ground now uses tile_top.png and tile_block.png, with tile_bushHalf.png replacing both bushes. Existing placement and collision floor remain unchanged.
+
+The game-over panel uses a 28% opacity cream StyleBoxFlat (result_panel in match_overlay.tscn). Buttons inherit the solid menu theme; outlined result text stays readable. Change the panel background alpha to tune arena visibility without fading its child controls.

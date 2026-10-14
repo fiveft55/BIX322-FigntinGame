@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="script"]
 [ext_resource type="AudioStream" path="res://assets/audio/menu/mfcc-game-game-music-603130.mp3" id="music"]
@@ -6,6 +6,25 @@
 [ext_resource type="Texture2D" path="res://assets/scribble/Sample.png" id="sample"]
 
 [ext_resource type="Theme" path="res://scenes/menu_theme.tres" id="theme"]
+
+[ext_resource type="Texture2D" path="res://assets/scribble/tile_cog.png" id="cog"]
+[ext_resource type="Texture2D" path="res://assets/scribble/ui_numXlarge.png" id="cross"]
+
+[ext_resource type="FontFile" path="res://assets/fonts/BalsamiqSans-Bold.ttf" id="title_font"]
+
+[sub_resource type="StyleBoxEmpty" id="home_empty"]
+
+[sub_resource type="StyleBoxFlat" id="icon_plate"]
+bg_color = Color(0.98, 0.965, 0.92, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.12, 0.18, 0.23, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_left = 10
+corner_radius_bottom_right = 10
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -47,7 +66,8 @@ offset_right = 902.0
 offset_bottom = 110.0
 text = "SCRIBBLE FIGHTERS"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 44
+theme_override_fonts/font = ExtResource("title_font")
+theme_override_font_sizes/font_size = 48
 theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
 
 [node name="Subtitle" type="Label" parent="."]
@@ -61,25 +81,28 @@ theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
 
 [node name="Home" type="Panel" parent="."]
-offset_left = 330.0
-offset_top = 165.0
-offset_right = 822.0
-offset_bottom = 600.0
+offset_left = 300.0
+offset_top = 250.0
+offset_right = 852.0
+offset_bottom = 530.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("home_empty")
 
-
-[node name="DifficultyLabel" type="Label" parent="Home"]
-offset_left = 40.0
-offset_top = 20.0
-offset_right = 215.0
-offset_bottom = 50.0
-text = "AI difficulty"
-theme_override_font_sizes/font_size = 20
+[node name="PlayAI" type="Button" parent="Home"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 250.0
+offset_bottom = 55.0
+text = "Player vs AI"
+theme_override_font_sizes/font_size = 22
 
 [node name="Difficulty" type="OptionButton" parent="Home"]
-offset_left = 235.0
-offset_top = 15.0
-offset_right = 450.0
+visible = false
+offset_left = 265.0
+offset_top = 0.0
+offset_right = 425.0
 offset_bottom = 55.0
+tooltip_text = "Choose AI difficulty"
 item_count = 3
 selected = 1
 popup/item_0/text = "Easy"
@@ -89,44 +112,28 @@ popup/item_1/id = 1
 popup/item_2/text = "Hard"
 popup/item_2/id = 2
 
-[node name="PlayAI" type="Button" parent="Home"]
-offset_left = 60.0
-offset_top = 80.0
-offset_right = 432.0
-offset_bottom = 125.0
-text = "Play vs AI"
-theme_override_font_sizes/font_size = 22
+[node name="StartAI" type="Button" parent="Home"]
+visible = false
+offset_left = 440.0
+offset_top = 0.0
+offset_right = 552.0
+offset_bottom = 55.0
+text = "Play"
 
 [node name="PlayLocal" type="Button" parent="Home"]
-offset_left = 60.0
-offset_top = 135.0
-offset_right = 432.0
-offset_bottom = 180.0
-text = "Local Two Players"
+offset_left = 0.0
+offset_top = 80.0
+offset_right = 250.0
+offset_bottom = 135.0
+text = "Player vs Player"
 theme_override_font_sizes/font_size = 22
 
-[node name="SettingsButton" type="Button" parent="Home"]
-offset_left = 60.0
-offset_top = 190.0
-offset_right = 432.0
-offset_bottom = 235.0
-text = "Settings"
-theme_override_font_sizes/font_size = 22
-
-[node name="ControlsButton" type="Button" parent="Home"]
-offset_left = 60.0
-offset_top = 245.0
-offset_right = 432.0
-offset_bottom = 290.0
-text = "Controls"
-theme_override_font_sizes/font_size = 22
-
-[node name="Quit" type="Button" parent="Home"]
-offset_left = 60.0
-offset_top = 365.0
-offset_right = 432.0
-offset_bottom = 410.0
-text = "Quit"
+[node name="CharactersButton" type="Button" parent="Home"]
+offset_left = 0.0
+offset_top = 160.0
+offset_right = 250.0
+offset_bottom = 215.0
+text = "Customize"
 theme_override_font_sizes/font_size = 22
 
 [node name="Settings" type="Panel" parent="."]
@@ -141,7 +148,7 @@ offset_left = 30.0
 offset_top = 15.0
 offset_right = 462.0
 offset_bottom = 55.0
-text = "AUDIO SETTINGS"
+text = "SETTINGS"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 26
 
@@ -223,14 +230,6 @@ offset_top = 365.0
 offset_right = 456.0
 offset_bottom = 410.0
 text = "Back"
-
-[node name="CharactersButton" type="Button" parent="Home"]
-offset_left = 60.0
-offset_top = 300.0
-offset_right = 432.0
-offset_bottom = 345.0
-text = "Characters, Weapons & Hats"
-theme_override_font_sizes/font_size = 20
 
 [node name="Characters" type="Panel" parent="."]
 visible = false
@@ -368,3 +367,54 @@ offset_bottom = 300.0
 visible = false
 position = Vector2(0, -58)
 scale = Vector2(1, 0.65)
+
+[node name="ControlsButton" type="Button" parent="Settings"]
+offset_left = 145.0
+offset_top = 325.0
+offset_right = 345.0
+offset_bottom = 360.0
+text = "Controls"
+
+[node name="Toolbar" type="Control" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -183.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = 104.0
+mouse_filter = 2
+
+[node name="SettingsButton" type="Button" parent="Toolbar"]
+offset_right = 64.0
+offset_bottom = 64.0
+tooltip_text = "Settings"
+theme_override_styles/normal = SubResource("icon_plate")
+theme_override_styles/hover = SubResource("icon_plate")
+
+[node name="Icon" type="TextureRect" parent="Toolbar/SettingsButton"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 52.0
+offset_bottom = 52.0
+mouse_filter = 2
+texture = ExtResource("cog")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Quit" type="Button" parent="Toolbar"]
+offset_left = 79.0
+offset_right = 143.0
+offset_bottom = 64.0
+tooltip_text = "Quit game"
+theme_override_styles/normal = SubResource("icon_plate")
+theme_override_styles/hover = SubResource("icon_plate")
+
+[node name="Icon" type="TextureRect" parent="Toolbar/Quit"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 52.0
+offset_bottom = 52.0
+mouse_filter = 2
+texture = ExtResource("cross")
+expand_mode = 1
+stretch_mode = 5

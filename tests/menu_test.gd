@@ -20,7 +20,17 @@ func run() -> void:
 	current_scene = menu
 	check(menu.music.playing and menu.music.stream.loop, "Menu music starts and loops")
 	check(menu.get_node("Background").texture.resource_path.ends_with("Sample.png"), "Menu uses original Kenney sample background")
-	menu.get_node("Home/SettingsButton").pressed.emit()
+	check(menu.home.get_theme_stylebox("panel") is StyleBoxEmpty, "Home has no solid backing")
+	var title: Label = menu.get_node("Title")
+	var font := title.get_theme_font("font")
+	check(font.resource_path.ends_with("BalsamiqSans-Bold.ttf"), "Bundled Google Font styles the title")
+	check(font.get_string_size(title.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 48).x < menu.get_node("TitleCard").size.x, "Title fits its solid card")
+	check(not menu.get_node("Home/Difficulty").visible, "AI difficulty waits for AI mode selection")
+	menu.get_node("Home/PlayAI").pressed.emit()
+	check(menu.get_node("Home/Difficulty").visible and menu.get_node("Home/StartAI").visible and not menu.starting, "AI option reveals difficulty and explicit Play")
+	check(menu.get_node("Toolbar").offset_right == -40 and menu.get_node("Toolbar").offset_top == 40, "Toolbar has 40 pixel viewport margins")
+	check(menu.get_node("Toolbar/Quit").position.x - menu.get_node("Toolbar/SettingsButton").size.x == 15, "Toolbar icons have 15 pixel gap")
+	menu.get_node("Toolbar/SettingsButton").pressed.emit()
 	check(menu.options.visible and not menu.home.visible, "Settings button opens settings page")
 	menu.get_node("Settings/MusicSlider").value = 0
 	check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Music")), "Music slider can mute music")
@@ -41,7 +51,8 @@ func run() -> void:
 	check(preferences.difficulty == 2 and preferences.characters == [2, 7], "Difficulty and characters persist")
 	check(preferences.hats == [2, 3], "Hat choices persist")
 	check(preferences.weapons == [1, 3] and preferences.music_volume == 0, "Weapons and audio volumes persist")
-	menu.show_page(menu.controls)
+	menu.get_node("Settings/ControlsButton").pressed.emit()
+	check(menu.controls.visible, "Controls opens from Settings")
 	check(menu.get_node("Controls/Info").text.contains("Hold shield"), "Controls page explains combat keys")
 	menu.start_game(true)
 	await create_timer(0.65).timeout
