@@ -29,7 +29,7 @@ func run() -> void:
 	Input.action_release("p1_jump")
 	await physics_frame
 	check(fighter.state == Fighter.State.JUMPING and fighter.position.y < GameSettings.FLOOR_Y, "Jump key launches fighter")
-	check(fighter.position.x > GameSettings.SPAWN_POSITIONS[0], "Air steering moves horizontally")
+	check(fighter.position.x > arena.spawn_positions[0].x, "Air steering moves horizontally")
 	var previous_velocity := fighter.velocity.y
 	fighter.buffer.push(&"jump")
 	arena._physics_process(1.0 / 60)

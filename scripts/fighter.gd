@@ -13,7 +13,12 @@ var health := GameSettings.MAX_HEALTH
 var facing := 1
 var combo := 0
 var stun_remaining := 0
-var player_index := 1
+## Per-character tuning is available in the scene Inspector.
+@export_range(0, 500, 1) var hit_push_distance: float = GameSettings.HIT_PUSH
+@export_range(0, 1000, 1) var hit_jump_speed: float = GameSettings.HIT_JUMP_SPEED
+var knockback_remaining := 0.0
+var knockback_speed := 0.0
+@export_range(1, 2) var player_index := 1
 var opponent: Fighter
 var buffer := FightInputBuffer.new()
 var hurtbox: Area2D
@@ -21,16 +26,15 @@ var hitbox: Area2D
 var victims: Array[int] = []
 var debug_boxes := true
 var enabled := true
-var use_ai := false
+@export var use_ai := false
 var ai_timer := 0.0
 var visuals: FighterVisual
 
 func _ready() -> void:
 	hurtbox = make_area(GameSettings.HURTBOX_SIZE, GameSettings.HURTBOX_CENTER, 1, 0)
 	hurtbox.set_meta("fighter", self)
-	visuals = FighterVisual.new()
-	visuals.z_index = -1 # Keep diagnostic collision boxes above the artwork.
-	add_child(visuals)
+	visuals = get_node_or_null("Visuals") as FighterVisual
+	# Isolated combat tests can instantiate Fighter without a presentation scene.
 	set_physics_process(false) # Arena updates both fighters before resolving collisions.
 
 func make_area(size: Vector2, center: Vector2, layer: int, mask: int) -> Area2D:
@@ -79,7 +83,7 @@ func tick(delta: float) -> void:
 	if not enabled:
 		queue_redraw()
 		if is_instance_valid(visuals):
-			visuals.queue_redraw()
+			visuals.update_pose()
 		return
 	var prefix := "p%d_" % player_index
 	# Human and AI commands feed the same FSM and input buffer.
@@ -100,6 +104,10 @@ func tick(delta: float) -> void:
 	velocity.x = 0.0
 	match state:
 		State.HIT_STUN:
+			# Spread the configured distance over stun instead of teleporting.
+			var step := minf(absf(knockback_remaining), knockback_speed * delta)
+			velocity.x = signf(knockback_remaining) * step / delta
+			knockback_remaining -= velocity.x * delta
 			stun_remaining -= 1
 			if stun_remaining <= 0:
 				change_state(State.IDLE if is_grounded() else State.JUMPING)
@@ -159,7 +167,7 @@ func tick(delta: float) -> void:
 				change_state(State.IDLE)
 	queue_redraw()
 	if is_instance_valid(visuals):
-		visuals.queue_redraw()
+		visuals.update_pose()
 
 func is_grounded() -> bool:
 	return position.y >= FLOOR_Y and velocity.y >= 0
@@ -188,18 +196,29 @@ func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 	change_state(State.HIT_STUN)
 	stun_remaining = GameSettings.BLOCK_STUN_FRAMES if guarded else int(attack.stun)
 	buffer.clear()
-	var push_distance := GameSettings.BLOCK_PUSH if guarded else GameSettings.HIT_PUSH
-	position.x = clampf(
-		position.x + attacker.facing * push_distance,
-		GameSettings.LEFT_BOUND,
-		GameSettings.RIGHT_BOUND
-	)
+	var away := signf(position.x - attacker.position.x)
+	if away == 0:
+		away = attacker.facing
+	knockback_remaining = 0.0
+	knockback_speed = 0.0
+	if guarded:
+		# A successful guard keeps the fighter grounded with a small shove.
+		position.x = clampf(
+			position.x + away * GameSettings.BLOCK_PUSH,
+			GameSettings.LEFT_BOUND, GameSettings.RIGHT_BOUND
+		)
+	else:
+		knockback_remaining = away * hit_push_distance
+		knockback_speed = hit_push_distance / (maxi(1, stun_remaining) / 60.0)
+		velocity.y = -hit_jump_speed
 
 func reset_fighter(x: float) -> void:
 	change_state(State.IDLE)
 	health = GameSettings.MAX_HEALTH
 	position = Vector2(x, FLOOR_Y)
 	velocity = Vector2.ZERO
+	knockback_remaining = 0.0
+	knockback_speed = 0.0
 	buffer.clear()
 	enabled = true
 	ai_timer = 0

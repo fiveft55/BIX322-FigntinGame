@@ -22,12 +22,12 @@ const MAX_BUFFER_COMMANDS := 8
 const COMBO_CANCEL_FRAMES := 6
 const BLOCK_DAMAGE := 1
 const BLOCK_STUN_FRAMES := 8
-const HIT_PUSH := 18.0
+const HIT_PUSH := 90.0 # Default travel distance on an unblocked hit, pixels.
+const HIT_JUMP_SPEED := 260.0 # Default upward hit launch, pixels per second.
 const BLOCK_PUSH := 8.0
 const AI_APPROACH_DISTANCE := 105.0
 const AI_ATTACK_DISTANCE := 145.0
 const AI_ATTACK_INTERVAL := 0.6
-const SPAWN_POSITIONS := [400.0, 750.0]
 const ATTACKS := [
 	{"startup": 6, "active": 4, "recovery": 13, "damage": 8, "stun": 18, "reach": 64.0},
 	{"startup": 7, "active": 4, "recovery": 14, "damage": 10, "stun": 21, "reach": 72.0},
@@ -44,13 +44,3 @@ const KEYS := {
 
 static func key_label(action: String) -> String:
 	return OS.get_keycode_string(KEYS[action])
-
-## Uploaded Kenney art. Arrays are indexed by player number minus one.
-const CHARACTER_TEXTURES := [
-	"res://assets/scribble/character_roundGreen.png",
-	"res://assets/scribble/character_squarePurple.png",
-]
-const HAND_TEXTURES := [
-	"res://assets/scribble/character_handGreen.png",
-	"res://assets/scribble/character_handPurple.png",
-]

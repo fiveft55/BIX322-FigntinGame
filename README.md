@@ -40,6 +40,7 @@ godot --headless --path . --script tests/combat_test.gd
 godot --headless --path . --script tests/arena_test.gd
 godot --headless --path . --script tests/jump_test.gd
 godot --headless --path . --script tests/assets_test.gd
+godot --headless --path . --script tests/knockback_test.gd
 godot --headless --path . --quit-after 180
 ```
 
@@ -69,3 +70,9 @@ Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jum
 ## Included artwork
 
 The uploaded Kenney Scribble Platformer pack provides green/purple fighters, hands, shields, punch effects, trees, clouds, and ground tiles. See [ASSET_GUIDE.md](ASSET_GUIDE.md) for file mappings and replacement instructions. The pack has static PNGs, not animation sheets or audio; poses are animated in code. Original CC0 license: [assets/scribble/License.txt](assets/scribble/License.txt).
+
+## Edit artwork in the scene editor
+
+Open scenes/arena.tscn for organized scenery and fighter instances. Open scenes/fighter_green.tscn or scenes/fighter_purple.tscn to edit body, hands, swords, shields, and effects directly in the Inspector. Both fighters now swing swords using the timed attack hitboxes. See [SCENE_GUIDE.md](SCENE_GUIDE.md) for step-by-step placement and replacement instructions.
+
+Unblocked hits now launch fighters upward and backward. Select the Fighter root in either fighter scene to edit **Hit Push Distance** (pixels) and **Hit Jump Speed** (pixels/second). See SCENE_GUIDE.md for tuning and scene overrides.

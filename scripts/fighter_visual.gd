@@ -1,25 +1,30 @@
 class_name FighterVisual
 extends Node2D
-## Static Kenney artwork animated by the fighter's simulation frame, not a timer.
-var fighter: Fighter
-var body: Texture2D
-var hand: Texture2D
-var shield: Texture2D
-var blast: Texture2D
+## Scene-authored sprites; gameplay supplies pose offsets, never texture paths.
+@onready var fighter := get_parent() as Fighter
+@onready var rig: Node2D = $Rig
+@onready var body: Sprite2D = $Rig/Body
+@onready var front_hand: Sprite2D = $Rig/FrontHand
+@onready var shield: Sprite2D = $Rig/Shield
+@onready var effect: Sprite2D = $Rig/PunchEffect
+@onready var sword: Sprite2D = $Rig/FrontHand/SwordGrip/Sword
+var base_positions: Dictionary = {}
+var base_body_rotation := 0.0
+@onready var sword_grip: Node2D = $Rig/FrontHand/SwordGrip
+var base_sword_rotation := 0.0
 
 func _ready() -> void:
-	fighter = get_parent() as Fighter
-	body = load(GameSettings.CHARACTER_TEXTURES[fighter.player_index - 1])
-	hand = load(GameSettings.HAND_TEXTURES[fighter.player_index - 1])
-	shield = load("res://assets/scribble/item_shieldRound.png")
-	blast = load("res://assets/scribble/effect_blast.png")
+	for node in [body, front_hand, effect]:
+		base_positions[node] = node.position
+	base_body_rotation = body.rotation
+	base_sword_rotation = sword_grip.rotation
+	update_pose()
 
-func _draw() -> void:
-	if not is_instance_valid(fighter) or body == null:
-		return
+func update_pose() -> void:
 	var bob := 0.0
 	var tilt := 0.0
 	var extension := 0.0
+	var swing := -0.6
 	var active := is_instance_valid(fighter.hitbox)
 	match fighter.state:
 		Fighter.State.WALKING:
@@ -30,26 +35,26 @@ func _draw() -> void:
 		Fighter.State.ATTACKING:
 			var attack: Dictionary = Fighter.ATTACKS[fighter.combo]
 			if fighter.state_frame < attack.startup:
-				extension = -8.0 * fighter.state_frame / attack.startup
+				var progress: float = float(fighter.state_frame) / attack.startup
+				extension = -8.0 * progress
+				swing = -0.6 - progress * 0.6
 			elif active:
-				extension = attack.reach - 12.0
+				extension = 12.0
+				swing = 0.0
 			else:
-				var recovery_frame: float = fighter.state_frame - attack.startup - attack.active
-				extension = (attack.reach - 12.0) * maxf(0, 1 - recovery_frame / maxf(1, attack.recovery))
-			tilt = fighter.facing * (0.12 if active else -0.04)
+				var elapsed: float = fighter.state_frame - attack.startup - attack.active
+				var progress := clampf(elapsed / maxf(1, attack.recovery), 0, 1)
+				extension = 12.0 * (1 - progress)
+				swing = -0.6 * progress
+			tilt = 0.1 if active else -0.04
 		Fighter.State.HIT_STUN:
 			tilt = sin(fighter.state_frame * 1.2) * 0.15
-	var body_color := Color.WHITE
-	if fighter.state == Fighter.State.HIT_STUN:
-		body_color = Color(1, 0.65, 0.65)
-	# Artwork is centered around feet; only visual transforms are mirrored.
-	draw_set_transform(Vector2(0, -56 + bob), tilt, Vector2(fighter.facing, 1))
-	draw_texture_rect(body, Rect2(-36, -56, 72, 112), false, body_color)
-	draw_set_transform(Vector2.ZERO)
-	draw_texture_rect(hand, Rect2(-fighter.facing * 20 - 32, -82 + bob, 64, 64), false)
-	var fist_x := fighter.facing * (24 + extension)
-	draw_texture_rect(hand, Rect2(fist_x - 32, -94 + bob, 64, 64), false)
-	if active:
-		draw_texture_rect(blast, Rect2(fist_x - 18, -80, 36, 36), false, Color(1, 1, 1, 0.8))
-	if fighter.state == Fighter.State.BLOCKING:
-		draw_texture_rect(shield, Rect2(fighter.facing * 28 - 32, -100, 64, 72), false)
+	rig.scale.x = fighter.facing
+	body.position = base_positions[body] + Vector2(0, bob)
+	body.rotation = base_body_rotation + tilt
+	body.modulate = Color(1, 0.65, 0.65) if fighter.state == Fighter.State.HIT_STUN else Color.WHITE
+	front_hand.position = base_positions[front_hand] + Vector2(extension, bob)
+	sword_grip.rotation = base_sword_rotation + swing
+	effect.position = base_positions[effect] + Vector2(Fighter.ATTACKS[fighter.combo].reach - 24, 0)
+	effect.visible = active
+	shield.visible = fighter.state == Fighter.State.BLOCKING

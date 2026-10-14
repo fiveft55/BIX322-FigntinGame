@@ -21,10 +21,11 @@ Edit **scripts/game_settings.gd**, save, then restart the game. Constants affect
 | MAX_BUFFER_COMMANDS | Capacity; oldest command is dropped when full |
 | COMBO_CANCEL_FRAMES | Final recovery frames permitting the next strike |
 | BLOCK_DAMAGE / BLOCK_STUN_FRAMES | Guard chip damage and stun duration |
-| HIT_PUSH / BLOCK_PUSH | Immediate horizontal hit displacement, pixels |
+| HIT_PUSH / BLOCK_PUSH | Default unblocked travel distance / instant guarded shove, pixels |
+| HIT_JUMP_SPEED | Default upward launch speed on an unblocked hit, pixels per second |
 | AI_APPROACH_DISTANCE / AI_ATTACK_DISTANCE | Horizontal approach/attack thresholds, pixels |
 | AI_ATTACK_INTERVAL | Seconds between AI attack decisions |
-| SPAWN_POSITIONS | Starting X coordinates for both players |
+| Scene Player1/Player2 positions | Starting X coordinates, edited in arena.tscn |
 | ATTACKS | Ordered dictionaries defining combo strikes |
 | KEYS | Action names mapped to physical keyboard keys |
 
@@ -89,13 +90,13 @@ AI guard timing remains in tick(): fmod(ai_timer, 1.5) < 0.65. Edit this express
 
 ### scripts/arena.gd
 
-_ready() sets 60 Hz physics, binds keys, creates fighters/opponent references, enables default AI, builds HUD, and restarts. bind() replaces an action's runtime events with its configured physical key. create_hud() builds labels/health bars. restart() restores both fighters. _physics_process() handles match controls, ticks fighters, separates bodies, collects both hits before damage (allowing trades), handles KO, and updates HUD. ArenaVisual draws arena/grid/floor.
+_ready() sets 60 Hz physics, binds keys, references scene fighters, captures spawn positions, assigns opponents, builds HUD, and restarts. bind() replaces an action's runtime events with its configured physical key. create_hud() builds labels/health bars. restart() restores both fighters. _physics_process() handles match controls, ticks fighters, separates bodies, collects both hits before damage (allowing trades), handles KO, and updates HUD. Scenery nodes in arena.tscn provide the background and floor.
 
-fighters owns both fighters, info is the status label, bars holds health bars, and round_over tracks the match outcome. Change CHARACTER_TEXTURES and HAND_TEXTURES in settings for character colors and use_ai initialization for default local play. UI positions/fonts are in create_hud(). For a different viewport, update project.godot, settings bounds/spawns, and arena UI/background coordinates together. Keep physics at 60 Hz unless intentionally changing frame-based combat timing.
+fighters owns both fighters, info is the status label, bars holds health bars, and round_over tracks the match outcome. Change Body and Hand Sprite2D textures in the fighter scenes for character colors and use_ai initialization for default local play. UI positions/fonts are in create_hud(). For a different viewport, update project.godot, settings bounds/spawns, and arena UI/background coordinates together. Keep physics at 60 Hz unless intentionally changing frame-based combat timing.
 
 ### Other files
 
-- scenes/arena.tscn: main Node2D and its arena script; fighters/UI are created dynamically.
+- scenes/arena.tscn: main Node2D and its arena script; fighter instances and scenery are scene-authored; UI is created dynamically.
 - project.godot: game name, main scene, viewport/stretch, renderer, background color.
 - .gitignore: excludes generated .godot import cache. .gd.uid files identify scripts and belong in version control.
 - tests/combat_test.gd: queue expiration/consumption, attack phases, damage/stun, once-per-strike hits, combo, directional guard.
@@ -110,8 +111,10 @@ Input events are collected individually in `Fighter._input()`, including presses
 
 Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.
 
-## Asset presentation scripts
+## Scene-authored artwork
 
-`scripts/fighter_visual.gd` loads configured body/hand textures and shared shield/blast art in `_ready()`. Its `_draw()` reads the fighter state and frame counter for walking bob, jump lean, attack windup/extension/recovery, stun flash, and guarding. It mirrors artwork independently of collision. Fighter.tick() requests a visual redraw; presentation never applies damage or advances combat.
+All texture references and placement now live in arena.tscn and fighter_green/purple.tscn. fighter_visual.gd references Sprite2D children, captures their scene transforms in _ready(), and applies simulation-driven pose offsets in update_pose(). SwordGrip pivots the sword around the hand. fighter.tick() refreshes this presentation without changing collision timing. arena.gd uses existing Player1/Player2 scene instances and captures scene spawn positions. ArenaVisual was removed; scenery no longer requires a script. See SCENE_GUIDE.md for the hierarchy and editing instructions.
 
-`scripts/arena_visual.gd` loads scenery textures in `_ready()`, uses `stamp()` to draw texture rectangles, and draws the notebook background and decorative scenery in `_draw()`. Tiles align with FLOOR_Y. Trees/castles are decoration, not platforms. See ASSET_GUIDE.md for asset paths and sizing.
+## Hit reaction movement
+
+Fighter exposes hit_push_distance and hit_jump_speed as Inspector properties. receive_hit() launches upward and stores signed knockback_remaining and knockback_speed. The HIT_STUN branch of tick() moves that distance over the configured stun duration, while existing gravity integrates the hop. Direction is away from the attacker's position; walls clamp travel. Guard keeps a small immediate shove instead. reset_fighter() clears remaining displacement and speed. tests/knockback_test.gd checks editable values, both directions, landing, guard, walls, and restart.

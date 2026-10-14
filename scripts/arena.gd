@@ -5,22 +5,17 @@ var fighters: Array[Fighter] = []
 var info: Label
 var bars: Array[ProgressBar] = []
 var round_over := false
+var spawn_positions: Array[Vector2] = []
 
 func _ready() -> void:
 	Engine.physics_ticks_per_second = 60
-	var scenery := ArenaVisual.new()
-	scenery.z_index = -10
-	add_child(scenery)
 	for action in GameSettings.KEYS:
 		bind(action, GameSettings.KEYS[action])
-	for i in range(2):
-		var fighter := Fighter.new()
-		fighter.player_index = i + 1
-		add_child(fighter)
-		fighters.append(fighter)
+	fighters.assign([$Fighters/Player1, $Fighters/Player2])
+	for fighter in fighters:
+		spawn_positions.append(fighter.position)
 	fighters[0].opponent = fighters[1]
 	fighters[1].opponent = fighters[0]
-	fighters[1].use_ai = true
 	create_hud()
 	restart()
 
@@ -88,8 +83,8 @@ func create_hud() -> void:
 
 func restart() -> void:
 	round_over = false
-	fighters[0].reset_fighter(GameSettings.SPAWN_POSITIONS[0])
-	fighters[1].reset_fighter(GameSettings.SPAWN_POSITIONS[1])
+	for i in range(fighters.size()):
+		fighters[i].reset_fighter(spawn_positions[i].x)
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("restart"):
