@@ -1,16 +1,13 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://dcv86slaoilje"]
 
-[ext_resource type="Script" path="res://scripts/main_menu.gd" id="script"]
-[ext_resource type="AudioStream" path="res://assets/audio/menu/mfcc-game-game-music-603130.mp3" id="music"]
-[ext_resource type="AudioStream" path="res://assets/audio/menu/freesound_community-game-start-6104.mp3" id="start"]
-[ext_resource type="Texture2D" path="res://assets/scribble/Sample.png" id="sample"]
-
+[ext_resource type="Texture2D" uid="uid://dntkuxsrowwmi" path="res://assets/scribble/tile_cog.png" id="cog"]
+[ext_resource type="Texture2D" uid="uid://db6541ehsvuu6" path="res://assets/scribble/ui_numXlarge.png" id="cross"]
+[ext_resource type="AudioStream" uid="uid://cpjwryo53ei1k" path="res://assets/audio/menu/mfcc-game-game-music-603130.mp3" id="music"]
+[ext_resource type="Texture2D" uid="uid://c637p8wf7v8oh" path="res://assets/scribble/Sample.png" id="sample"]
+[ext_resource type="Script" uid="uid://bnlfm7e1op4mc" path="res://scripts/main_menu.gd" id="script"]
+[ext_resource type="AudioStream" uid="uid://b8p2mxkawp5xm" path="res://assets/audio/menu/freesound_community-game-start-6104.mp3" id="start"]
 [ext_resource type="Theme" path="res://scenes/menu_theme.tres" id="theme"]
-
-[ext_resource type="Texture2D" path="res://assets/scribble/tile_cog.png" id="cog"]
-[ext_resource type="Texture2D" path="res://assets/scribble/ui_numXlarge.png" id="cross"]
-
-[ext_resource type="FontFile" path="res://assets/fonts/BalsamiqSans-Bold.ttf" id="title_font"]
+[ext_resource type="FontFile" uid="uid://bnq4at36t17g2" path="res://assets/fonts/BalsamiqSans-Bold.ttf" id="title_font"]
 
 [sub_resource type="StyleBoxFlat" id="icon_plate"]
 bg_color = Color(0.98, 0.965, 0.92, 1)
@@ -21,18 +18,21 @@ border_width_bottom = 2
 border_color = Color(0.12, 0.18, 0.23, 1)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
-corner_radius_bottom_left = 10
 corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=1411252802]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("script")
+grow_horizontal = 2
+grow_vertical = 2
 theme = ExtResource("theme")
+script = ExtResource("script")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=2132006118]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -40,347 +40,387 @@ texture = ExtResource("sample")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="TitleCard" type="Panel" parent="."]
-mouse_filter = 2
+[node name="TitleCard" type="Panel" parent="." unique_id=918660299]
+layout_mode = 0
 offset_left = 336.0
 offset_top = 40.0
 offset_right = 816.0
 offset_bottom = 130.0
+mouse_filter = 2
 
-[node name="Music" type="AudioStreamPlayer" parent="."]
+[node name="Music" type="AudioStreamPlayer" parent="." unique_id=938527556]
 stream = ExtResource("music")
-volume_db = -17.721133
+volume_db = -17.721132
 bus = &"Music"
 
-[node name="StartSound" type="AudioStreamPlayer" parent="."]
+[node name="StartSound" type="AudioStreamPlayer" parent="." unique_id=2016507635]
 stream = ExtResource("start")
 volume_db = -10.0
 bus = &"SFX"
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1197391589]
+layout_mode = 0
 offset_left = 346.0
-offset_top = 45.0
+offset_top = 51.0
 offset_right = 806.0
 offset_bottom = 95.0
-text = "SCRIBBLE FIGHTERS"
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
 theme_override_fonts/font = ExtResource("title_font")
 theme_override_font_sizes/font_size = 36
-theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
+text = "SCRIBBLE FIGHTERS"
+horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="."]
+[node name="Subtitle" type="Label" parent="." unique_id=1255768369]
+layout_mode = 0
 offset_left = 346.0
 offset_top = 95.0
 offset_right = 806.0
 offset_bottom = 125.0
+theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
+theme_override_font_sizes/font_size = 16
 text = "Swords up. Shields ready."
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
 
-[node name="Home" type="Panel" parent="."]
-offset_left = 456.0
-offset_top = 250.0
-offset_right = 696.0
-offset_bottom = 445.0
+[node name="Home" type="Panel" parent="." unique_id=1129304146]
+layout_mode = 0
+offset_left = 454.0
+offset_top = 377.0
+offset_right = 694.0
+offset_bottom = 572.0
 mouse_filter = 2
 
-[node name="PlayAI" type="Button" parent="Home"]
+[node name="PlayAI" type="Button" parent="Home" unique_id=1729857024]
+layout_mode = 0
 offset_left = 15.0
 offset_top = 15.0
 offset_right = 225.0
 offset_bottom = 60.0
-text = "Player vs AI"
 theme_override_font_sizes/font_size = 18
+text = "Player vs AI"
 
-[node name="Difficulty" type="OptionButton" parent="Home"]
+[node name="Difficulty" type="OptionButton" parent="Home" unique_id=2006711171]
 visible = false
+layout_mode = 0
 offset_left = 15.0
 offset_top = 75.0
 offset_right = 225.0
 offset_bottom = 120.0
 tooltip_text = "Choose AI difficulty"
-item_count = 3
+theme_override_font_sizes/font_size = 18
 selected = 1
+item_count = 3
 popup/item_0/text = "Easy"
 popup/item_0/id = 0
 popup/item_1/text = "Normal"
 popup/item_1/id = 1
 popup/item_2/text = "Hard"
 popup/item_2/id = 2
-theme_override_font_sizes/font_size = 18
 
-[node name="StartAI" type="Button" parent="Home"]
+[node name="StartAI" type="Button" parent="Home" unique_id=1636679307]
 visible = false
+layout_mode = 0
 offset_left = 15.0
 offset_top = 15.0
 offset_right = 225.0
 offset_bottom = 60.0
-text = "Play"
 theme_override_font_sizes/font_size = 18
+text = "Play"
 
-[node name="PlayLocal" type="Button" parent="Home"]
+[node name="PlayLocal" type="Button" parent="Home" unique_id=1767310004]
+layout_mode = 0
 offset_left = 15.0
 offset_top = 75.0
 offset_right = 225.0
 offset_bottom = 120.0
-text = "Player vs Player"
 theme_override_font_sizes/font_size = 18
+text = "Player vs Player"
 
-[node name="CharactersButton" type="Button" parent="Home"]
+[node name="CharactersButton" type="Button" parent="Home" unique_id=941776438]
+layout_mode = 0
 offset_left = 15.0
 offset_top = 135.0
 offset_right = 225.0
 offset_bottom = 180.0
-text = "Customize"
 theme_override_font_sizes/font_size = 18
+text = "Customize"
 
-[node name="Settings" type="Panel" parent="."]
+[node name="AIBack" type="Button" parent="Home" unique_id=1596966597]
+visible = false
+layout_mode = 0
+offset_left = 15.0
+offset_top = 135.0
+offset_right = 225.0
+offset_bottom = 180.0
+theme_override_font_sizes/font_size = 18
+text = "Main Menu"
+
+[node name="Settings" type="Panel" parent="." unique_id=761396687]
+visible = false
+layout_mode = 0
 offset_left = 330.0
 offset_top = 165.0
 offset_right = 822.0
 offset_bottom = 600.0
-visible = false
 
-[node name="Heading" type="Label" parent="Settings"]
+[node name="Heading" type="Label" parent="Settings" unique_id=448135075]
+layout_mode = 0
 offset_left = 30.0
 offset_top = 15.0
 offset_right = 462.0
 offset_bottom = 55.0
+theme_override_font_sizes/font_size = 24
 text = "SETTINGS"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 24
 
-[node name="MusicLabel" type="Label" parent="Settings"]
+[node name="MusicLabel" type="Label" parent="Settings" unique_id=2016532784]
+layout_mode = 0
 offset_left = 45.0
 offset_top = 75.0
 offset_right = 445.0
 offset_bottom = 105.0
-text = "Music"
 theme_override_font_sizes/font_size = 20
+text = "Music"
 
-[node name="MusicSlider" type="HSlider" parent="Settings"]
+[node name="MusicSlider" type="HSlider" parent="Settings" unique_id=1547213477]
+layout_mode = 0
 offset_left = 45.0
 offset_top = 110.0
 offset_right = 445.0
 offset_bottom = 140.0
-max_value = 100.0
-step = 1.0
 value = 100.0
 
-[node name="EffectsLabel" type="Label" parent="Settings"]
+[node name="EffectsLabel" type="Label" parent="Settings" unique_id=515819675]
+layout_mode = 0
 offset_left = 45.0
 offset_top = 165.0
 offset_right = 445.0
 offset_bottom = 195.0
-text = "Effects"
 theme_override_font_sizes/font_size = 20
+text = "Effects"
 
-[node name="EffectsSlider" type="HSlider" parent="Settings"]
+[node name="EffectsSlider" type="HSlider" parent="Settings" unique_id=1954067971]
+layout_mode = 0
 offset_left = 45.0
 offset_top = 200.0
 offset_right = 445.0
 offset_bottom = 230.0
-max_value = 100.0
-step = 1.0
 value = 100.0
 
-[node name="VoiceLabel" type="Label" parent="Settings"]
+[node name="VoiceLabel" type="Label" parent="Settings" unique_id=647265503]
+layout_mode = 0
 offset_left = 45.0
 offset_top = 255.0
 offset_right = 445.0
 offset_bottom = 285.0
-text = "Voice"
 theme_override_font_sizes/font_size = 20
+text = "Voice"
 
-[node name="VoiceSlider" type="HSlider" parent="Settings"]
+[node name="VoiceSlider" type="HSlider" parent="Settings" unique_id=1997887474]
+layout_mode = 0
 offset_left = 45.0
 offset_top = 290.0
 offset_right = 445.0
 offset_bottom = 320.0
-max_value = 100.0
-step = 1.0
 value = 100.0
 
-[node name="Back" type="Button" parent="Settings"]
+[node name="Back" type="Button" parent="Settings" unique_id=1009772423]
+layout_mode = 0
 offset_left = 145.0
 offset_top = 365.0
 offset_right = 345.0
 offset_bottom = 410.0
-text = "Back"
 theme_override_font_sizes/font_size = 18
+text = "Back"
 
-[node name="Controls" type="Panel" parent="."]
+[node name="ControlsButton" type="Button" parent="Settings" unique_id=1197155686]
+layout_mode = 0
+offset_left = 145.0
+offset_top = 325.0
+offset_right = 345.0
+offset_bottom = 360.0
+theme_override_font_sizes/font_size = 18
+text = "Controls"
+
+[node name="Controls" type="Panel" parent="." unique_id=1942104506]
+visible = false
+layout_mode = 0
 offset_left = 220.0
 offset_top = 165.0
 offset_right = 932.0
 offset_bottom = 600.0
-visible = false
 
-[node name="Info" type="Label" parent="Controls"]
+[node name="Info" type="Label" parent="Controls" unique_id=1083703078]
+layout_mode = 0
 offset_left = 30.0
 offset_top = 20.0
 offset_right = 682.0
 offset_bottom = 360.0
 theme_override_font_sizes/font_size = 18
 
-[node name="Back" type="Button" parent="Controls"]
+[node name="Back" type="Button" parent="Controls" unique_id=1422098133]
+layout_mode = 0
 offset_left = 256.0
 offset_top = 365.0
 offset_right = 456.0
 offset_bottom = 410.0
-text = "Back"
 theme_override_font_sizes/font_size = 18
+text = "Back"
 
-[node name="Characters" type="Panel" parent="."]
+[node name="Characters" type="Panel" parent="." unique_id=1481268474]
 visible = false
+layout_mode = 0
 offset_left = 220.0
 offset_top = 165.0
 offset_right = 932.0
 offset_bottom = 600.0
 
-[node name="Heading" type="Label" parent="Characters"]
+[node name="Heading" type="Label" parent="Characters" unique_id=2077650759]
+layout_mode = 0
 offset_left = 20.0
 offset_top = 10.0
 offset_right = 692.0
 offset_bottom = 50.0
+theme_override_font_sizes/font_size = 24
 text = "CHOOSE YOUR FIGHTERS"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 24
 
-[node name="Back" type="Button" parent="Characters"]
+[node name="Back" type="Button" parent="Characters" unique_id=841704856]
+layout_mode = 0
 offset_left = 256.0
 offset_top = 365.0
 offset_right = 456.0
 offset_bottom = 410.0
-text = "Save & Back"
 theme_override_font_sizes/font_size = 18
+text = "Save & Back"
 
-[node name="Player1" type="Control" parent="Characters"]
+[node name="Player1" type="Control" parent="Characters" unique_id=938587853]
+anchors_preset = 0
 offset_left = 40.0
 offset_top = 50.0
 offset_right = 332.0
 offset_bottom = 350.0
 
-[node name="Name" type="Label" parent="Characters/Player1"]
-offset_top = 0.0
+[node name="Name" type="Label" parent="Characters/Player1" unique_id=1931184632]
+layout_mode = 0
 offset_right = 292.0
 offset_bottom = 30.0
+theme_override_font_sizes/font_size = 20
 text = "PLAYER 1"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 20
 
-[node name="Character" type="OptionButton" parent="Characters/Player1"]
+[node name="Character" type="OptionButton" parent="Characters/Player1" unique_id=638877482]
+layout_mode = 0
 offset_top = 175.0
 offset_right = 292.0
 offset_bottom = 210.0
 theme_override_font_sizes/font_size = 18
 
-[node name="Weapon" type="OptionButton" parent="Characters/Player1"]
+[node name="Weapon" type="OptionButton" parent="Characters/Player1" unique_id=1228132380]
+layout_mode = 0
 offset_top = 220.0
 offset_right = 292.0
 offset_bottom = 255.0
 theme_override_font_sizes/font_size = 18
 
-[node name="ColorBar" type="ColorRect" parent="Characters/Player1"]
+[node name="ColorBar" type="ColorRect" parent="Characters/Player1" unique_id=1376591109]
+layout_mode = 0
 offset_top = 160.0
 offset_right = 292.0
 offset_bottom = 166.0
 mouse_filter = 2
 
-[node name="Preview" type="Node2D" parent="Characters/Player1"]
+[node name="Preview" type="Node2D" parent="Characters/Player1" unique_id=1582434276]
 position = Vector2(130, 100)
 
-[node name="Body" type="Sprite2D" parent="Characters/Player1/Preview"]
+[node name="Body" type="Sprite2D" parent="Characters/Player1/Preview" unique_id=2110486412]
 scale = Vector2(0.6, 0.8)
 
-[node name="Hand" type="Sprite2D" parent="Characters/Player1/Preview"]
+[node name="Hat" type="Sprite2D" parent="Characters/Player1/Preview/Body" unique_id=176506605]
+visible = false
+position = Vector2(0, -58)
+scale = Vector2(1, 0.65)
+
+[node name="Hand" type="Sprite2D" parent="Characters/Player1/Preview" unique_id=227431851]
 position = Vector2(28, 0)
 scale = Vector2(0.5, 0.5)
 
-[node name="Weapon" type="Sprite2D" parent="Characters/Player1/Preview/Hand"]
+[node name="Weapon" type="Sprite2D" parent="Characters/Player1/Preview/Hand" unique_id=90060997]
 position = Vector2(30, -25)
 rotation = 0.5
 scale = Vector2(0.6, 0.8)
 
-[node name="Player2" type="Control" parent="Characters"]
+[node name="Hat" type="OptionButton" parent="Characters/Player1" unique_id=1858768839]
+layout_mode = 0
+offset_top = 265.0
+offset_right = 292.0
+offset_bottom = 300.0
+theme_override_font_sizes/font_size = 18
+
+[node name="Player2" type="Control" parent="Characters" unique_id=2056188257]
+anchors_preset = 0
 offset_left = 380.0
 offset_top = 50.0
 offset_right = 672.0
 offset_bottom = 350.0
 
-[node name="Name" type="Label" parent="Characters/Player2"]
-offset_top = 0.0
+[node name="Name" type="Label" parent="Characters/Player2" unique_id=470973649]
+layout_mode = 0
 offset_right = 292.0
 offset_bottom = 30.0
+theme_override_font_sizes/font_size = 20
 text = "PLAYER 2"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 20
 
-[node name="Character" type="OptionButton" parent="Characters/Player2"]
+[node name="Character" type="OptionButton" parent="Characters/Player2" unique_id=55120418]
+layout_mode = 0
 offset_top = 175.0
 offset_right = 292.0
 offset_bottom = 210.0
 theme_override_font_sizes/font_size = 18
 
-[node name="Weapon" type="OptionButton" parent="Characters/Player2"]
+[node name="Weapon" type="OptionButton" parent="Characters/Player2" unique_id=536719475]
+layout_mode = 0
 offset_top = 220.0
 offset_right = 292.0
 offset_bottom = 255.0
 theme_override_font_sizes/font_size = 18
 
-[node name="ColorBar" type="ColorRect" parent="Characters/Player2"]
+[node name="ColorBar" type="ColorRect" parent="Characters/Player2" unique_id=2050799461]
+layout_mode = 0
 offset_top = 160.0
 offset_right = 292.0
 offset_bottom = 166.0
 mouse_filter = 2
 
-[node name="Preview" type="Node2D" parent="Characters/Player2"]
+[node name="Preview" type="Node2D" parent="Characters/Player2" unique_id=1445103783]
 position = Vector2(130, 100)
 
-[node name="Body" type="Sprite2D" parent="Characters/Player2/Preview"]
+[node name="Body" type="Sprite2D" parent="Characters/Player2/Preview" unique_id=307299338]
 scale = Vector2(0.6, 0.8)
 
-[node name="Hand" type="Sprite2D" parent="Characters/Player2/Preview"]
+[node name="Hat" type="Sprite2D" parent="Characters/Player2/Preview/Body" unique_id=264195169]
+visible = false
+position = Vector2(0, -58)
+scale = Vector2(1, 0.65)
+
+[node name="Hand" type="Sprite2D" parent="Characters/Player2/Preview" unique_id=664344012]
 position = Vector2(28, 0)
 scale = Vector2(0.5, 0.5)
 
-[node name="Weapon" type="Sprite2D" parent="Characters/Player2/Preview/Hand"]
+[node name="Weapon" type="Sprite2D" parent="Characters/Player2/Preview/Hand" unique_id=1327072981]
 position = Vector2(30, -25)
 rotation = 0.5
 scale = Vector2(0.6, 0.8)
 
-[node name="Hat" type="OptionButton" parent="Characters/Player1"]
+[node name="Hat" type="OptionButton" parent="Characters/Player2" unique_id=2078250634]
+layout_mode = 0
 offset_top = 265.0
 offset_right = 292.0
 offset_bottom = 300.0
 theme_override_font_sizes/font_size = 18
 
-[node name="Hat" type="Sprite2D" parent="Characters/Player1/Preview/Body"]
-visible = false
-position = Vector2(0, -58)
-scale = Vector2(1, 0.65)
-
-[node name="Hat" type="OptionButton" parent="Characters/Player2"]
-offset_top = 265.0
-offset_right = 292.0
-offset_bottom = 300.0
-theme_override_font_sizes/font_size = 18
-
-[node name="Hat" type="Sprite2D" parent="Characters/Player2/Preview/Body"]
-visible = false
-position = Vector2(0, -58)
-scale = Vector2(1, 0.65)
-
-[node name="ControlsButton" type="Button" parent="Settings"]
-offset_left = 145.0
-offset_top = 325.0
-offset_right = 345.0
-offset_bottom = 360.0
-text = "Controls"
-theme_override_font_sizes/font_size = 18
-
-[node name="Toolbar" type="Control" parent="."]
+[node name="Toolbar" type="Control" parent="." unique_id=1799629875]
+anchors_preset = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -183.0
@@ -389,15 +429,17 @@ offset_right = -40.0
 offset_bottom = 104.0
 mouse_filter = 2
 
-[node name="SettingsButton" type="Button" parent="Toolbar"]
+[node name="SettingsButton" type="Button" parent="Toolbar" unique_id=1751222148]
+layout_mode = 0
 offset_right = 64.0
 offset_bottom = 64.0
 tooltip_text = "Settings"
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("icon_plate")
 theme_override_styles/hover = SubResource("icon_plate")
-theme_override_font_sizes/font_size = 18
 
-[node name="Icon" type="TextureRect" parent="Toolbar/SettingsButton"]
+[node name="Icon" type="TextureRect" parent="Toolbar/SettingsButton" unique_id=433582136]
+layout_mode = 0
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 52.0
@@ -407,16 +449,18 @@ texture = ExtResource("cog")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Quit" type="Button" parent="Toolbar"]
+[node name="Quit" type="Button" parent="Toolbar" unique_id=1676785429]
+layout_mode = 0
 offset_left = 79.0
 offset_right = 143.0
 offset_bottom = 64.0
 tooltip_text = "Quit game"
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("icon_plate")
 theme_override_styles/hover = SubResource("icon_plate")
-theme_override_font_sizes/font_size = 18
 
-[node name="Icon" type="TextureRect" parent="Toolbar/Quit"]
+[node name="Icon" type="TextureRect" parent="Toolbar/Quit" unique_id=522643245]
+layout_mode = 0
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 52.0
@@ -425,12 +469,3 @@ mouse_filter = 2
 texture = ExtResource("cross")
 expand_mode = 1
 stretch_mode = 5
-
-[node name="AIBack" type="Button" parent="Home"]
-visible = false
-offset_left = 15.0
-offset_top = 135.0
-offset_right = 225.0
-offset_bottom = 180.0
-text = "Main Menu"
-theme_override_font_sizes/font_size = 18
