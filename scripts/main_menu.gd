@@ -138,6 +138,9 @@ func choose_hat(slot: int, index: int) -> void:
 	update_preview(slot)
 
 func select_ai_mode() -> void:
+	# Expand only when the additional AI controls are needed.
+	home.offset_left = 305
+	home.offset_right = 847
 	$Home/Difficulty.show()
 	$Home/StartAI.show()
 	$Home/Difficulty.grab_focus()

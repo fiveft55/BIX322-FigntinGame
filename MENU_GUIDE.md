@@ -42,8 +42,12 @@ Menu styling uses solid cream cards, dark text, navy buttons, teal hover states,
 
 ## Updated home layout and title font
 
-Only the title retains a solid cream card. Home uses a StyleBoxEmpty, leaving the sample image visible behind individual menu buttons. The upper-right toolbar is anchored 40 pixels from the top/right viewport edges with 64-pixel icon buttons and a 15-pixel gap: Kenney tile_cog for Settings and ui_numXlarge for Quit. Controls is reached from Settings; Back returns to Settings. Customize opens characters, weapons, and hats.
+Title and Home use compact solid cream cards. Home is 240 × 195 pixels initially and expands to 542 × 195 when AI controls are revealed. The upper-right toolbar is anchored 40 pixels from the top/right viewport edges with 64-pixel icon buttons and a 15-pixel gap: Kenney tile_cog for Settings and ui_numXlarge for Quit. Controls is reached from Settings; Back returns to Settings. Customize opens characters, weapons, and hats.
 
 Selecting Player vs AI reveals the difficulty dropdown to its right plus an explicit Play button; selection alone does not start the match. Player vs Player starts local play directly.
 
 The title uses Balsamiq Sans Bold from Google Fonts' official repository, downloaded into assets/fonts/BalsamiqSans-Bold.ttf. It is bundled for offline use under the included SIL Open Font License (assets/fonts/OFL.txt), separate from the CC0 artwork. Source: https://github.com/google/fonts/tree/main/ofl/balsamiqsans. Other text retains its readable standard font. Edit Title's font/size in main_menu.tscn.
+
+The title is now 36 px with a 480 × 90 card; its subtitle is 16 px. Home buttons have 15 px vertical spacing and inner padding. The AI dropdown and Play button retain 15 px horizontal spacing.
+
+Menu buttons and dropdowns use 18 px text, page headings 24 px, and the title 36 px to fit the compact cards.
