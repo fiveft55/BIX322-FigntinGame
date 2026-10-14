@@ -9,13 +9,14 @@ func advance(delta: float) -> void:
 	clock += delta
 	commands = commands.filter(
 		func(command: Dictionary) -> bool:
-			return clock - command.time <= WINDOW
+			return clock - command.time <= command.window
 	)
 
 func push(command: StringName) -> void:
 	if commands.size() >= GameSettings.MAX_BUFFER_COMMANDS:
 		commands.pop_front()
-	commands.append({"command": command, "time": clock})
+	var window := GameSettings.ATTACK_INPUT_WINDOW if command == &"attack" else WINDOW
+	commands.append({"command": command, "time": clock, "window": window})
 
 func consume(command: StringName) -> bool:
 	for i in range(commands.size()):

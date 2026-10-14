@@ -18,7 +18,7 @@ Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles 
 ## Architecture for your project report
 
 - `scripts/fighter.gd`: explicit `IDLE`, `WALKING`, `ATTACKING`, `HIT_STUN`, `BLOCKING`, and `JUMPING` states. `change_state()` centralizes transitions and destroys attack hitboxes when interrupted. Idle/walking/blocking can start an attack; attacks finish or chain into the next strike; incoming hits interrupt with timed stun. Block stun uses the same stun state with a shorter duration.
-- `scripts/input_buffer.gd`: a bounded queue of timestamped commands, expiring after 220 ms. Consumption removes a command exactly once. Up to eight presses are retained; hits clear pending commands. This tolerates early presses without indefinite delayed attacks.
+- `scripts/input_buffer.gd`: a bounded queue of timestamped commands, expiring after 220 ms for jump and 750 ms for attack. Consumption removes a command exactly once. Up to eight presses are retained; hits clear pending commands. This tolerates early presses without indefinite delayed attacks.
 - Attacks use a fixed 60 Hz simulation timeline. Startup has no hitbox; active frames instantiate an `Area2D` with a separate rectangle; recovery destroys it. Persistent hurtboxes are separate `Area2D` nodes. Combat uses immediate rectangle intersection with identical dimensions, avoiding stale overlap lists when Godot defers physics updates. A per-attack victim list prevents repeated damage across active frames.
 - `scripts/arena.gd`: input mapping, both fighters' simulation, body separation, simultaneous hit collection, health UI, round outcome, and restart. Both attacks are collected before damage is applied so trades can occur.
 
@@ -57,4 +57,10 @@ For a Bachelor's submission, supplement the prototype with your own design ratio
 
 ## Customization
 
-Edit `scripts/game_settings.gd` for movement keys, speed, gravity, jump height, health, attack data, and buffering. See [CODE_GUIDE.md](CODE_GUIDE.md) for every script and function, variable units, examples, and jump rules. W/Up jumps; steer in the air with movement keys. Attacking and blocking are ground-only.
+Edit `scripts/game_settings.gd` for movement keys, speed, gravity, jump height, health, attack data, and buffering. See [CODE_GUIDE.md](CODE_GUIDE.md) for every script and function, variable units, examples, and jump rules. W/Up jumps; steer in the air with movement keys. Attacks work on the ground and in the air; blocking is ground-only.
+
+## Simultaneous inputs and attack mashing
+
+Input events are collected individually in `Fighter._input()`, including presses arriving between physics ticks. Keyboard auto-repeat is ignored. Hold movement while attacking or blocking; attack movement uses `ATTACK_MOVE_SPEED` and guard movement uses `BLOCK_MOVE_SPEED`. Jump + attack + movement can execute together, and airborne attacks use air steering. Attack takes priority over guard: pressing attack while holding guard starts a strike, and guard resumes after recovery. You cannot guard an attack while striking or airborne. Left + right cancel to zero horizontal input.
+
+Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.

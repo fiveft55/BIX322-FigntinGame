@@ -19,7 +19,7 @@ func run() -> void:
 	check(buffer.consume(&"attack"), "Buffered input survives short delay")
 	check(not buffer.consume(&"attack"), "Input consumed once")
 	buffer.push(&"attack")
-	buffer.advance(0.23)
+	buffer.advance(GameSettings.ATTACK_INPUT_WINDOW + 0.01)
 	check(not buffer.consume(&"attack"), "Stale input expires")
 	var a := Fighter.new()
 	var b := Fighter.new()
@@ -57,5 +57,32 @@ func run() -> void:
 	b.change_state(Fighter.State.BLOCKING)
 	b.receive_hit(Fighter.ATTACKS[0], a)
 	check(b.health == 92, "Guard does not protect rear")
+	a.reset_fighter(400)
+	b.reset_fighter(750)
+	Input.action_press("p1_right")
+	var attack_event := InputEventAction.new()
+	attack_event.action = "p1_attack"
+	attack_event.pressed = true
+	var jump_event := InputEventAction.new()
+	jump_event.action = "p1_jump"
+	jump_event.pressed = true
+	a._input(attack_event)
+	a._input(jump_event)
+	a.tick(1.0 / 60)
+	check(a.state == Fighter.State.ATTACKING and a.position.y < Fighter.FLOOR_Y, "Jump plus attack launches aerial attack")
+	check(a.position.x > 400, "Movement combines with jump and attack")
+	Input.action_release("p1_right")
+	a.reset_fighter(400)
+	# Multiple presses before a simulation tick must all be retained.
+	for press in range(3):
+		a._input(attack_event)
+	check(a.buffer.commands.size() == 3, "Rapid attack presses are captured individually")
+	a.tick(1.0 / 60)
+	for frame in range(17):
+		a.tick(1.0 / 60)
+	check(a.combo == 1, "Early mash queues the second strike")
+	for frame in range(19):
+		a.tick(1.0 / 60)
+	check(a.combo == 2, "Early mash queues the third strike")
 	print("Combat checks: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

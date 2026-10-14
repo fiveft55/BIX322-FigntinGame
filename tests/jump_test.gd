@@ -19,7 +19,10 @@ func run() -> void:
 	opponent.use_ai = false
 	# Just-pressed flags are sampled in the physics domain by fighter.tick().
 	await physics_frame
-	Input.action_press("p1_jump")
+	var jump_event := InputEventAction.new()
+	jump_event.action = "p1_jump"
+	jump_event.pressed = true
+	fighter._input(jump_event)
 	Input.action_press("p1_right")
 	await physics_frame
 	arena._physics_process(1.0 / 60)

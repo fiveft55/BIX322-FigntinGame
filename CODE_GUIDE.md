@@ -6,6 +6,7 @@ Edit **scripts/game_settings.gd**, save, then restart the game. Constants affect
 
 | Setting | Purpose and unit |
 | --- | --- |
+| ATTACK_MOVE_SPEED / BLOCK_MOVE_SPEED | Ground attack/guard movement speed, pixels per second |
 | MOVE_SPEED / AIR_SPEED | Ground/air horizontal speed, pixels per second |
 | JUMP_SPEED | Upward launch magnitude, pixels per second; larger means higher |
 | GRAVITY | Downward acceleration, pixels per second squared |
@@ -15,7 +16,8 @@ Edit **scripts/game_settings.gd**, save, then restart the game. Constants affect
 | BODY_WIDTH | Body separation and attack origin offset |
 | HURTBOX_SIZE / HURTBOX_CENTER | Receiving rectangle dimensions/offset relative to feet |
 | HITBOX_HEIGHT / HITBOX_Y | Attack rectangle height/vertical center relative to feet |
-| INPUT_WINDOW | Queue expiration in seconds |
+| INPUT_WINDOW | Jump queue expiration in seconds |
+| ATTACK_INPUT_WINDOW | Attack queue expiration in seconds |
 | MAX_BUFFER_COMMANDS | Capacity; oldest command is dropped when full |
 | COMBO_CANCEL_FRAMES | Final recovery frames permitting the next strike |
 | BLOCK_DAMAGE / BLOCK_STUN_FRAMES | Guard chip damage and stun duration |
@@ -46,7 +48,7 @@ Each ATTACKS dictionary has startup, active, recovery, damage, stun, and reach. 
 
 ## Jump rules
 
-W/Up queues a jump. Idle, walking, or blocking consumes it; jump takes priority over a simultaneous attack. A recent jump press in attack recovery can execute afterward if it has not expired. JUMPING allows air steering, but no double jump, attack, or guard. Holding jump does not repeat; a fresh press shortly before landing may trigger another jump after landing. An attack buffered shortly before landing may execute on the ground.
+W/Up queues a jump. Idle, walking, or blocking consumes it; jump and attack execute together when both are queued. A recent jump press in attack recovery can execute afterward if it has not expired. JUMPING allows air steering and attacks, but no double jump or airborne guard. Holding jump does not repeat; a fresh press shortly before landing may trigger another jump after landing. Jump plus attack launches an aerial strike immediately; its hitbox follows the fighter in the air.
 
 Gravity continues during airborne hit stun. Landing clamps feet to FLOOR_Y and clears vertical velocity; jumping becomes idle, but stun must finish separately. Stun finishing in the air returns to jumping. Hurtboxes follow vertical position, so high jumps can avoid ground attacks. Body separation only applies where hurtboxes overlap, allowing jump-over movement. The AI stays on the ground. Restart clears momentum.
 
@@ -66,6 +68,7 @@ FightInputBuffer owns commands (command/time dictionaries) and a simulation cloc
 
 | Function | Responsibility |
 | --- | --- |
+| _input | Capture individual attack/jump presses; ignore keyboard auto-repeat |
 | _ready | Create persistent hurtbox; arena owns scheduling |
 | make_area | Build Area2D and rectangle collision shape with specified layers |
 | change_state | Reset state frame and clean up a leaving attack hitbox |
@@ -101,3 +104,9 @@ fighters owns both fighters, info is the status label, bars holds health bars, a
 - tests/jump_test.gd: real jump/movement actions, steering, no double jump, landing, vertical dodge, airborne stun, restart momentum reset.
 
 Tests extend SceneTree, schedule run(), and exit nonzero on failure. Run the README commands after changing code. Headless tests validate mechanics; desktop playtesting evaluates appearance and feel.
+
+## Simultaneous inputs and attack mashing
+
+Input events are collected individually in `Fighter._input()`, including presses arriving between physics ticks. Keyboard auto-repeat is ignored. Hold movement while attacking or blocking; attack movement uses `ATTACK_MOVE_SPEED` and guard movement uses `BLOCK_MOVE_SPEED`. Jump + attack + movement can execute together, and airborne attacks use air steering. Attack takes priority over guard: pressing attack while holding guard starts a strike, and guard resumes after recovery. You cannot guard an attack while striking or airborne. Left + right cancel to zero horizontal input.
+
+Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.

@@ -60,6 +60,17 @@ func remove_hitbox() -> void:
 		hitbox.queue_free()
 	hitbox = null
 
+func _input(event: InputEvent) -> void:
+	# Capture every press, even multiple presses between physics ticks.
+	# Keyboard auto-repeat is not a new command.
+	if use_ai or not enabled or event.is_echo():
+		return
+	var prefix := "p%d_" % player_index
+	for command in [&"attack", &"jump"]:
+		if event.is_action_pressed(prefix + String(command)):
+			buffer.push(command)
+
+
 func tick(delta: float) -> void:
 	buffer.advance(delta)
 	if not enabled:
@@ -78,11 +89,6 @@ func tick(delta: float) -> void:
 			ai_timer = 0.0
 			if absf(opponent.position.x - position.x) < GameSettings.AI_ATTACK_DISTANCE:
 				buffer.push(&"attack")
-	else:
-		if Input.is_action_just_pressed(prefix + "attack"):
-			buffer.push(&"attack")
-		if Input.is_action_just_pressed(prefix + "jump"):
-			buffer.push(&"jump")
 	if state != State.ATTACKING and state != State.HIT_STUN:
 		facing = 1 if opponent.position.x >= position.x else -1
 	state_frame += 1
@@ -94,7 +100,11 @@ func tick(delta: float) -> void:
 				change_state(State.IDLE if is_grounded() else State.JUMPING)
 		State.JUMPING:
 			velocity.x = direction * GameSettings.AIR_SPEED
+			if buffer.consume(&"attack"):
+				start_attack()
 		State.ATTACKING:
+			var attack_speed := GameSettings.ATTACK_MOVE_SPEED if is_grounded() else GameSettings.AIR_SPEED
+			velocity.x = direction * attack_speed
 			var attack: Dictionary = ATTACKS[combo]
 			if state_frame == attack.startup:
 				hitbox = make_area(
@@ -111,17 +121,21 @@ func tick(delta: float) -> void:
 			if can_chain and in_cancel_window and buffer.consume(&"attack"):
 				start_attack(combo + 1)
 			elif state_frame >= total:
-				change_state(State.IDLE)
+				change_state(State.IDLE if is_grounded() else State.JUMPING)
 		_:
 			if buffer.consume(&"jump"):
 				velocity.y = -GameSettings.JUMP_SPEED
 				velocity.x = direction * GameSettings.AIR_SPEED
 				change_state(State.JUMPING)
+				if buffer.consume(&"attack"):
+					start_attack()
+			elif buffer.consume(&"attack"):
+				velocity.x = direction * GameSettings.ATTACK_MOVE_SPEED
+				start_attack()
 			elif blocking:
 				if state != State.BLOCKING:
 					change_state(State.BLOCKING)
-			elif buffer.consume(&"attack"):
-				start_attack()
+				velocity.x = direction * GameSettings.BLOCK_MOVE_SPEED
 			else:
 				var next := State.WALKING if direction != 0 else State.IDLE
 				if state != next:

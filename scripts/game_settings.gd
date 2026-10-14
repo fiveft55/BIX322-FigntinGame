@@ -2,6 +2,9 @@ class_name GameSettings
 extends RefCounted
 ## Edit this file to tune gameplay. Units: pixels, seconds, or 60 Hz frames.
 const MOVE_SPEED := 240.0 # Horizontal pixels per second.
+const ATTACK_MOVE_SPEED := 120.0 # Movement while attacking on the ground.
+const BLOCK_MOVE_SPEED := 90.0 # Movement while guarding.
+const ATTACK_INPUT_WINDOW := 0.75 # Mash presses survive startup and recovery.
 const AIR_SPEED := 210.0 # Horizontal control while jumping.
 const JUMP_SPEED := 620.0 # Positive magnitude; applied upward as negative Y.
 const GRAVITY := 1800.0 # Downward pixels per second squared.
