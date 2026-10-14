@@ -1,38 +1,56 @@
-# Sound mapping and volume controls
+# Audio guide for this project
 
-Audio comes from the uploaded battle.zip and kenney_voiceover-pack-fighter.zip. Original filenames are preserved under assets/audio. Kenney's original CC0 license is retained in voice/License.txt. The project owner confirmed the battle assets are CC0; battle/License.txt records that declaration. The new ZIP files were verified against the imported audio bytes.
+## Files and events
 
-## Events
+Original supplied filenames are preserved under assets/audio.
 
-| Event | Audio |
+| Event | File |
 | --- | --- |
-| Countdown 3 / 2 / 1 | Voice 3.ogg / 2.ogg / 1.ogg |
-| Countdown finishes | Voice fight.ogg and battle music start |
-| Sword's first active frame | oxidvideos-video-game-sword-swing-sfx-409364.mp3 |
-| Unblocked damage | 53439420-retro-hurt-sound-03-474780.mp3 |
-| Front shield block / parry | gargamel10-sword-slashing-game-sound-effect-2-379229.mp3 |
-| Jump launch | cartoon_music-kids-game-victory-504518.mp3 (supplied jump folder) |
-| Knockout result | soundreality-game-over-man-136233.mp3 |
-| Winner | player_1.ogg or player_2.ogg, followed by winner.ogg |
-| Draw | it's_a_tie.ogg |
-| Timeout | time.ogg, then the result voice sequence |
+| Menu music | menu/mfcc-game-game-music-603130.mp3 |
+| Play accepted | menu/freesound_community-game-start-6104.mp3 |
+| Countdown 3 / 2 / 1 | voice/3.ogg, 2.ogg, 1.ogg |
+| Countdown finishes | voice/fight.ogg; battle music starts |
+| Battle music | battle/331music-video-game-music-598332.mp3 |
+| Alternate battle track | battle/retro-bgm-chan-vs-robbot_vs-534622.mp3 |
+| First active attack frame | battle/oxidvideos-video-game-sword-swing-sfx-409364.mp3 |
+| Unblocked hit | battle/53439420-retro-hurt-sound-03-474780.mp3 |
+| Front block/parry | battle/gargamel10-sword-slashing-game-sound-effect-2-379229.mp3 |
+| Jump | battle/cartoon_music-kids-game-victory-504518.mp3 |
+| Knockout cinematic starts | knockout/yarzur_ofc-sfx13-boss_damage2-324519.mp3 |
+| Knockout results | battle/soundreality-game-over-man-136233.mp3 |
+| Winner | voice/player_1.ogg or player_2.ogg, then winner.ogg |
+| Draw | voice/it's_a_tie.ogg |
+| Timeout results | voice/time.ogg, then player/winner or tie |
 
-Music uses 331music-video-game-music-598332.mp3 by default. The alternate retro-bgm-chan-vs-robbot_vs-534622.mp3 is included and can be swapped in the scene. Original audio is not trimmed or modified. The supplied jump clip is a short musical cue rather than a physical jump sound; replace it in the Inspector if you prefer another effect. Unused announcer mode clips remain available; menu audio uses the separately supplied music and start cue.
+The jump file was supplied in the jump folder despite its victory-style filename; it is a musical cue. Original audio is not trimmed. Unused mode/count clips remain available but are not mapped to nonexistent game modes.
 
-## Editor configuration
+## Base mix and volume settings
 
-Open scenes/match_audio.tscn. Select MatchAudio to swap any exported effect or voice AudioStream by dragging a file into its Inspector field. Select Music to change the battle stream and Volume dB (default -17.72). Announcer has Volume dB -3; Effects has -10 and is used as the template for an eight-player effect pool. Lower dB means quieter. Voices are sequential; effects can overlap so simultaneous hits do not cut each other off.
+| Player | Base Volume dB | Bus |
+| --- | --- | --- |
+| Menu Music | -17.721133 | Music |
+| Menu StartSound | -10 | SFX |
+| Battle Music | -17.721133 | Music |
+| Announcer | -3 | Voice |
+| Effects template/pool | -10 | SFX |
+| Knockout hurt cue | -6 | SFX |
 
-Open Godot's Audio panel to adjust the Music, Voice, and SFX buses separately, or edit default_bus_layout.tres. The Music stream is duplicated at runtime and its MP3 loop flag is enabled; it repeats the entire track until the result screen. Headless tests verify loop configuration and event routing, not audible mix quality or a seamless musical transition. Desktop listening is recommended to tune volume and the loop boundary.
+Battle music's current gain is 30% above its original -20 dB setting: 20 × log10(1.3) ≈ +2.279 dB. The Settings sliders apply separate linear 0–100% bus gains on top of these base mixes. Zero mutes a bus. Music affects menu and battle, Effects includes start/normal combat/knockout, Voice controls the announcer.
 
-## Runtime flow
+Swap menu streams in main_menu.tscn. Swap battle effects/voices using MatchAudio root Inspector fields in match_audio.tscn; select player nodes for stream/base volume. Keep the Music, Announcer, Effects, and Knockout names intact. default_bus_layout.tres defines independent buses.
 
-Fighter.combat_sound(event) emits sword, jump, hit, or block events. Arena connects both fighters to MatchAudio.on_combat_sound(). Countdown checkpoints select the numbered clips, and begin_battle() starts music/fight voice. finish_match() stops battle music/effects and queues the appropriate result clips; Announcer.finished advances the queue. Restart stops every old sound and begins a fresh countdown. _exit_tree() releases playback resources. The sound scene is created by the arena alongside the UI overlay.
+## Playback behavior
 
-Run tests/audio_test.gd with the README commands. It checks count timing, loop flag/start/stop, audio buses, event routing, result voice order, and rematch cleanup. Other tests allow the audio mixer a short cleanup interval before exiting.
+Menu and battle MP3 resources are duplicated before enabling their loop flags; imported source resources are not modified. Entire tracks repeat. No crossfade or authored seamless loop points are implemented.
 
-Menu music and start cues are now supplied in assets/audio/menu and referenced by main_menu.tscn. The Settings menu applies saved Music/SFX/Voice bus gains to both menu and battle audio; individual player dB values remain the base mix. See MENU_GUIDE.md.
+Fighter.combat_sound emits sword/hit/block/jump; Arena connects both fighters to MatchAudio.on_combat_sound. Up to eight effect players overlap. If all are busy, the first is reused. Numbered voices replace the prior countdown clip at one-second checkpoints. Results use a sequential queue advanced by Announcer.finished.
 
-## Final-blow hurt effect
+The final-hit cue has a dedicated player, starts with the losing-player cinematic, and is not cut off by result transitions. Battle music continues through the cinematic, then stops for results. Reset/menu exit stops old audio and clears voice queues; streams are released on scene exit. Cinematic slow motion does not change pitch or playback speed.
 
-The separately uploaded yarzur_ofc-sfx13-boss_damage2-324519.mp3 is included under assets/audio/knockout. MatchAudio/Knockout plays it on the SFX bus at the beginning of the losing player's cinematic. It has a dedicated player, so the result transition does not cut the cue off. Restart/menu exit stops it. Change its base volume or stream in match_audio.tscn; the Effects slider also controls it. Normal hit sounds remain unchanged. Source is the user-supplied file; no license document accompanied this separate upload.
+## Tests and listening
+
+Audio and cinematic tests verify routing, loop flags, event timing, result ordering, final-hit cue, and cleanup. Menu tests verify live bus controls and persistence. Tests wait briefly for the audio mixer before scene destruction. Headless tests cannot evaluate sound quality, perceived loudness, speaker clipping, or musical loop boundaries; test those on a desktop.
+
+## Licensing
+
+Kenney Voiceover Pack has its original [CC0 license](assets/audio/voice/License.txt). The project owner confirmed CC0 for battle/menu packs; declaration notes and original filenames are preserved in their folders. The separately supplied knockout MP3 had no accompanying license document; its filename/source is recorded here without assigning a new license. Font licensing is separate; see README credits.

@@ -75,4 +75,5 @@ func update_pose() -> void:
 	rear_hand.position = base_positions[rear_hand] + Vector2(0, bob)
 	rear_hand.position += guard_hand_offset * guard_amount + guard_recoil_offset * recoil
 	rear_hand.rotation = base_rear_rotation - 0.15 * guard_amount + 0.2 * recoil
-	shield.visible = true
+	shield.visible = not fighter.equipment_detached
+	sword.visible = not fighter.equipment_detached

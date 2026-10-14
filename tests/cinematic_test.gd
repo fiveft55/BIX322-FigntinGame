@@ -43,13 +43,14 @@ func run() -> void:
 	check(victim.health == 0 and arena.cinematic_active, "Actual final strike begins cinematic")
 	check(arena.match_audio.knockout.playing and arena.match_audio.last_event == "knockout", "Losing-player hurt cue starts with final blow")
 	check(not arena.match_overlay.get_node("Victory").visible, "Game over waits for cinematic")
-	check(arena.flying_hats.size() == 1 and not victim.visuals.body.get_node("Hat").visible, "Equipped helmet detaches")
-	var start_position: Vector2 = arena.flying_hats[0].sprite.position
+	check(arena.flying_equipment.size() == 3 and not victim.visuals.body.get_node("Hat").visible, "Equipped helmet, weapon, and shield detach")
+	check(not victim.visuals.sword.visible and not victim.visuals.shield.visible, "Original hand equipment is hidden")
+	var start_position: Vector2 = arena.flying_equipment[0].sprite.position
 	var victim_start := victim.position
 	var time_remaining: int = arena.round_ticks_remaining
 	for tick in range(30):
 		arena._physics_process(1.0 / 60)
-	check(arena.flying_hats[0].sprite.position.y < start_position.y, "Helmet is hurled upward")
+	check(arena.flying_equipment[0].sprite.position.y < start_position.y, "Helmet is hurled upward")
 	check(victim.position.x > victim_start.x, "Slow cinematic continues final-hit knockback")
 	check(arena.round_ticks_remaining == time_remaining, "Cinematic freezes match clock")
 	check(arena.cinematic_active, "Slow motion persists before result")
@@ -57,9 +58,10 @@ func run() -> void:
 		arena._physics_process(1.0 / 60)
 	check(arena.match_over and arena.match_overlay.get_node("Victory").visible, "Result appears after cinematic")
 	arena.restart()
-	check(not arena.cinematic_active and arena.flying_hats.is_empty(), "Restart clears flying props")
+	check(not arena.cinematic_active and arena.flying_equipment.is_empty(), "Restart clears flying props")
 	check(not arena.match_audio.knockout.playing, "Restart stops knockout hurt cue")
 	check(victim.visuals.body.get_node("Hat").visible, "Restart restores equipped headgear")
+	check(victim.visuals.sword.visible and victim.visuals.shield.visible and not victim.equipment_detached, "Restart restores weapon and shield")
 	arena.match_audio.reset_match()
 	await create_timer(0.15).timeout
 	arena.free()

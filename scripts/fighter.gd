@@ -15,6 +15,7 @@ var health := GameSettings.MAX_HEALTH
 var facing := 1
 var combo := 0
 var stun_remaining := 0
+var equipment_detached := false
 var guard_hit := false # Distinguishes guard recoil from an unblocked hit.
 ## Per-character tuning is available in the scene Inspector.
 @export_range(0, 500, 1) var hit_push_distance: float = GameSettings.HIT_PUSH
@@ -262,6 +263,7 @@ func receive_parry(defender: Fighter) -> void:
 
 
 func reset_fighter(x: float) -> void:
+	equipment_detached = false
 	change_state(State.IDLE)
 	health = GameSettings.MAX_HEALTH
 	position = Vector2(x, FLOOR_Y)

@@ -1,55 +1,65 @@
-# Main menu, settings, and character selection
+# Menu guide for this project
 
-The project starts in scenes/main_menu.tscn. Open it in Godot's 2D editor to rearrange the Home, Settings, Controls, and Characters panels. All buttons, labels, sliders, character previews, and music players are scene-authored.
+## Navigation
 
-## Play and controls
+The entry scene is `scenes/main_menu.tscn`. Home contains Player vs AI, Player vs Player, and Customize in a compact solid card. Selecting Player vs AI hides those controls and displays Play, Difficulty, and Main Menu in the same rows. Choose Easy/Normal/Hard and press Play. Main Menu or Escape restores the original controls. Player vs Player starts local play directly.
 
-Home offers Play vs AI, Local Two Players, AI difficulty, Characters & Weapons, Settings, Controls, and Quit. Pick characters/weapons before pressing Play. Play uses the uploaded start cue, then enters the existing three-second voiced countdown. Menu music loops until Play; battle music starts at FIGHT!. Escape returns from a fight to the menu; the result screen also offers Main Menu. Escape in submenu pages goes back to Home.
+The upper-right cog opens Settings; the cross quits. Settings includes Music, Effects, Voice sliders and a Controls button. Controls Back returns to Settings. Customize opens both players' body, weapon, and hat choices; Save & Back returns to Home. Escape from a fight returns to the menu. Result buttons are Play Again and Main Menu, without Quit or health numbers.
 
-The Controls page reads current keys from GameSettings.KEYS, so editing bindings updates the displayed information automatically. It explains player movement, jumping, sword/melee attacks, shield/parries, restart, diagnostics, and match rules. It displays information, not a key rebinding UI.
+## Current scene layout
+
+| Element | Current configuration |
+| --- | --- |
+| Background | Original Kenney Sample.png, aspect-cover TextureRect |
+| Title card | Solid cream, 480 × 90 pixels |
+| Title / subtitle | Balsamiq Sans Bold 36 px / standard font 16 px |
+| Home card | 240 × 195 pixels |
+| Home controls | 210 × 45, 15 px inner padding and vertical gaps |
+| Button/dropdown text | 18 px |
+| Settings/Customize headings | 24 px |
+| Toolbar | Anchored 40 px from top/right; two 64 px buttons with 15 px gap |
+| Icons | tile_cog.png and ui_numXlarge.png, centered with 12 px inner padding |
+
+Panels use `menu_theme.tres`: cream cards, navy text/buttons, teal hover/pressed states, and gold keyboard-focus outlines. There is no full-screen background wash. Title and Home retain solid fills; game-over uses a separate translucent panel. Edit the scene rather than rebuilding layouts in code. Keep widget names used by main_menu.gd intact.
 
 ## AI difficulty
 
-Easy, Normal, and Hard are configured in GameSettings.AI_DIFFICULTIES. Difficulty changes attack decision interval, horizontal speed multiplier, minimum observed attack-frame reaction, and guard availability. Damage, health, and player controls do not change. Easy waits 0.85 seconds between decisions with 0.8 movement; Normal uses 0.6/1.0; Hard uses 0.25/1.1. Hard therefore queues combos more often and reacts to guard opportunities earlier. This is deterministic rule-based AI, not machine learning.
+| Level | Attack decision interval | Movement multiplier | Reaction threshold | Guard window threshold |
+| --- | --- | --- | --- | --- |
+| Easy | 0.85 seconds | 0.8 | 10 attack timeline frames | 0.2 |
+| Normal | 0.6 seconds | 1.0 | 4 attack timeline frames | 0.65 |
+| Hard | 0.25 seconds | 1.1 | 1 attack timeline frame | 0.95 |
 
-## Characters and weapons
+Profiles are `GameSettings.AI_DIFFICULTIES`. AI approaches when horizontally farther than 105 pixels and considers attacks within 145. Guard availability uses `fmod(ai_timer, 1.5) < profile.guard`, not a random percentage. Difficulty changes behavior, not damage/health. The AI is deterministic and remains ground-based.
 
-Both players have eight choices: round/square bodies in Green, Purple, Red, and Yellow. Hands match the chosen color. Four available melee art choices are Sword, Spear, Rod, and Pencil. All use the existing three-strike melee FSM, timing, and hitboxes; selecting a spear or pencil does not add projectile attacks or different stats. Shield art remains shared. The colored preview strip and in-game health bar use the character's palette.
+## Customization
 
-GameSettings.CHARACTERS defines names, body/hand textures, and health-bar colors. GameSettings.WEAPONS defines display names and texture paths. Add choices there with valid imported assets. Menus populate automatically. Fighter._ready() applies saved selection textures to the existing scene nodes; scene positions and weapon pivots remain editable. Selected textures override the green/purple scene default textures at runtime. For radically different weapon dimensions, adjust the scene's SwordGrip/Sword transforms and collision reach together. The node is still named Sword for compatibility with the pose script.
+Eight body choices are round/square variants in Green, Purple, Red, and Yellow. Hands and health-bar colors follow body color. Weapon choices are Sword, Spear, Rod, and Pencil; all share the tested melee combo and hitboxes. Hats are No Hat, Cap, Top Hat, Helmet, and Modern Helmet, with no stat effects.
 
-## Sound and persistence
+Catalogs live in `GameSettings.CHARACTERS`, `WEAPONS`, and `HATS`. Add valid names/paths there to populate dropdowns automatically. Selections apply to live previews and fighter sprites. Saved texture choices override fighter scene default art at runtime; transforms remain scene-editable. Existing saved indices are positional: reordering a catalog changes what old preferences select. A real weapon ability requires additional gameplay, not just another texture.
 
-Settings has Music, Effects, and Voice sliders (0–100%). They apply instantly to separate AudioServer buses. Music affects both menu and battle tracks; Effects includes jump, attacks, hits, and the start cue; Voice controls the announcer. Zero mutes the bus. Player-specific Volume dB in the audio scenes remains the base mix, multiplied by the bus slider value.
+## Saved settings
 
-Preferences is an autoload from scripts/preferences.gd. It saves difficulty, character/weapon/hat choices, and volumes to user://settings.cfg. Missing files use defaults; loaded values are clamped to supported ranges. The chosen local/AI play mode is a runtime choice. On desktop, user:// is Godot's application-data directory; in the cloud it follows the documented XDG_DATA_HOME. Tests use a separate settings file so they do not overwrite user preferences.
+Preferences stores ConfigFile data in `user://settings.cfg`:
 
-Menu sound filenames from the uploaded menu.zip are preserved under assets/audio/menu: mfcc-game-game-music-603130.mp3 and freesound_community-game-start-6104.mp3. The project owner's CC0 declaration is recorded there. Select Music/StartSound in main_menu.tscn to swap files or change base volume.
+| Section | Keys |
+| --- | --- |
+| game | difficulty |
+| audio | music, effects, voice (linear 0..1) |
+| players | character_0/1, weapon_0/1, hat_0/1 |
 
-## Verification
+Changes apply and save immediately. Music controls menu/battle tracks; Effects controls start/combat/knockout cues; Voice controls the announcer. Zero mutes the bus. Default per-player dB mix levels still apply. Match mode is runtime-only. On desktop, user:// uses Godot's application-data directory; in the cloud it follows XDG_DATA_HOME.
 
-Run tests/menu_test.gd alongside the README suites. It checks looping menu music, opening settings, live bus mute/volume, saved options, character/weapon application, health color, both play modes, menu return, and actual Easy/Hard AI behavior. Headless tests cannot evaluate how the music sounds or visual spacing; desktop playtesting is recommended.
+To return to defaults, close the game and remove the settings.cfg file from its application-data location. Do not delete assets or repository files. Tests use a separate settings file and restore runtime options.
 
-## Hats, background, and practice-only shortcuts
+## Mode-specific shortcuts
 
-Characters now includes a hat selector for each player: No Hat, Cap, Top Hat, Helmet, and Modern Helmet from the original pack. GameSettings.HATS defines names and paths. Preferences.hats saves choices. Hat is a Sprite2D child of Body in each fighter scene and menu preview, so it follows body motion and facing. Edit its local position/scale in the scenes to adjust fit.
+R/reset, H/boxes, and Tab/AI toggle are available only in matches launched via Player vs AI. That practice mode remains eligible after Tab temporarily switches the opponent to manual input. Matches launched via Player vs Player ignore all three keys. Escape and result-screen navigation work in either mode.
 
-MainMenu/Background uses the pack's original Sample.png via a full-size TextureRect with aspect-cover scaling; Opaque cream panels and a TitleCard keep text legible without washing out the image. Edit Background/TitleCard for placement and menu_theme.tres for panel and button styling. The original unmodified sample retains Kenney's artwork and attribution.
+## Menu audio and font
 
-R, H, and Tab practice controls are ignored in matches launched with Local Two Players. AI practice matches allow them, including toggling the practice opponent temporarily to manual control and back. The match mode is captured at launch, so a local match cannot be converted to AI using Tab. Escape and result-screen Play Again/Main Menu remain available in either mode. Quit is removed from results and remains on the main menu.
+Menu music is `mfcc-game-game-music-603130.mp3`; start cue is `freesound_community-game-start-6104.mp3`, under assets/audio/menu. Select Music/StartSound in the scene to swap streams and base volume. Music loops and stops when Play is accepted. Battle starts after the voiced countdown.
 
-Menu styling uses solid cream cards, dark text, navy buttons, teal hover states, and gold keyboard-focus borders. The sample background has no full-screen transparency wash and remains visible at full contrast around the cards.
+Title font is bundled Balsamiq Sans Bold from the [official Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/balsamiqsans). It works offline under [SIL OFL](assets/fonts/OFL.txt), separately from CC0 art. Edit Title font/size in the scene.
 
-## Updated home layout and title font
-
-Title and Home use compact solid cream cards. Home is 240 × 195 pixels initially and expands to 542 × 195 when AI controls are revealed. The upper-right toolbar is anchored 40 pixels from the top/right viewport edges with 64-pixel icon buttons and a 15-pixel gap: Kenney tile_cog for Settings and ui_numXlarge for Quit. Controls is reached from Settings; Back returns to Settings. Customize opens characters, weapons, and hats.
-
-Selecting Player vs AI reveals the difficulty dropdown to its right plus an explicit Play button; selection alone does not start the match. Player vs Player starts local play directly.
-
-The title uses Balsamiq Sans Bold from Google Fonts' official repository, downloaded into assets/fonts/BalsamiqSans-Bold.ttf. It is bundled for offline use under the included SIL Open Font License (assets/fonts/OFL.txt), separate from the CC0 artwork. Source: https://github.com/google/fonts/tree/main/ofl/balsamiqsans. Other text retains its readable standard font. Edit Title's font/size in main_menu.tscn.
-
-The title is now 36 px with a 480 × 90 card; its subtitle is 16 px. Home buttons have 15 px vertical spacing and inner padding. The AI dropdown and Play button retain 15 px horizontal spacing.
-
-Menu buttons and dropdowns use 18 px text, page headings 24 px, and the title 36 px to fit the compact cards.
-
-Player vs AI now toggles the same compact card to Play, Difficulty, and Main Menu in the three original rows. Original menu buttons hide while this submenu is open; Main Menu or Escape restores them. No wider panel is needed.
+`tests/menu_test.gd` checks navigation, layout/font fit, persistence, selected art, palette bars, play modes, shortcut restrictions, and actual Easy/Hard behavior. Desktop playtesting is still required for final visual spacing and sound mix.

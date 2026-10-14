@@ -7,7 +7,7 @@ var bars: Array[ProgressBar] = []
 @export_range(0.05, 1, 0.05) var knockout_slow_motion := 0.25
 var cinematic_active := false
 var cinematic_elapsed := 0.0
-var flying_hats: Array[Dictionary] = []
+var flying_equipment: Array[Dictionary] = []
 var round_over := false
 var ai_practice_mode := true
 var match_over := false
@@ -132,7 +132,7 @@ func finish_round() -> void:
 		match_overlay.get_node("Countdown").hide()
 		for fighter in fighters:
 			if fighter.health == 0:
-				launch_headgear(fighter)
+				launch_equipment(fighter)
 		return
 	show_result()
 
@@ -154,20 +154,29 @@ func show_result() -> void:
 	update_match_hud()
 
 
-func launch_headgear(fighter: Fighter) -> void:
-	var hat: Sprite2D = fighter.visuals.body.get_node("Hat")
-	if not hat.visible or hat.texture == null:
-		return # No invented helmet when a fighter chose No Hat.
-	var flying := Sprite2D.new()
-	flying.texture = hat.texture
-	flying.z_index = 20
-	add_child(flying)
-	flying.global_transform = hat.global_transform
-	hat.hide()
+func launch_equipment(fighter: Fighter) -> void:
 	var away := signf(fighter.position.x - fighter.opponent.position.x)
 	if away == 0:
 		away = -fighter.facing
-	flying_hats.append({"sprite": flying, "velocity": Vector2(away * 220, -420), "spin": away * 5.0})
+	var hat: Sprite2D = fighter.visuals.body.get_node("Hat")
+	# Each prop starts at its exact equipped world transform and has its own arc.
+	if hat.visible and hat.texture != null:
+		spawn_flying_equipment(hat, Vector2(away * 220, -420), away * 5)
+	spawn_flying_equipment(fighter.visuals.sword, Vector2(away * 260, -360), away * 8)
+	spawn_flying_equipment(fighter.visuals.shield, Vector2(away * 160, -300), -away * 6)
+	fighter.equipment_detached = true
+
+
+func spawn_flying_equipment(source: Sprite2D, launch_velocity: Vector2, spin: float) -> void:
+	if source.texture == null:
+		return
+	var flying := Sprite2D.new()
+	flying.texture = source.texture
+	flying.z_index = 20
+	add_child(flying)
+	flying.global_transform = source.global_transform
+	source.hide()
+	flying_equipment.append({"sprite": flying, "velocity": launch_velocity, "spin": spin})
 
 
 func tick_cinematic(delta: float) -> void:
@@ -184,7 +193,7 @@ func tick_cinematic(delta: float) -> void:
 				fighter.velocity.y = 0
 		fighter.state_frame += slow_delta * 60
 		fighter.visuals.update_pose()
-	for prop in flying_hats:
+	for prop in flying_equipment:
 		prop.velocity.y += 900 * slow_delta
 		prop.sprite.position += prop.velocity * slow_delta
 		prop.sprite.rotation += prop.spin * slow_delta
@@ -196,12 +205,15 @@ func tick_cinematic(delta: float) -> void:
 func clear_cinematic() -> void:
 	cinematic_active = false
 	cinematic_elapsed = 0
-	for prop in flying_hats:
+	for prop in flying_equipment:
 		prop.sprite.queue_free()
-	flying_hats.clear()
+	flying_equipment.clear()
 	for fighter in fighters:
 		var hat: Sprite2D = fighter.visuals.body.get_node("Hat")
 		hat.visible = hat.texture != null
+		fighter.equipment_detached = false
+		fighter.visuals.sword.show()
+		fighter.visuals.shield.show()
 
 
 func update_match_hud() -> void:

@@ -1,9 +1,32 @@
-# Included Kenney artwork
+# Asset guide for this project
 
-Source: user-uploaded kenney_scribble-platformer.zip. Creator: Kenney (https://kenney.nl). The Retina PNG set is in assets/scribble; the original CC0 license is preserved in assets/scribble/License.txt. The pack has static images and no audio or animation sheets. Unused textures remain available for customization.
+## Artwork
 
-Player1 uses character_roundGreen and character_handGreen; Player2 uses character_squarePurple and character_handPurple. Both use item_sword, item_shieldRound, and effect_blast. Arena scenery uses background_cloudA/B, background_tree/treeLarge, tile_castle, tile_bushHalf, tile_top, and tile_block.
+The original user-uploaded kenney_scribble-platformer.zip supplies the Retina PNG set under assets/scribble. Default-size duplicates, vector/SWF files, and the Construct project are not required. The unmodified Sample.png is also included for the main-menu background. Kenney's original [CC0 license](assets/scribble/License.txt) is retained.
 
-All artwork is now stored as editable Sprite2D nodes in scenes/arena.tscn, scenes/fighter_green.tscn, and scenes/fighter_purple.tscn. Texture paths and placement are no longer loaded/drawn by gameplay scripts. See [SCENE_GUIDE.md](SCENE_GUIDE.md) for editor placement, sword pivots, swapping textures, and matching collision boxes.
+| Role | Source textures |
+| --- | --- |
+| Bodies | character_round/square Green/Purple/Red/Yellow |
+| Matching hands | character_hand Green/Purple/Red/Yellow |
+| Weapons | item_sword, item_spear, item_rod, item_pencil |
+| Headgear | item_hat, item_hatTop, item_helmet, item_helmetModern |
+| Shield/effect | item_shieldRound, effect_blast |
+| Clouds/trees | background_cloudA/B, background_tree/treeLarge |
+| Arena decorations | tile_castle, tile_bushHalf |
+| Ground | tile_top, tile_block |
+| Menu background | Sample.png |
+| Settings/quit icons | tile_cog, ui_numXlarge |
 
-Arena ground now uses tile_top.png and tile_block.png, with tile_bushHalf.png replacing both bushes. Existing placement and collision floor remain unchanged.
+Static artwork is animated with transforms, not imported animation sheets. Extra PNGs remain available for additions but are not all game objects. Catalog paths are configured in GameSettings; scene nodes define placement. See [SCENE_GUIDE.md](SCENE_GUIDE.md) for rig/pivot/scale rules. Hats and weapons have no independent gameplay stats.
+
+## Font and sound
+
+Balsamiq Sans Bold is bundled from Google's official fonts repository under the included [SIL OFL](assets/fonts/OFL.txt), not CC0. It is used only for the main-menu title. No runtime download occurs.
+
+Sound files are grouped into voice, battle, menu, and knockout directories. Source filenames are preserved. Original voice license and owner declarations for battle/menu are included. See [AUDIO_GUIDE.md](AUDIO_GUIDE.md) for mappings and the separate knockout upload's provenance.
+
+## Import and version control
+
+Add supported textures/audio/fonts under assets, allow Godot to import them, then reference them from scenes or catalogs. PNG/MP3/OGG/TTF source files, .import configuration files, .tscn/.tres resources, and .gd.uid identifiers belong in version control. The generated .godot cache is ignored and rebuilt on import.
+
+For a replacement character, match feet to the fighter origin, align hands and weapon grip, and then tune receiving/attack rectangles. Art-only rescaling does not change collisions. Keep original license files with redistributed third-party assets and record the source of new additions.

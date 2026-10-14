@@ -1,108 +1,86 @@
-# Place and customize artwork in Godot
+# Scene editing guide for this project
 
-## Open the editable arena
+Import project.godot in Godot 4.6. Press F5 for the full menu flow; open an individual scene and press F6 for a scene-specific preview. Arena references the Preferences autoload even when run directly.
 
-Import project.godot with Godot 4.6. Double-click scenes/arena.tscn and select the 2D workspace. The artwork and both characters are visible without running the game. Press F5 to play.
+## Arena structure
 
 ```text
-Arena
+Arena (arena.gd)
 ├── Scenery
 │   ├── Paper
-│   ├── Clouds
+│   ├── Clouds (CloudLeft / CloudRight)
 │   ├── Trees
-│   ├── Decorations
-│   └── Ground (Top01–18, Block01–18)
+│   ├── Decorations (castles / half bushes)
+│   └── Ground (Top01–18 / Block01–18)
 └── Fighters
-    ├── Player1 (fighter_green.tscn instance)
-    └── Player2 (fighter_purple.tscn instance)
+    ├── Player1 (fighter_green.tscn)
+    └── Player2 (fighter_purple.tscn)
 ```
 
-Select any scenery Sprite2D and drag it with the move tool (W), or edit Inspector → Transform → Position/Scale/Rotation. Replace artwork by dragging a PNG from assets/scribble onto its Texture field. Ctrl+D duplicates a selected node. Rename new nodes meaningfully and keep them inside the matching group. Scenery is decorative, not collidable.
+Scenery and fighter instances are visible before running. Select sprites and edit Transform Position/Scale/Rotation; drag an imported PNG into Texture to replace it. Ctrl+D duplicates nodes. Keep new scenery inside the appropriate group. Decoration has no gameplay collisions.
 
-Ground is positioned at Y = 520. Top tiles are 64 × 64 on screen; centers are X = 32, 96, 160, etc. The node group position controls the whole ground. If you change its height, also change GameSettings.FLOOR_Y and tree/decor positions so feet and scenery align. The simulation floor is a mathematical plane, not these sprites. Adjust arena bounds if changing arena width.
+Ground uses tile_top.png and tile_block.png; bushes use tile_bushHalf.png. Tiles are 64 × 64 on screen with centers spaced 64 pixels. Ground's Y is 520, matching GameSettings.FLOOR_Y. Moving ground visually does not move the simulation floor: change both, and adjust decoration positions when changing height. Player root origins represent feet. Their scene X positions determine restart spawns; keep their Y at FLOOR_Y.
 
-Move Player1/Player2 horizontally in the editor to change their spawn positions; restart now uses their initial scene X positions. Keep their scene Y at FLOOR_Y. Their Inspector exposes Player Index and Use Ai; Player2 defaults to AI. Do not give both the same player index.
+Cloud sprites have cloud_drift.gd with exported Drift Speed: +10 and -8 pixels/second. Change sign for direction and magnitude for speed. They wrap only after leaving the viewport by their scaled half-width.
 
-## Edit either character
+## Fighter structure
 
-Open scenes/fighter_green.tscn or scenes/fighter_purple.tscn. These are separate reusable fighter scenes, so edits affect the matching arena instance. You can also select an instance in the arena and choose Open in Editor. The character's root origin is its feet.
+Open fighter_green.tscn or fighter_purple.tscn for either reusable rig:
 
 ```text
 Fighter (CharacterBody2D, fighter.gd)
 └── Visuals (fighter_visual.gd)
     └── Rig
-        ├── Body (Sprite2D)
-        ├── RearHand (Sprite2D)
-        │   └── Shield (Sprite2D, always held)
-        ├── FrontHand (Sprite2D)
-        │   └── SwordGrip (Node2D)
-        │       └── Sword (Sprite2D)
-        └── PunchEffect (Sprite2D, hidden initially)
+        ├── Body
+        │   └── Hat
+        ├── RearHand
+        │   └── Shield
+        ├── FrontHand
+        │   └── SwordGrip
+        │       └── Sword
+        └── PunchEffect
 ```
 
-Select Body/Hand/Sword nodes to replace textures or edit their local transforms. The script captures authored body/hand/effect positions and body/grip rotations on startup, then adds pose offsets. These baseline edits persist during animation. Rig X scale is controlled by facing, and guard/effect visibility is controlled by combat. Keep node names and hierarchy intact because the animation script references them.
+Body/hand/weapon/hat textures are replaced by saved selections at runtime. Scene transforms remain the baseline for animation. The green/purple filenames identify rig templates, not restrictions on selected colors. Keep node names/hierarchy unchanged because the script references them directly.
 
-SwordGrip pivots the sword around the hand. Sword points upward in its PNG; the grip's 90° baseline turns it forward. Position/scale the Sword child to line up its hilt with the hand; change SwordGrip baseline rotation for the resting orientation. Attack startup draws the sword back, active frames swing forward, and recovery retracts it. Both fighters use the same timing logic and mirror toward their opponent.
+The default body draws from a 128 px source with transparent margins, scaled to roughly 45 visible pixels wide and 104 high. Origin is at the feet. Hats follow Body; shields follow RearHand. SwordGrip pivots around FrontHand; its 90° baseline turns the upward-pointing source sword forward. Adjust the Sword child position/scale to align the hilt. All weapon variants share that pivot and combat rules; art size alone does not increase reach.
 
-Shield is visible at rest and follows RearHand. Temporarily enable PunchEffect visibility to place it, then disable the effect again before saving. Runtime effect visibility is automatic. The effect retains its scene position as a baseline and shifts toward the attack reach.
+The visual script captures authored body/hand/effect positions and body/grip rotations, then adds state-driven offsets. Rig X scale is controlled by facing. Effect position shifts by reach; effect visibility is runtime-controlled. Temporarily show PunchEffect to place it, then restore hidden before saving.
 
-## Collision and animation
+## Shield and collision alignment
 
-Art does not directly cause damage: timed hitboxes still handle combat. Use H in the running game to show red attack and green receiving rectangles. Tune GameSettings.ATTACKS reach, HITBOX_HEIGHT/HITBOX_Y, and HURTBOX_SIZE/HURTBOX_CENTER to match changed artwork. The sword is a visual weapon using the existing three-strike hitboxes, not a physics sword with per-pixel collisions. Do not add an always-active damaging Area2D to the sword.
+Shield remains visible at rest, has 80% of its original size, and Z Index 5 to render in front of the weapon. Because RearHand is scaled 0.5, shield child scale compensates for that parent. Visuals Inspector fields are Guard Hand Offset (48,-18), Guard Raise Frames (6), and Guard Recoil Offset (-10,4). Guard raises the free hand; a blocked hit keeps it raised and recoils it briefly.
 
-State-driven animation remains in fighter_visual.gd: walking bob, air tilt, sword windup/active/recovery, hit flash, shield, and effect. Static artwork is positioned in the scenes; code only changes poses according to gameplay. Controls, health bars, and status labels are still built by arena.gd.create_hud(), while collision nodes are generated by fighter.gd. These can be moved to scenes in a separate UI/collision-authoring pass if desired.
+In AI practice press H to inspect green hurtboxes and red hitboxes. Tune HURTBOX_SIZE/CENTER, HITBOX_HEIGHT/Y, and ATTACKS reach in settings to align collision with changed art. Do not add always-active sword damage: attacks must still create/destroy hitboxes by active frames. The collision nodes are generated by fighter.gd, while visible art is scene-authored.
 
-Run the README tests after changes. A desktop playtest is needed to judge the final placement and sword motion.
+## Editable hit reactions
 
-## Editable hit knockback
+Select Fighter root in either template or its arena instance:
 
-Open fighter_green.tscn or fighter_purple.tscn and select the Fighter root. In Inspector → Script Variables:
+| Inspector field | Default | Purpose |
+| --- | --- | --- |
+| Hit Push Distance | 180 px | Victim's horizontal travel |
+| Hit Jump Speed | 260 px/s | Upward hit launch |
+| Hit Stun Seconds | 0.4 s | Minimum unblocked action lock |
+| Parry Push Distance | 120 px | This fighter's recoil when its attack is blocked |
 
-- **Hit Push Distance**: horizontal travel in pixels on an unblocked hit (default 180). Try 240 for stronger knockback or 0 to disable horizontal push.
-- **Hit Jump Speed**: upward launch magnitude in pixels/second (default 260). Try 350 for a higher hit hop or 0 for no upward launch.
+Zero push disables horizontal travel; zero launch disables the hop. Walls shorten actual travel. KNOCKBACK_SECONDS controls speed independently of distance. Attack stun may exceed the minimum. Guard uses short stun and a small shove; parried attackers take no damage. Explicitly saved Inspector values override new script defaults.
 
-These values are per character and can also be overridden on Player1/Player2 scene instances. Project-wide defaults are HIT_PUSH and HIT_JUMP_SPEED in game_settings.gd; explicitly saved Inspector overrides take precedence. Distance is delivered over KNOCKBACK_SECONDS (default 0.3 seconds), followed by a stationary stun; arena walls can shorten actual travel. Gravity controls landing. A new hit replaces the previous knockback. Guarded hits use BLOCK_PUSH and do not launch upward. Restart clears all knockback momentum.
+## Knockout cinematic
 
-**Hit Stun Seconds** is also editable on the Fighter root (default 0.4). Unblocked hits prevent movement, attacks, jumping, and blocking for at least this duration. Attack data can specify longer stun. The default is 24 simulation ticks; guard still uses the shorter BLOCK_STUN_FRAMES. New hits restart stun. Change KNOCKBACK_SECONDS in game_settings.gd to tune travel speed without changing total distance or stun duration.
+Arena root exports Knockout Duration (1.4 seconds) and Knockout Slow Motion (0.25). The cinematic continues victim knockback/gravity and poses with scaled delta, copies weapon, shield, and equipped headgear into flying props, and delays results using unscaled delta. No global Engine.time_scale is changed; clouds/audio keep normal timing.
 
-## Shield hand animation
+Headgear launch/spin/gravity constants are in arena.gd.launch_equipment()/tick_cinematic(): horizontal 220, upward 420 pixels/second, spin 5 radians/second, gravity 900 pixels/second². Only equipped headgear flies; No Hat creates no headgear prop; weapon and shield still fly. Restart removes loose sprites and restores attached hats. Timeout bypasses the cinematic. Headgear does not damage anyone or collide with the arena.
 
-Both fighters always hold their shield in RearHand, the hand without the sword. Shield is a child Sprite2D, so repositioning/scaling the hand also moves the shield. Its child scale compensates for the hand's 0.5 scale.
+## UI and sound scenes
 
-Select Visuals in either fighter scene to edit **Guard Hand Offset** (default 48, -18), **Guard Raise Frames** (6 frames), and **Guard Recoil Offset** (-10, 4). Holding guard raises the hand forward and upward over those frames. A front blocked hit keeps the shield raised and nudges the hand back; it returns as the brief guard stun expires. Releasing guard restores the resting hand position. Rig mirrors the whole arrangement for either facing. Shield artwork alone does not add protection: normal front-facing guard rules still determine damage.
+- main_menu.tscn: compact Home/Settings/Controls/Characters pages, title, background, toolbar, previews, menu sound.
+- menu_theme.tres: shared cream/navy/teal styles and keyboard focus.
+- match_overlay.tscn: Clock, Countdown, Victory labels/buttons. Result panel uses a 28% opacity cream StyleBoxFlat; buttons remain opaque. Change its style alpha, not the Panel's overall modulate, to avoid fading buttons.
+- match_audio.tscn: exported battle/voice streams and Music/Announcer/Effects/Knockout players.
 
-## Shield size and block parries
+Health bars and the arena title remain generated by arena.gd.create_hud(). Other scene art can be rearranged in the editor. UI text/visibility and selected textures are runtime-driven. Consult [MENU_GUIDE.md](MENU_GUIDE.md) and [AUDIO_GUIDE.md](AUDIO_GUIDE.md) before changing referenced node names.
 
-Shield scale is now reduced by 20% (80% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+Save scenes, run relevant README tests, and visually playtest both facing directions, all hats/weapons, guard, aerial attacks, KO, and rematch.
 
-Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.4). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.4 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.
-
-## Timer and result screen
-
-Open scenes/match_overlay.tscn to edit Clock, Victory panel, title/result labels, and Play Again/Quit buttons. The arena instantiates this CanvasLayer, so it appears over combat. Button pressed signals are connected by arena.gd. Match text and visibility update from gameplay; edit positions, theme, and sizes in the scene. ROUND_SECONDS in settings controls duration (60 by default). This is one match with no series scoring.
-
-## Pre-fight countdown
-
-Every new match and rematch starts with centered 3, 2, 1 text over three seconds. Each number fades, then FIGHT! appears and fades away over 0.5 seconds while combat begins. Controls and the 60-second match clock remain paused during the numeric countdown. Pre-fight attack/jump presses are ignored. Edit the Countdown label in scenes/match_overlay.tscn to change placement, font, outline, and size. Game-end results show only winner/draw and Knockout/Time Up, without remaining-health numbers.
-
-Audio is editable in scenes/match_audio.tscn. Select its root for effect/voice slots and the Music, Announcer, or Effects players for volume. See AUDIO_GUIDE.md.
-
-## Console diagnostics and faster combat
-
-Controls print once at startup in Godot's Output panel (or the terminal when launched from CLI). Player states print on transitions; AI/local mode changes also print. The on-screen state and control labels are removed, while health bars, match timer, countdown, and result screen remain.
-
-Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
-
-The game now starts at main_menu.tscn. Edit its Home/Settings/Controls/Characters panels directly. Saved character and weapon texture choices override default fighter scene textures at runtime, while your local transforms remain. See MENU_GUIDE.md for details.
-
-Hats are editable Body/Hat Sprite2D nodes in each fighter scene, populated by the character menu selection. The menu Background TextureRect references Kenney Sample.png. Result buttons are now Play Again and Main Menu; Quit is only in the main menu.
-
-Arena ground now uses tile_top.png and tile_block.png, with tile_bushHalf.png replacing both bushes. Existing placement and collision floor remain unchanged.
-
-The game-over panel uses a 28% opacity cream StyleBoxFlat (result_panel in match_overlay.tscn). Buttons inherit the solid menu theme; outlined result text stays readable. Change the panel background alpha to tune arena visibility without fading its child controls.
-
-## Clouds and knockout presentation
-
-Select CloudLeft/CloudRight in arena.tscn and edit Drift Speed: defaults are +10 and -8 pixels/second. cloud_drift.gd wraps the sprites after their full widths leave the screen. Scene-authored positions remain the starting points.
-
-Select the Arena root to edit Knockout Duration (1.4 seconds) and Knockout Slow Motion (0.25). A fatal hit freezes actions, keeps the victim's movement running at the slow factor, and copies equipped headgear into a spinning flying Sprite2D. Duration uses real gameplay delta; no global Engine.time_scale is changed, so audio, clouds, and UI timing remain unaffected. Results appear afterward. Reset removes loose props and restores the selected hat. Timeouts bypass the cinematic, and fighters selecting No Hat have no invented helmet.
+The final-blow cinematic detaches the weapon and shield as well as optional headgear. spawn_flying_equipment() preserves each source sprite's global transform, hides the original, and assigns an independent arc/spin. Weapon launch is 260 horizontally / 360 upward with spin 8; shield launch is 160 horizontally / 300 upward with opposite spin 6; headgear uses 220 / 420 with spin 5. These are pixels/second and radians/second, scaled by cinematic delta. All share prop gravity 900. Fighter.equipment_detached prevents pose updates from showing hand equipment again; reset/clear restores it. Loose props are cosmetic and have no collision/damage.

@@ -164,7 +164,7 @@ done
 | Match | Full timer, countdown/fade, timeout/KO/draw, result display, rematch |
 | Audio | Countdown routing, music looping/start/stop, effects, voice ordering, cleanup |
 | Menu | Navigation/layout, font fit, settings persistence, previews, selections, health colors, AI behavior, PvP shortcut restrictions |
-| Cinematic | Cloud drift/wrap, final-hit slow motion, helmet flight, delayed results, restart cleanup |
+| Cinematic | Cloud drift/wrap, final-hit slow motion, equipment flight, delayed results, restart cleanup |
 
 All nine suites have passed in the cloud environment. Headless checks validate mechanics and configuration; they do not replace desktop playtesting for visual layout, controller feel, audio levels, or the music loop boundary.
 
@@ -179,6 +179,7 @@ mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
 
 ## Detailed guides
 
+- [Architecture and signals](ARCHITECTURE.md): diagrams, match phases, timing, persistence, and limitations.
 - [Code guide](CODE_GUIDE.md): functions, variables, FSM behavior, and tuning.
 - [Scene guide](SCENE_GUIDE.md): placing artwork, weapon pivots, shield poses, and collision alignment.
 - [Menu guide](MENU_GUIDE.md): menu layout, AI profiles, customization, and saved preferences.
@@ -201,4 +202,18 @@ For an academic report, document your design decisions, state transitions, frame
 
 ## Arena visual effects
 
-Clouds drift slowly in opposite directions and wrap only after leaving the viewport. A knockout triggers a 1.4-second cinematic before the result screen: combat presentation runs at 25% speed, final-hit knockback continues, and the defeated fighter's equipped hat/helmet is hurled upward with rotation. No Hat produces no headgear prop. Double knockouts animate both defeated fighters; timeouts show results directly. The match clock and player actions stop during the cinematic, and rematches restore headgear. Cloud movement and audio keep normal timing.
+Clouds drift slowly in opposite directions and wrap only after leaving the viewport. A knockout triggers a 1.4-second cinematic before the result screen: combat presentation runs at 25% speed, final-hit knockback continues, and the defeated fighter's weapon, shield, and equipped hat/helmet are hurled outward with rotation. No Hat produces no headgear prop; the weapon and shield still fly. Double knockouts animate both defeated fighters; timeouts show results directly. The match clock and player actions stop during the cinematic, and rematches restore headgear. Cloud movement and audio keep normal timing.
+
+## Current menu layout
+
+Home uses a compact solid card with 15-pixel control spacing. Player vs AI toggles that card to Play, Difficulty, and Main Menu in the same three positions. Title text is 36 px with its smaller solid card; menu buttons/dropdowns are 18 px. The settings cog and quit cross sit at the top right with 40-pixel outer margins and a 15-pixel gap. Controls is inside Settings; Customize includes bodies, weapons, and hats. The game-over panel is 28% opaque with solid buttons.
+
+## Troubleshooting and export
+
+- Missing textures/classes after cloning: open the project in the editor and allow import, or run the headless import command before tests. Keep source assets, .import settings, and .gd.uid files; do not copy the generated .godot cache between machines.
+- Settings not changing: saved selections override default textures, and explicit Inspector values override changed script defaults. See the menu/scene guides for reset and precedence.
+- Silent sound: check the Music/SFX/Voice sliders and buses, then audio-player base dB values. Headless tests do not produce an audible desktop mix.
+- Inputs missing while many keys are held: check keyboard rollover and try different physical keys. The buffer cannot recover events suppressed by hardware.
+- Direct arena preview: F6 uses current saved preferences; F5 starts the full menu flow.
+
+For a desktop build, install Godot export templates matching the editor version, open Project → Export, add the target desktop preset, and export. No export preset or packaged executable is currently committed, and release builds have not been independently validated. Keep asset/font license files with redistributed builds.

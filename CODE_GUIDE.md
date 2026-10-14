@@ -1,158 +1,124 @@
-# Code and customization guide
+# Code reference for this project
 
-## Change keys and gameplay variables
+This guide describes the current implementation. Start with [README.md](README.md) to run the game, [SCENE_GUIDE.md](SCENE_GUIDE.md) to edit artwork, and [ARCHITECTURE.md](ARCHITECTURE.md) for system diagrams and signals.
 
-Edit **scripts/game_settings.gd**, save, then restart the game. Constants affect both fighters. The on-screen key labels use the same settings automatically. These are code constants, not Inspector fields.
+## Shared tuning: `scripts/game_settings.gd`
 
-| Setting | Purpose and unit |
-| --- | --- |
-| ATTACK_MOVE_SPEED / BLOCK_MOVE_SPEED | Ground attack/guard movement speed, pixels per second |
-| MOVE_SPEED / AIR_SPEED | Ground/air horizontal speed, pixels per second |
-| JUMP_SPEED | Upward launch magnitude, pixels per second; larger means higher |
-| GRAVITY | Downward acceleration, pixels per second squared |
-| MAX_HEALTH | Starting health and health-bar maximum |
-| FLOOR_Y | Foot height when grounded; positive Y goes downward |
-| LEFT_BOUND / RIGHT_BOUND | Limits for fighter foot X positions |
-| BODY_WIDTH | Body separation and attack origin offset |
-| HURTBOX_SIZE / HURTBOX_CENTER | Receiving rectangle dimensions/offset relative to feet |
-| HITBOX_HEIGHT / HITBOX_Y | Attack rectangle height/vertical center relative to feet |
-| INPUT_WINDOW | Jump queue expiration in seconds |
-| ATTACK_INPUT_WINDOW | Attack queue expiration in seconds |
-| MAX_BUFFER_COMMANDS | Capacity; oldest command is dropped when full |
-| COMBO_CANCEL_FRAMES | Final recovery frames permitting the next strike |
-| BLOCK_DAMAGE / BLOCK_STUN_FRAMES | Guard chip damage and stun duration |
-| HIT_PUSH / BLOCK_PUSH | Default unblocked travel distance / instant guarded shove, pixels |
-| HIT_JUMP_SPEED | Default upward launch speed on an unblocked hit, pixels per second |
-| AI_APPROACH_DISTANCE / AI_ATTACK_DISTANCE | Horizontal approach/attack thresholds, pixels |
-| AI_DIFFICULTIES | Per-level attack interval, speed, reaction, and guard settings |
-| Scene Player1/Player2 positions | Starting X coordinates, edited in arena.tscn |
-| ATTACKS | Ordered dictionaries defining combo strikes |
-| KEYS | Action names mapped to physical keyboard keys |
+`GameSettings` is a `RefCounted` class used for constants and catalogs, not a running node. Edit its constants and restart the game to apply changes.
 
-To jump higher and float longer, try JUMP_SPEED = 700.0 and GRAVITY = 1600.0. Approximate height = speed²/(2 × gravity), airtime = 2 × speed/gravity. Defaults give about 107 pixels and 0.69 seconds, with small discrete-step differences. Keep speed, gravity, dimensions, and capacity positive.
+| Setting | Default | Meaning |
+| --- | --- | --- |
+| `MOVE_SPEED` | 300 | Ground pixels/second |
+| `AIR_SPEED` | 262.5 | Air steering pixels/second |
+| `ATTACK_MOVE_SPEED` | 150 | Ground attack movement pixels/second |
+| `BLOCK_MOVE_SPEED` | 112.5 | Guard movement pixels/second |
+| `ATTACK_SPEED` | 1.25 | Attack-timeline advancement per physics tick |
+| `JUMP_SPEED` | 620 | Upward launch magnitude, pixels/second |
+| `GRAVITY` | 1800 | Downward acceleration, pixels/second² |
+| `MAX_HEALTH` | 100 | Initial health and health-bar maximum |
+| `ROUND_SECONDS` | 60 | Live match length |
+| `FLOOR_Y` | 520 | Grounded foot Y coordinate |
+| `LEFT_BOUND` / `RIGHT_BOUND` | 42 / 1110 | Fighter X limits |
+| `BODY_WIDTH` | 44 | Separation distance and hitbox origin offset |
+| `HURTBOX_SIZE` / `HURTBOX_CENTER` | (42,104) / (0,-54) | Receiving rectangle dimensions/offset from feet |
+| `HITBOX_HEIGHT` / `HITBOX_Y` | 36 / -62 | Attack rectangle height/center relative to feet |
+| `INPUT_WINDOW` | 0.22 | Jump command lifetime, seconds |
+| `ATTACK_INPUT_WINDOW` | 0.75 | Attack command lifetime, seconds |
+| `MAX_BUFFER_COMMANDS` | 8 | Queue capacity |
+| `COMBO_CANCEL_FRAMES` | 6 | Final recovery timeline frames permitting the next strike |
+| `BLOCK_DAMAGE` / `BLOCK_STUN_FRAMES` | 1 / 8 | Guard chip damage / defender stun |
+| `HIT_PUSH` / `HIT_JUMP_SPEED` | 180 / 260 | Default hit travel distance / upward speed |
+| `HIT_STUN_SECONDS` | 0.4 | Default minimum unblocked stun |
+| `KNOCKBACK_SECONDS` | 0.3 | Horizontal travel duration |
+| `BLOCK_PUSH` | 8 | Instant grounded shove on a guarded hit |
+| `PARRY_PUSH` / `PARRY_STUN_SECONDS` | 120 / 0.4 | Attacker recoil distance / recovery |
+| `AI_APPROACH_DISTANCE` / `AI_ATTACK_DISTANCE` | 105 / 145 | Horizontal AI decision thresholds |
 
-### Change movement keys
+`ATTACKS` contains ordered dictionaries with `startup`, `active`, `recovery`, `damage`, `stun`, and `reach`. Timings are base timeline frames; reach is pixels. The README has the full table. `AI_DIFFICULTIES` contains decision interval, movement multiplier, reaction threshold, and guard availability. `CHARACTERS`, `WEAPONS`, and `HATS` provide names, texture paths, and character colors. `key_label()` translates `KEYS` into readable menu/console labels.
 
-In the KEYS dictionary, replace the constant for the desired action:
+Keep speeds, gravity, dimensions, and travel duration positive. Keep attack startup/active at least one frame and recovery nonnegative; the cancel window should not exceed recovery. Large attack-speed multipliers can cross both the active start and end in one physics tick, leaving no collision opportunity; the default 1.25 is tested. Changing the 60 Hz engine tick rate requires updating frame-based timers and formulas throughout the project.
 
-```gdscript
-"p1_left": KEY_A,
-"p1_right": KEY_D,
-"p1_jump": KEY_SPACE, # Changes player 1 jump from W to Space.
-```
+### Keys
 
-Player 2 uses p2_left, p2_right, and p2_jump. Other actions are p1_attack, p1_block, p2_attack, p2_block, restart, boxes, and ai. Constants include KEY_W, KEY_UP, KEY_SHIFT, and KEY_SPACE. Avoid duplicate keys. Bindings use physical keyboard positions. Settings overwrite runtime Input Map bindings on startup; editing only Project Settings → Input Map will not change these defaults. Adding an action also requires implementing its behavior. Tab switches player 2 from AI to local controls.
+Change `KEYS`, for example `"p1_jump": KEY_SPACE`, to use Space instead of W. Bindings use physical key positions. Arena startup overwrites runtime Input Map events from this dictionary, so editing only Project Settings → Input Map is insufficient. Adding an action also requires implementing its behavior. Avoid duplicate keys and test keyboard rollover for simultaneous presses.
 
-### Change attacks
-
-Each ATTACKS dictionary has startup, active, recovery, damage, stun, and reach. Durations are integer frames at 60 Hz; reach is pixels. The default first strike becomes active on frame 6 and loses its hitbox on frame 10. Keep startup/active at least 1, recovery nonnegative, and COMBO_CANCEL_FRAMES no greater than recovery. Append a dictionary to extend the combo; code uses array length. Tests assert default timing/damage, so deliberately update expected results when tuning defaults.
-
-## Jump rules
-
-W/Up queues a jump. Idle, walking, or blocking consumes it; jump and attack execute together when both are queued. A recent jump press in attack recovery can execute afterward if it has not expired. JUMPING allows air steering and attacks, but no double jump or airborne guard. Holding jump does not repeat; a fresh press shortly before landing may trigger another jump after landing. Jump plus attack launches an aerial strike immediately; its hitbox follows the fighter in the air.
-
-Gravity continues during airborne hit stun. Landing clamps feet to FLOOR_Y and clears vertical velocity; jumping becomes idle, but stun must finish separately. Stun finishing in the air returns to jumping. Hurtboxes follow vertical position, so high jumps can avoid ground attacks. Body separation only applies where hurtboxes overlap, allowing jump-over movement. The AI stays on the ground. Restart clears momentum.
-
-This project uses an explicit mathematical floor plane, not platform collisions. CharacterBody2D is moved directly; is_grounded() replaces is_on_floor(). Adding platforms requires a deliberate collision/move_and_slide() redesign.
-
-## File and function reference
-
-### scripts/game_settings.gd
-
-GameSettings is a shared RefCounted class containing tuning constants. key_label(action) converts configured keys into HUD text. It has no process or saved state.
-
-### scripts/input_buffer.gd
-
-FightInputBuffer owns commands (command/time dictionaries) and a simulation clock. advance(delta) advances time and expires stale commands. push(command) appends a timestamped press and caps capacity. consume(command) removes the oldest matching command exactly once and returns success. clear() removes pending presses on hit, restart, and AI toggle. This is a command queue rather than a special-move directional recognizer.
-
-### scripts/fighter.gd
+## Fighter: `scripts/fighter.gd`
 
 | Function | Responsibility |
 | --- | --- |
-| _input | Capture individual attack/jump presses; ignore keyboard auto-repeat |
-| _ready | Create persistent hurtbox; arena owns scheduling |
-| make_area | Build Area2D and rectangle collision shape with specified layers |
-| change_state | Reset state frame and clean up a leaving attack hitbox |
-| start_attack | Select combo index, enter attack, clear already-hit victims |
-| remove_hitbox | Detach/free active attack collision node |
-| tick | Read input/AI, advance FSM, integrate horizontal movement and gravity |
-| is_grounded | Test foot position and non-upward velocity against floor |
-| attack_rectangle | Compute world attack rectangle mirrored by facing |
-| hurt_rectangle | Compute world receiving rectangle |
-| resolve_attack | Resolve one attack for isolated tests; arena batches match hits |
-| receive_hit | Apply guard/damage/stun/push and clear inputs |
-| reset_fighter | Reset health, state, position, velocity, buffer, AI timer |
-| _draw | Draw optional collision visualization; FighterVisual draws artwork |
+| `_ready()` | Create persistent hurtbox, apply saved textures/headgear, reference scene visuals |
+| `make_area()` | Construct Area2D with rectangle shape and specified layer/mask |
+| `change_state()` | Remove interrupted hitbox, print transition, reset frame counter/guard reaction |
+| `start_attack()` | Enter attack, choose combo index, clear already-hit targets |
+| `remove_hitbox()` | Detach/free active attack area |
+| `_input()` | Capture attack/jump presses individually; ignore echo, disabled fighters, and AI input |
+| `tick()` | Advance buffer, human/AI decisions, FSM, movement, gravity, and presentation |
+| `is_grounded()` | Test foot height and non-upward velocity |
+| `attack_rectangle()` / `hurt_rectangle()` | Calculate world rectangles matching collision shapes |
+| `resolve_attack()` | Isolated attack resolution used by tests; arena batches real-match hits |
+| `receive_hit()` | Apply guard/damage/stun, clear inputs, initiate push/hop or parry |
+| `receive_parry()` | Cancel attacking fighter, apply recoil/stun without damage |
+| `reset_fighter()` | Reset state, health, position, momentum, queue, and AI timer |
+| `_draw()` | Optional green hurtbox/red attack overlays |
 
-Runtime fields: state/state_frame track the FSM; health tracks damage; facing is ±1; combo selects attack data; stun_remaining counts stun frames. Inherited velocity is pixels/second. player_index selects action names; opponent references the other fighter. buffer stores commands; hurtbox/hitbox are Area2D nodes; victims stores already-hit IDs. enabled freezes combat after KO. use_ai/ai_timer drive decisions. debug_boxes controls collision overlays. Artwork paths are configured in GameSettings. Tune settings rather than runtime fields.
+Inspector exports on the Fighter root are `player_index`, `use_ai`, `hit_push_distance`, `hit_jump_speed`, `hit_stun_seconds`, and `parry_push_distance`. Player index selects inputs and saved customization slots. Arena sets `use_ai` from the chosen mode; Tab may change it only in AI practice. Explicitly saved Inspector overrides take precedence over changed script default values.
 
-AI guard timing in tick() uses the selected AI_DIFFICULTIES profile. Edit its reaction and guard values to tune behavior. Drawing coordinates in FighterVisual._draw() control art independently of collision size; adjust the art if you resize hurtboxes. Immediate rectangle checks use the same dimensions as collision nodes to avoid deferred physics overlap updates.
+Runtime fields include state/frame, health, facing (±1), combo index, stun ticks, guard-hit flag, remaining knockback/speed, inherited velocity, opponent reference, command buffer, collision nodes, hit-victim IDs, enabled flag, and AI timer. `state_frame` is fractional for attacks and advances by one for other states. `guard_hit` distinguishes a shield recoil from unblocked damage while both use HIT_STUN.
 
-### scripts/arena.gd
+Jump + attack executes together when both commands are available. Attacks take priority over held guard. Air steering and aerial attacks are allowed; guard/double-jump are not. A fresh jump press near landing can survive until grounded; holding the key does not repeatedly jump. Gravity continues during airborne stun. Movement uses explicit positions and a mathematical floor, rather than `move_and_slide()` or platform collision.
 
-_ready() sets 60 Hz physics, binds keys, references scene fighters, captures spawn positions, assigns opponents, builds HUD, and restarts. bind() replaces an action's runtime events with its configured physical key. create_hud() builds labels/health bars. restart() restores both fighters. _physics_process() handles match controls, ticks fighters, separates bodies, collects both hits before damage (allowing trades), handles KO, and updates HUD. Scenery nodes in arena.tscn provide the background and floor.
+## Input buffer: `scripts/input_buffer.gd`
 
-fighters owns both fighters, info is the status label, bars holds health bars, and round_over tracks the match outcome. Change Body and Hand Sprite2D textures in the fighter scenes for character colors and use_ai initialization for default local play. UI positions/fonts are in create_hud(). For a different viewport, update project.godot, settings bounds/spawns, and arena UI/background coordinates together. Keep physics at 60 Hz unless intentionally changing frame-based combat timing.
+`commands` stores command/time/window dictionaries; `clock` tracks simulation seconds. `advance(delta)` expires stale entries; `push()` appends a timestamped entry and drops the oldest at capacity; `consume()` removes the oldest matching entry once; `clear()` drops all entries. Attack and jump have separate lifetimes. This recognizes queued actions rather than directional special-move sequences.
 
-### Other files
+## Fighter poses: `scripts/fighter_visual.gd`
 
-- scenes/arena.tscn: main Node2D and its arena script; fighter instances and scenery are scene-authored; UI is created dynamically.
-- project.godot: game name, main scene, viewport/stretch, renderer, background color.
-- .gitignore: excludes generated .godot import cache. .gd.uid files identify scripts and belong in version control.
-- tests/combat_test.gd: queue expiration/consumption, attack phases, damage/stun, once-per-strike hits, combo, directional guard.
-- tests/arena_test.gd: AI approach/damage, KO freeze, restart.
-- tests/jump_test.gd: real jump/movement actions, steering, no double jump, landing, vertical dodge, airborne stun, restart momentum reset.
+`_ready()` caches scene-authored body/hand/effect positions and body/grip rotations. `update_pose()` adds walking bob, jumping lean, sword windup/extension/recovery, hit shake/tint, and shield-hand movement. It mirrors the Rig to face the opponent; collision mirroring is handled independently. Child hats follow Body and shields follow RearHand. During a blocked hit the shield stays raised and recoils; it is always held at rest.
 
-Tests extend SceneTree, schedule run(), and exit nonzero on failure. Run the README commands after changing code. Headless tests validate mechanics; desktop playtesting evaluates appearance and feel.
+Exported pose controls are `guard_hand_offset` (48,-18), `guard_raise_frames` (6), and `guard_recoil_offset` (-10,4). This script never applies damage, owns attack timing, or loads texture choices. Fighter startup supplies textures, and gameplay supplies state/frame information.
 
-## Simultaneous inputs and attack mashing
+## Match coordinator: `scripts/arena.gd`
 
-Input events are collected individually in `Fighter._input()`, including presses arriving between physics ticks. Keyboard auto-repeat is ignored. Hold movement while attacking or blocking; attack movement uses `ATTACK_MOVE_SPEED` and guard movement uses `BLOCK_MOVE_SPEED`. Jump + attack + movement can execute together, and airborne attacks use air steering. Attack takes priority over guard: pressing attack while holding guard starts a strike, and guard resumes after recovery. You cannot guard an attack while striking or airborne. Left + right cancel to zero horizontal input.
+| Function | Responsibility |
+| --- | --- |
+| `_ready()` | Bind keys, reference scene fighters, capture mode/spawns, connect audio/UI, restart |
+| `bind()` | Replace an action's physical key mapping |
+| `create_hud()` | Build title/health bars and print console controls |
+| `restart()` / `start_round()` | Clear cinematic, restore fighters, initialize clock and countdown |
+| `finish_round()` | Stop combat once; begin knockout cinematic or show timeout result |
+| `show_result()` | Determine health-based winner, play result audio, display result panel |
+| `launch_equipment()` | Detach weapon, shield, and optional headgear into flying props |
+| `spawn_flying_equipment()` | Copy a source sprite world transform and assign launch velocity/spin |
+| `tick_cinematic()` | Move victim/equipment with scaled delta; measure delay with normal delta |
+| `clear_cinematic()` | Remove loose props and restore attached equipment |
+| `update_match_hud()` | Refresh timer and health bars |
+| `update_countdown()` | Advance numbered fade/voice checkpoints and enable fighters at FIGHT |
+| `_physics_process()` | Gate shortcuts, update match phase, simulate fighters, separate bodies, resolve hits |
+| `return_to_menu()` | Disable fighters, stop battle audio, change scene |
+| `_unhandled_key_input()` | Handle Escape menu return |
 
-Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.
+`round_over` stops new combat; `cinematic_active` permits only the knockout presentation; `match_over` becomes true when results are visible. `ai_practice_mode` records the initial match selection and does not change with Tab. Clock/countdown/fight-fade are integer tick counters. `flying_equipment` stores sprite/velocity/spin dictionaries. Arena exports cinematic duration (1.4) and slow factor (0.25).
 
-## Scene-authored artwork
+Health bars and title are generated in code; scenery, fighters, overlays, and audio assignments are scene-authored. Both attacks are collected before applying damage so trades can occur. Clouds run their own physics callbacks; they do not slow down with the cinematic.
 
-All texture references and placement now live in arena.tscn and fighter_green/purple.tscn. fighter_visual.gd references Sprite2D children, captures their scene transforms in _ready(), and applies simulation-driven pose offsets in update_pose(). SwordGrip pivots the sword around the hand. fighter.tick() refreshes this presentation without changing collision timing. arena.gd uses existing Player1/Player2 scene instances and captures scene spawn positions. ArenaVisual was removed; scenery no longer requires a script. See SCENE_GUIDE.md for the hierarchy and editing instructions.
+## Cloud movement: `scripts/cloud_drift.gd`
 
-## Hit reaction movement
+`_physics_process(delta)` moves a Sprite2D by exported `drift_speed` and wraps after its full visible width leaves viewport bounds. Arena scene defaults are +10 and -8 pixels/second. Texture width and scene scale determine wrapping margins.
 
-Fighter exposes hit_push_distance, hit_jump_speed, and hit_stun_seconds as Inspector properties. receive_hit() launches upward and stores signed knockback_remaining and knockback_speed. The HIT_STUN branch of tick() moves that distance over KNOCKBACK_SECONDS (capped to the stun duration), while existing gravity integrates the hop. Direction is away from the attacker's position; walls clamp travel. Guard keeps a small immediate shove instead. reset_fighter() clears remaining displacement and speed. tests/knockback_test.gd checks editable values, both directions, landing, guard, walls, and restart.
+## Menus: `scripts/main_menu.gd`
 
-HIT_STUN_SECONDS sets the default minimum unblocked stun (0.4 seconds); KNOCKBACK_SECONDS controls travel time (0.3 seconds). The effective hit stun is the larger of the per-character minimum converted to frames and the attack dictionary stun value. Default hit travel is 180 pixels. After travel finishes, HIT_STUN still ignores actions until the timer expires. Wall limits and repeat hits still apply.
+`_ready()` connects widgets, starts looping menu music, restores selections, populates catalogs, builds control text, and opens Home. `show_page()` selects a page/focus target. `select_ai_mode()`, `reset_home()`, and `set_home_buttons()` switch between the original three buttons and Play/Difficulty/Main Menu in the same card.
 
-## Shield reactions
+`set_difficulty()`, `set_volume()`, and `update_volume_label()` update/synchronize saved settings and audio buses. `configure_characters()` creates dropdown entries; `choose_character()`, `choose_weapon()`, and `choose_hat()` save choices; `update_preview()` applies art/palette. `update_controls()` uses configured keys. `start_game()` records local/AI mode, disables navigation, plays the start cue, waits 0.5 seconds, and changes to Arena. Escape navigates back; `_exit_tree()` stops menu audio.
 
-RearHand/Shield is scene-authored. Fighter.guard_hit marks guarded HIT_STUN, resets on state transitions, and lets presentation distinguish guard recoil from full damage. FighterVisual.update_pose() blends the hand to guard_hand_offset over guard_raise_frames, applies guard_recoil_offset during guard stun, and restores the authored resting pose afterward. These pose settings are exported on Visuals. The shield stays visible at rest; gameplay protection still depends on BLOCKING and facing.
+## Persistent options: `scripts/preferences.gd`
 
-## Shield size and block parries
+Preferences is a project autoload. `_ready()` calls `load_settings()` and `apply_volumes()`. Load/save use ConfigFile at `settings_path`, defaulting to `user://settings.cfg`; tests use an isolated path. `save_settings()` returns an Error. Loaded indices and numeric volumes are clamped; missing/unreadable files leave defaults. Unexpected incompatible value types are not fully validated.
 
-Shield scale is now reduced by 20% (80% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+Persisted fields are difficulty, music/effects/voice volumes, and two-element character/weapon/hat arrays. `local_mode` is runtime-only. `apply_volumes()` maps normalized linear gains to Music/SFX/Voice dB values and mutes zero gain.
 
-Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.4). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.4 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.
+## Audio: `scripts/match_audio.gd`
 
-## Match clock and results
+`_ready()` duplicates/enables looping music, creates eight effect players, and connects announcer `finished`. `reset_match()` stops all sound and clears queue; `_exit_tree()` releases streams. `say()` replaces countdown voice, `begin_battle()` starts music/FIGHT, `play_next_voice()` advances the result queue, `play_effect()` chooses an idle effect player (or replaces the first if all are busy), and `on_combat_sound()` routes fighter events. `play_knockout()` uses a dedicated hurt player. `finish_match()` stops music/effects and queues timeout/player/winner/draw clips while leaving the knockout cue able to finish. See [AUDIO_GUIDE.md](AUDIO_GUIDE.md) for exact resources.
 
-arena.gd.restart() resets the whole match and calls start_round(). start_round() restores fighters and initializes round_ticks_remaining to ROUND_SECONDS × 60. Each live physics tick subtracts one; stopped matches do not tick combat. finish_round() freezes both fighters, removes hitboxes, determines the winner by remaining health (equal is a draw), and displays match_overlay.tscn. update_match_hud() formats the clock and updates health bars. Victory/Rematch.pressed connects to restart(); Victory/Quit.pressed quits the tree. tests/match_test.gd runs a full timer, checks timeout/KO/draw, combat freezing, and button-driven rematch. No best-of-three scoring is implemented.
-
-update_countdown() advances the 180-tick pre-fight sequence and updates text opacity. start_round() disables fighters and resets it; the final countdown tick enables fighters and shows FIGHT!. fight_fade_ticks then fades the label over 30 live-combat ticks. Match time is decremented only after the numeric countdown completes. tests/match_test.gd verifies numbers, fade, frozen time/positions, exact start, and disappearance.
-
-## Audio events
-
-Fighter.combat_sound is a custom signal emitted at actual sword active frames, jump launch, and hit/guard resolution. Arena connects it to MatchAudio.on_combat_sound. MatchAudio owns looping music, a sequential announcer queue advanced by AudioStreamPlayer.finished, and an eight-player effects pool. Source streams and volumes live in match_audio.tscn; independent Music/Voice/SFX buses live in default_bus_layout.tres. See AUDIO_GUIDE.md for every event mapping, controls, and test coverage.
-
-## Console diagnostics and faster combat
-
-Controls print once at startup in Godot's Output panel (or the terminal when launched from CLI). Player states print on transitions; AI/local mode changes also print. The on-screen state and control labels are removed, while health bars, match timer, countdown, and result screen remain.
-
-Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
-
-## Menu and saved preferences
-
-main_menu.gd connects scene button/slider/option signals, loads saved choices into widgets, generates current control text, updates character previews, and transitions to battle with a start cue. preferences.gd is an autoload that loads/saves ConfigFile data, validates ranges, and applies independent bus gains. AI profiles and character/weapon catalogs live in GameSettings. Fighter samples the selected AI profile for speed/attack/guard decisions and applies selected textures at initialization; arena chooses AI/local mode and palette-derived health bars. See MENU_GUIDE.md for editor configuration and menu_test.gd coverage.
-
-Arena.ai_practice_mode captures the launch mode and gates reset/boxes/ai keyboard shortcuts; it does not depend on temporary opponent toggles. Local matches ignore those shortcuts. Preferences.hats persists per-player decoration indices, and GameSettings.HATS supplies their textures. main_menu.gd.choose_hat() updates saved choices/previews; Fighter._ready() applies Body/Hat art. menu_test.gd verifies shortcut gating, hats, sample background, and result button removal.
-
-## Knockout cinematic
-
-cloud_drift.gd moves each cloud using its exported signed drift_speed and wraps outside viewport bounds. Arena.finish_round() disables combat and starts cinematic_active for knockouts, otherwise shows timeout results. launch_headgear() copies the equipped sprite's world transform, hides the attached hat, and gives the loose prop upward/outward velocity and spin. tick_cinematic() advances final-hit knockback, gravity, poses, and flying hats with scaled delta while measuring result delay with unscaled delta. show_result() performs the existing winner/audio/UI logic. clear_cinematic() cleans props and restores attached hats on restart. tests/cinematic_test.gd exercises an actual lethal attack rather than just setting a KO flag.
+The final-blow cinematic detaches the weapon and shield as well as optional headgear. spawn_flying_equipment() preserves each source sprite's global transform, hides the original, and assigns an independent arc/spin. Weapon launch is 260 horizontally / 360 upward with spin 8; shield launch is 160 horizontally / 300 upward with opposite spin 6; headgear uses 220 / 420 with spin 5. These are pixels/second and radians/second, scaled by cinematic delta. All share prop gravity 900. Fighter.equipment_detached prevents pose updates from showing hand equipment again; reset/clear restores it. Loose props are cosmetic and have no collision/damage.
