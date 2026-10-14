@@ -100,3 +100,9 @@ Hats are editable Body/Hat Sprite2D nodes in each fighter scene, populated by th
 Arena ground now uses tile_top.png and tile_block.png, with tile_bushHalf.png replacing both bushes. Existing placement and collision floor remain unchanged.
 
 The game-over panel uses a 28% opacity cream StyleBoxFlat (result_panel in match_overlay.tscn). Buttons inherit the solid menu theme; outlined result text stays readable. Change the panel background alpha to tune arena visibility without fading its child controls.
+
+## Clouds and knockout presentation
+
+Select CloudLeft/CloudRight in arena.tscn and edit Drift Speed: defaults are +10 and -8 pixels/second. cloud_drift.gd wraps the sprites after their full widths leave the screen. Scene-authored positions remain the starting points.
+
+Select the Arena root to edit Knockout Duration (1.4 seconds) and Knockout Slow Motion (0.25). A fatal hit freezes actions, keeps the victim's movement running at the slow factor, and copies equipped headgear into a spinning flying Sprite2D. Duration uses real gameplay delta; no global Engine.time_scale is changed, so audio, clouds, and UI timing remain unaffected. Results appear afterward. Reset removes loose props and restores the selected hat. Timeouts bypass the cinematic, and fighters selecting No Hat have no invented helmet.

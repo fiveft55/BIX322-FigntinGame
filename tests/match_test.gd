@@ -57,6 +57,9 @@ func run() -> void:
 		arena._physics_process(1.0 / 60)
 	arena.fighters[0].health = 0
 	arena._physics_process(1.0 / 60)
+	check(arena.cinematic_active and not arena.match_overlay.get_node("Victory").visible, "KO delays result for cinematic")
+	for tick in range(85):
+		arena._physics_process(1.0 / 60)
 	check(arena.match_overlay.get_node("Victory/Title").text == "PLAYER 2 WINS!", "Knockout ends single match immediately")
 	check(not arena.fighters[0].enabled and not arena.fighters[1].enabled, "Both fighters disabled after match")
 	arena.match_audio.reset_match()

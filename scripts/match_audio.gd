@@ -15,6 +15,7 @@ extends Node
 @export var winner_voice: AudioStream
 @export var tie_voice: AudioStream
 @export var time_voice: AudioStream
+@onready var knockout: AudioStreamPlayer = $Knockout
 @onready var music: AudioStreamPlayer = $Music
 @onready var voice: AudioStreamPlayer = $Announcer
 @onready var effect_template: AudioStreamPlayer = $Effects
@@ -34,6 +35,7 @@ func _ready() -> void:
 	voice.finished.connect(play_next_voice)
 
 func reset_match() -> void:
+	knockout.stop()
 	music.stop()
 	voice.stop()
 	voice_queue.clear()
@@ -43,6 +45,7 @@ func reset_match() -> void:
 
 func _exit_tree() -> void:
 	reset_match()
+	knockout.stream = null
 	music.stream = null
 	voice.stream = null
 	for player in effect_players:
@@ -84,6 +87,11 @@ func on_combat_sound(event: StringName) -> void:
 		&"hit": play_effect(hit_sound)
 		&"block": play_effect(block_sound)
 		&"jump": play_effect(jump_sound)
+
+func play_knockout() -> void:
+	# Dedicated player lets the hurt cue finish beneath the later result voice.
+	last_event = "knockout"
+	knockout.play()
 
 func finish_match(winner: int, timed_out: bool) -> void:
 	music.stop()

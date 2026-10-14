@@ -3,6 +3,11 @@ extends Node2D
 
 var fighters: Array[Fighter] = []
 var bars: Array[ProgressBar] = []
+@export_range(0.1, 3, 0.1) var knockout_duration := 1.4
+@export_range(0.05, 1, 0.05) var knockout_slow_motion := 0.25
+var cinematic_active := false
+var cinematic_elapsed := 0.0
+var flying_hats: Array[Dictionary] = []
 var round_over := false
 var ai_practice_mode := true
 var match_over := false
@@ -90,6 +95,7 @@ func create_hud() -> void:
 
 func restart() -> void:
 	# R and Play Again restart the entire match, not just the current round.
+	clear_cinematic()
 	match_over = false
 	match_overlay.get_node("Victory").hide()
 	start_round()
@@ -119,6 +125,19 @@ func finish_round() -> void:
 	for fighter in fighters:
 		fighter.enabled = false
 		fighter.remove_hitbox()
+	if fighters[0].health == 0 or fighters[1].health == 0:
+		cinematic_active = true
+		match_audio.play_knockout()
+		cinematic_elapsed = 0.0
+		match_overlay.get_node("Countdown").hide()
+		for fighter in fighters:
+			if fighter.health == 0:
+				launch_headgear(fighter)
+		return
+	show_result()
+
+
+func show_result() -> void:
 	match_over = true
 	match_overlay.get_node("Countdown").hide()
 	var result := "DRAW!"
@@ -133,6 +152,56 @@ func finish_round() -> void:
 	match_overlay.get_node("Victory").show()
 	match_overlay.get_node("Victory/Rematch").grab_focus()
 	update_match_hud()
+
+
+func launch_headgear(fighter: Fighter) -> void:
+	var hat: Sprite2D = fighter.visuals.body.get_node("Hat")
+	if not hat.visible or hat.texture == null:
+		return # No invented helmet when a fighter chose No Hat.
+	var flying := Sprite2D.new()
+	flying.texture = hat.texture
+	flying.z_index = 20
+	add_child(flying)
+	flying.global_transform = hat.global_transform
+	hat.hide()
+	var away := signf(fighter.position.x - fighter.opponent.position.x)
+	if away == 0:
+		away = -fighter.facing
+	flying_hats.append({"sprite": flying, "velocity": Vector2(away * 220, -420), "spin": away * 5.0})
+
+
+func tick_cinematic(delta: float) -> void:
+	cinematic_elapsed += delta
+	var slow_delta := delta * knockout_slow_motion
+	for fighter in fighters:
+		if fighter.health == 0:
+			var step := minf(absf(fighter.knockback_remaining), fighter.knockback_speed * slow_delta)
+			fighter.position.x = clampf(fighter.position.x + signf(fighter.knockback_remaining) * step, GameSettings.LEFT_BOUND, GameSettings.RIGHT_BOUND)
+			fighter.knockback_remaining -= signf(fighter.knockback_remaining) * step
+			fighter.velocity.y += GameSettings.GRAVITY * slow_delta
+			fighter.position.y = minf(GameSettings.FLOOR_Y, fighter.position.y + fighter.velocity.y * slow_delta)
+			if fighter.position.y == GameSettings.FLOOR_Y:
+				fighter.velocity.y = 0
+		fighter.state_frame += slow_delta * 60
+		fighter.visuals.update_pose()
+	for prop in flying_hats:
+		prop.velocity.y += 900 * slow_delta
+		prop.sprite.position += prop.velocity * slow_delta
+		prop.sprite.rotation += prop.spin * slow_delta
+	if cinematic_elapsed >= knockout_duration:
+		cinematic_active = false
+		show_result()
+
+
+func clear_cinematic() -> void:
+	cinematic_active = false
+	cinematic_elapsed = 0
+	for prop in flying_hats:
+		prop.sprite.queue_free()
+	flying_hats.clear()
+	for fighter in fighters:
+		var hat: Sprite2D = fighter.visuals.body.get_node("Hat")
+		hat.visible = hat.texture != null
 
 
 func update_match_hud() -> void:
@@ -173,6 +242,9 @@ func _physics_process(delta: float) -> void:
 		fighters[1].use_ai = not fighters[1].use_ai
 		fighters[1].buffer.clear()
 		print("Player 2 mode: ", "AI" if fighters[1].use_ai else "LOCAL")
+	if cinematic_active:
+		tick_cinematic(delta)
+		return
 	if round_over:
 		return
 	if countdown_ticks > 0:

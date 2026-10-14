@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/match_audio.gd" id="script"]
 [ext_resource type="AudioStream" path="res://assets/audio/battle/oxidvideos-video-game-sword-swing-sfx-409364.mp3" id="sword_sound"]
@@ -16,6 +16,8 @@
 [ext_resource type="AudioStream" path="res://assets/audio/voice/it's_a_tie.ogg" id="tie_voice"]
 [ext_resource type="AudioStream" path="res://assets/audio/voice/time.ogg" id="time_voice"]
 [ext_resource type="AudioStream" path="res://assets/audio/battle/331music-video-game-music-598332.mp3" id="music"]
+
+[ext_resource type="AudioStream" path="res://assets/audio/knockout/yarzur_ofc-sfx13-boss_damage2-324519.mp3" id="knockout"]
 
 [node name="MatchAudio" type="Node"]
 script = ExtResource("script")
@@ -45,4 +47,9 @@ bus = &"Voice"
 
 [node name="Effects" type="AudioStreamPlayer" parent="."]
 volume_db = -10.0
+bus = &"SFX"
+
+[node name="Knockout" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("knockout")
+volume_db = -6.0
 bus = &"SFX"

@@ -32,3 +32,7 @@ Fighter.combat_sound(event) emits sword, jump, hit, or block events. Arena conne
 Run tests/audio_test.gd with the README commands. It checks count timing, loop flag/start/stop, audio buses, event routing, result voice order, and rematch cleanup. Other tests allow the audio mixer a short cleanup interval before exiting.
 
 Menu music and start cues are now supplied in assets/audio/menu and referenced by main_menu.tscn. The Settings menu applies saved Music/SFX/Voice bus gains to both menu and battle audio; individual player dB values remain the base mix. See MENU_GUIDE.md.
+
+## Final-blow hurt effect
+
+The separately uploaded yarzur_ofc-sfx13-boss_damage2-324519.mp3 is included under assets/audio/knockout. MatchAudio/Knockout plays it on the SFX bus at the beginning of the losing player's cinematic. It has a dedicated player, so the result transition does not cut the cue off. Restart/menu exit stops it. Change its base volume or stream in match_audio.tscn; the Effects slider also controls it. Normal hit sounds remain unchanged. Source is the user-supplied file; no license document accompanied this separate upload.

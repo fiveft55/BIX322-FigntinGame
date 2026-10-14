@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/arena.gd" id="arena"]
 [ext_resource type="PackedScene" path="res://scenes/fighter_green.tscn" id="green"]
@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" path="res://assets/scribble/tile_block.png" id="tile_block"]
 [ext_resource type="Texture2D" path="res://assets/scribble/tile_bushHalf.png" id="tile_bushHalf"]
 [ext_resource type="Texture2D" path="res://assets/scribble/tile_castle.png" id="tile_castle"]
+
+[ext_resource type="Script" path="res://scripts/cloud_drift.gd" id="cloud_drift"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("arena")
@@ -32,12 +34,16 @@ color = Color(0.973, 0.961, 0.922, 1)
 position = Vector2(0, 520)
 
 [node name="CloudLeft" type="Sprite2D" parent="Scenery/Clouds"]
+script = ExtResource("cloud_drift")
+drift_speed = 10.0
 position = Vector2(205.0, 237.5)
 scale = Vector2(0.859375, 0.7421875)
 modulate = Color(1, 1, 1, 1)
 texture = ExtResource("background_cloudA")
 
 [node name="CloudRight" type="Sprite2D" parent="Scenery/Clouds"]
+script = ExtResource("cloud_drift")
+drift_speed = -8.0
 position = Vector2(885.0, 240.0)
 scale = Vector2(0.9765625, 0.859375)
 modulate = Color(1, 1, 1, 1)

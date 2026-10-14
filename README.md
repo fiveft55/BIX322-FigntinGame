@@ -138,7 +138,7 @@ scenes/
   match_audio.tscn       Sound assignments and players
   menu_theme.tres        Shared UI styles
 scripts/                 Gameplay, presentation, menus, and preferences
-tests/                   Eight headless regression suites
+tests/                   Nine headless regression suites
 project.godot            Godot project configuration
 ```
 
@@ -149,7 +149,7 @@ From the repository root, import resources before running the suites:
 ```sh
 godot --headless --path . --editor --import --quit
 
-for suite in combat arena jump assets knockback match audio menu; do
+for suite in combat arena jump assets knockback match audio menu cinematic; do
   godot --headless --path . --script "tests/${suite}_test.gd" || exit 1
 done
 ```
@@ -164,8 +164,9 @@ done
 | Match | Full timer, countdown/fade, timeout/KO/draw, result display, rematch |
 | Audio | Countdown routing, music looping/start/stop, effects, voice ordering, cleanup |
 | Menu | Navigation/layout, font fit, settings persistence, previews, selections, health colors, AI behavior, PvP shortcut restrictions |
+| Cinematic | Cloud drift/wrap, final-hit slow motion, helmet flight, delayed results, restart cleanup |
 
-All eight suites have passed in the cloud environment. Headless checks validate mechanics and configuration; they do not replace desktop playtesting for visual layout, controller feel, audio levels, or the music loop boundary.
+All nine suites have passed in the cloud environment. Headless checks validate mechanics and configuration; they do not replace desktop playtesting for visual layout, controller feel, audio levels, or the music loop boundary.
 
 For a restricted cloud sandbox, redirect Godot's writable runtime directories before running commands:
 
@@ -197,3 +198,7 @@ mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
 This is a local fighting-game prototype with one arena and one melee combo chain. Online multiplayer, gamepad bindings, runtime key rebinding, weapon-specific abilities, and a full competitive ruleset are not implemented. AI does not use machine learning.
 
 For an academic report, document your design decisions, state transitions, frame-data experiments, test results, and evaluation. Disclose AI-assisted work according to your institution's requirements. The guides explain the implementation so you can adapt it and justify your own changes.
+
+## Arena visual effects
+
+Clouds drift slowly in opposite directions and wrap only after leaving the viewport. A knockout triggers a 1.4-second cinematic before the result screen: combat presentation runs at 25% speed, final-hit knockback continues, and the defeated fighter's equipped hat/helmet is hurled upward with rotation. No Hat produces no headgear prop. Double knockouts animate both defeated fighters; timeouts show results directly. The match clock and player actions stop during the cinematic, and rematches restore headgear. Cloud movement and audio keep normal timing.

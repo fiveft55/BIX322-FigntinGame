@@ -48,6 +48,8 @@ func run() -> void:
 	check(audio.last_event == "block", "Front guard emits block effect")
 	arena.fighters[1].health = 0
 	arena.finish_round()
+	for tick in range(85):
+		arena._physics_process(1.0 / 60)
 	check(not audio.music.playing, "Music stops at result screen")
 	check(audio.voice.stream == audio.player_one_voice, "Correct winner announced first")
 	audio.play_next_voice()
