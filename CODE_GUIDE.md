@@ -119,7 +119,7 @@ All texture references and placement now live in arena.tscn and fighter_green/pu
 
 Fighter exposes hit_push_distance, hit_jump_speed, and hit_stun_seconds as Inspector properties. receive_hit() launches upward and stores signed knockback_remaining and knockback_speed. The HIT_STUN branch of tick() moves that distance over KNOCKBACK_SECONDS (capped to the stun duration), while existing gravity integrates the hop. Direction is away from the attacker's position; walls clamp travel. Guard keeps a small immediate shove instead. reset_fighter() clears remaining displacement and speed. tests/knockback_test.gd checks editable values, both directions, landing, guard, walls, and restart.
 
-HIT_STUN_SECONDS sets the default minimum unblocked stun (0.5 seconds); KNOCKBACK_SECONDS controls travel time (0.3 seconds). The effective hit stun is the larger of the per-character minimum converted to frames and the attack dictionary stun value. Default hit travel is 180 pixels. After travel finishes, HIT_STUN still ignores actions until the timer expires. Wall limits and repeat hits still apply.
+HIT_STUN_SECONDS sets the default minimum unblocked stun (0.4 seconds); KNOCKBACK_SECONDS controls travel time (0.3 seconds). The effective hit stun is the larger of the per-character minimum converted to frames and the attack dictionary stun value. Default hit travel is 180 pixels. After travel finishes, HIT_STUN still ignores actions until the timer expires. Wall limits and repeat hits still apply.
 
 ## Shield reactions
 
@@ -127,6 +127,6 @@ RearHand/Shield is scene-authored. Fighter.guard_hit marks guarded HIT_STUN, res
 
 ## Shield size and block parries
 
-Shield scale is now reduced by 10% (90% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.5 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+Shield scale is now reduced by 10% (90% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
 
-Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.5). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.5 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.
+Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.4). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.4 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.

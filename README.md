@@ -26,7 +26,7 @@ Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles 
 | --- | --- | --- | --- | --- | --- |
 | 1 | 6 | 4 | 13 | 8 | 18 |
 | 2 | 7 | 4 | 14 | 10 | 21 |
-| 3 | 10 | 5 | 22 | 16 | 27 |
+| 3 | 10 | 5 | 22 | 16 | 24 |
 
 The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking, audio, or a full competitive fighting-game ruleset.
 
@@ -77,7 +77,7 @@ Open scenes/arena.tscn for organized scenery and fighter instances. Open scenes/
 
 Unblocked hits now launch fighters upward and backward. Select the Fighter root in either fighter scene to edit **Hit Push Distance** (pixels) and **Hit Jump Speed** (pixels/second). See SCENE_GUIDE.md for tuning and scene overrides.
 
-Default unblocked hits now push 180 pixels over 0.3 seconds and stun for 0.5 seconds. **Hit Stun Seconds** joins the editable Fighter Inspector settings. Attack frame-data stun values are lower bounds; the per-character 30-frame default minimum takes precedence. Blocking keeps its short guard stun.
+Default unblocked hits now push 180 pixels over 0.3 seconds and stun for 0.4 seconds. **Hit Stun Seconds** joins the editable Fighter Inspector settings. Attack frame-data stun values are lower bounds; the per-character 24-frame default minimum takes precedence. Blocking keeps its short guard stun.
 
 Collision outlines are hidden by default. Press H to toggle green hurtboxes and red attack hitboxes for debugging.
 
@@ -85,6 +85,6 @@ Both fighters hold shields in their free hands. Guard raises that hand; a blocke
 
 ## Shield size and block parries
 
-Shield scale is now reduced by 10% (90% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.5 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+Shield scale is now reduced by 10% (90% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
 
-Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.5). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.5 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.
+Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.4). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.4 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.

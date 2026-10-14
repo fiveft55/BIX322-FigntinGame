@@ -23,19 +23,19 @@ const COMBO_CANCEL_FRAMES := 6
 const BLOCK_DAMAGE := 1
 const BLOCK_STUN_FRAMES := 8
 const HIT_PUSH := 180.0 # Default travel distance on an unblocked hit, pixels.
-const HIT_STUN_SECONDS := 0.5 # Minimum unblocked stun; attacks can specify longer.
+const HIT_STUN_SECONDS := 0.4 # Minimum unblocked stun; attacks can specify longer.
 const KNOCKBACK_SECONDS := 0.3 # Travel completes before the stun wears off.
 const HIT_JUMP_SPEED := 260.0 # Default upward hit launch, pixels per second.
 const BLOCK_PUSH := 8.0
 const PARRY_PUSH := 120.0 # Attacker recoil distance after a front block.
-const PARRY_STUN_SECONDS := 0.5
+const PARRY_STUN_SECONDS := 0.4
 const AI_APPROACH_DISTANCE := 105.0
 const AI_ATTACK_DISTANCE := 145.0
 const AI_ATTACK_INTERVAL := 0.6
 const ATTACKS := [
 	{"startup": 6, "active": 4, "recovery": 13, "damage": 8, "stun": 18, "reach": 64.0},
 	{"startup": 7, "active": 4, "recovery": 14, "damage": 10, "stun": 21, "reach": 72.0},
-	{"startup": 10, "active": 5, "recovery": 22, "damage": 16, "stun": 27, "reach": 90.0}
+	{"startup": 10, "active": 5, "recovery": 22, "damage": 16, "stun": 24, "reach": 90.0}
 ]
 ## Physical keyboard keys. Restart the game after editing. Avoid duplicates.
 const KEYS := {
