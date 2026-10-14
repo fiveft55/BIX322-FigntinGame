@@ -2,7 +2,6 @@ extends Node2D
 ## Match coordinator: controls, fighter simulation, simultaneous hits, and HUD.
 
 var fighters: Array[Fighter] = []
-var info: Label
 var bars: Array[ProgressBar] = []
 var round_over := false
 var match_over := false
@@ -18,6 +17,7 @@ func _ready() -> void:
 	for action in GameSettings.KEYS:
 		bind(action, GameSettings.KEYS[action])
 	fighters.assign([$Fighters/Player1, $Fighters/Player2])
+	fighters[1].use_ai = not Preferences.local_mode
 	for fighter in fighters:
 		spawn_positions.append(fighter.position)
 	match_audio = (load("res://scenes/match_audio.tscn") as PackedScene).instantiate()
@@ -31,6 +31,7 @@ func _ready() -> void:
 	add_child(match_overlay)
 	match_overlay.get_node("Victory/Rematch").pressed.connect(restart)
 	match_overlay.get_node("Victory/Quit").pressed.connect(func() -> void: get_tree().quit())
+	match_overlay.get_node("Victory/MainMenu").pressed.connect(return_to_menu)
 	restart()
 
 func bind(action: String, key: Key) -> void:
@@ -56,7 +57,7 @@ func create_hud() -> void:
 		bar.size = Vector2(380, 26)
 		bar.max_value = GameSettings.MAX_HEALTH
 		var fill := StyleBoxFlat.new()
-		fill.bg_color = Color("32b982") if i == 0 else Color("9464df")
+		fill.bg_color = GameSettings.CHARACTERS[Preferences.characters[i]].color
 		fill.set_corner_radius_all(6)
 		bar.add_theme_stylebox_override("fill", fill)
 		var background := StyleBoxFlat.new()
@@ -68,13 +69,6 @@ func create_hud() -> void:
 		bar.show_percentage = false
 		layer.add_child(bar)
 		bars.append(bar)
-	info = Label.new()
-	info.position = Vector2(45, 125)
-	info.add_theme_color_override("font_color", Color("28333b"))
-	info.add_theme_font_size_override("font_size", 18)
-	layer.add_child(info)
-	var help := Label.new()
-	help.position = Vector2(45, 555)
 	var control_labels: Array[String] = []
 	for player in ["p1", "p2"]:
 		control_labels.append("%s %s/%s move · %s jump · %s attack · %s guard" % [
@@ -85,15 +79,13 @@ func create_hud() -> void:
 			GameSettings.key_label(player + "_attack"),
 			GameSettings.key_label(player + "_block"),
 		])
-	help.text = " | ".join(control_labels)
-	help.text += "\n%s AI/local · %s hitboxes · %s restart" % [
+	print(" | ".join(control_labels))
+	print("%s AI/local · %s hitboxes · %s restart" % [
 		GameSettings.key_label("ai"),
 		GameSettings.key_label("boxes"),
 		GameSettings.key_label("restart"),
-	]
-	help.add_theme_color_override("font_color", Color("28333b"))
-	help.add_theme_font_size_override("font_size", 18)
-	layer.add_child(help)
+	])
+	print("Collision debug: green hurtboxes, red attack hitboxes. States log on transition.")
 
 func restart() -> void:
 	# R and Play Again restart the entire match, not just the current round.
@@ -179,6 +171,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("ai"):
 		fighters[1].use_ai = not fighters[1].use_ai
 		fighters[1].buffer.clear()
+		print("Player 2 mode: ", "AI" if fighters[1].use_ai else "LOCAL")
 	if round_over:
 		return
 	if countdown_ticks > 0:
@@ -215,10 +208,13 @@ func _physics_process(delta: float) -> void:
 	if fighters[0].health == 0 or fighters[1].health == 0 or round_ticks_remaining == 0:
 		finish_round()
 	update_match_hud()
-	info.text = "P1: %s   |   P2: %s (%s)\nGreen: hurtbox · Red: active attack · Buffer: %d / %d" % [
-		Fighter.State.keys()[fighters[0].state],
-		Fighter.State.keys()[fighters[1].state],
-		"AI" if fighters[1].use_ai else "LOCAL",
-		fighters[0].buffer.commands.size(),
-		fighters[1].buffer.commands.size(),
-	]
+
+func return_to_menu() -> void:
+	for fighter in fighters:
+		fighter.enabled = false
+	match_audio.reset_match()
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		return_to_menu()

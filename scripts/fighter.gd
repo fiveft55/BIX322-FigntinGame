@@ -10,7 +10,7 @@ const SPEED := GameSettings.MOVE_SPEED
 const FLOOR_Y := GameSettings.FLOOR_Y
 const ATTACKS := GameSettings.ATTACKS
 var state: State = State.IDLE
-var state_frame := 0
+var state_frame := 0.0
 var health := GameSettings.MAX_HEALTH
 var facing := 1
 var combo := 0
@@ -36,9 +36,17 @@ var ai_timer := 0.0
 var visuals: FighterVisual
 
 func _ready() -> void:
+	var preferences := get_node("/root/Preferences")
 	hurtbox = make_area(GameSettings.HURTBOX_SIZE, GameSettings.HURTBOX_CENTER, 1, 0)
 	hurtbox.set_meta("fighter", self)
 	visuals = get_node_or_null("Visuals") as FighterVisual
+	if is_instance_valid(visuals):
+		var slot := player_index - 1
+		var character: Dictionary = GameSettings.CHARACTERS[preferences.characters[slot]]
+		visuals.body.texture = load(character.body)
+		visuals.front_hand.texture = load(character.hand)
+		visuals.rear_hand.texture = load(character.hand)
+		visuals.sword.texture = load(GameSettings.WEAPONS[preferences.weapons[slot]].texture)
 	# Isolated combat tests can instantiate Fighter without a presentation scene.
 	set_physics_process(false) # Arena updates both fighters before resolving collisions.
 
@@ -58,8 +66,10 @@ func make_area(size: Vector2, center: Vector2, layer: int, mask: int) -> Area2D:
 func change_state(next: State) -> void:
 	if state == State.ATTACKING:
 		remove_hitbox()
+	if state != next:
+		print("P%d: %s -> %s" % [player_index, State.keys()[state], State.keys()[next]])
 	state = next
-	state_frame = 0
+	state_frame = 0.0
 	guard_hit = false
 
 func start_attack(next_combo: int = 0) -> void:
@@ -85,6 +95,7 @@ func _input(event: InputEvent) -> void:
 
 
 func tick(delta: float) -> void:
+	var preferences := get_node("/root/Preferences")
 	buffer.advance(delta)
 	if not enabled:
 		queue_redraw()
@@ -96,17 +107,20 @@ func tick(delta: float) -> void:
 	var direction := Input.get_axis(prefix + "left", prefix + "right")
 	var blocking := Input.is_action_pressed(prefix + "block")
 	if use_ai:
+		var profile: Dictionary = GameSettings.AI_DIFFICULTIES[preferences.difficulty]
 		ai_timer += delta
 		var distance := opponent.position.x - position.x
 		direction = signf(distance) if absf(distance) > GameSettings.AI_APPROACH_DISTANCE else 0.0
-		blocking = opponent.state == State.ATTACKING and fmod(ai_timer, 1.5) < 0.65
-		if ai_timer >= GameSettings.AI_ATTACK_INTERVAL:
+		direction *= profile.speed
+		blocking = opponent.state == State.ATTACKING and opponent.state_frame >= profile.reaction and fmod(ai_timer, 1.5) < profile.guard
+		if ai_timer >= profile.interval:
 			ai_timer = 0.0
 			if absf(opponent.position.x - position.x) < GameSettings.AI_ATTACK_DISTANCE:
 				buffer.push(&"attack")
 	if state != State.ATTACKING and state != State.HIT_STUN:
 		facing = 1 if opponent.position.x >= position.x else -1
-	state_frame += 1
+	var previous_frame := state_frame
+	state_frame += GameSettings.ATTACK_SPEED if state == State.ATTACKING else 1.0
 	velocity.x = 0.0
 	match state:
 		State.HIT_STUN:
@@ -125,14 +139,14 @@ func tick(delta: float) -> void:
 			var attack_speed := GameSettings.ATTACK_MOVE_SPEED if is_grounded() else GameSettings.AIR_SPEED
 			velocity.x = direction * attack_speed
 			var attack: Dictionary = ATTACKS[combo]
-			if state_frame == attack.startup:
+			if previous_frame < attack.startup and state_frame >= attack.startup:
 				combat_sound.emit(&"sword")
 				hitbox = make_area(
 					Vector2(attack.reach, GameSettings.HITBOX_HEIGHT),
 					Vector2(facing * (GameSettings.BODY_WIDTH / 2 + attack.reach / 2), GameSettings.HITBOX_Y),
 					0, 1
 				)
-			if state_frame == attack.startup + attack.active:
+			if previous_frame < attack.startup + attack.active and state_frame >= attack.startup + attack.active:
 				remove_hitbox()
 			var total: int = attack.startup + attack.active + attack.recovery
 			# A buffered press can cancel the final six recovery frames into the next strike.

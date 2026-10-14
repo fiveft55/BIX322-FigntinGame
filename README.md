@@ -43,6 +43,7 @@ godot --headless --path . --script tests/assets_test.gd
 godot --headless --path . --script tests/knockback_test.gd
 godot --headless --path . --script tests/match_test.gd
 godot --headless --path . --script tests/audio_test.gd
+godot --headless --path . --script tests/menu_test.gd
 godot --headless --path . --quit-after 180
 ```
 
@@ -102,3 +103,13 @@ Every new match and rematch starts with centered 3, 2, 1 text over three seconds
 ## Audio
 
 Countdown and fight/result voiceovers, sword/block/hit/jump effects, and looping battle music are included. Open scenes/match_audio.tscn to swap audio and change player volumes, or use the Music/Voice/SFX buses. See [AUDIO_GUIDE.md](AUDIO_GUIDE.md) for the complete mapping and CC0 attribution notes. Desktop listening is recommended for final mix tuning.
+
+## Console diagnostics and faster combat
+
+Controls print once at startup in Godot's Output panel (or the terminal when launched from CLI). Player states print on transitions; AI/local mode changes also print. The on-screen state and control labels are removed, while health bars, match timer, countdown, and result screen remain.
+
+Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
+
+## Main menu and customization
+
+F5 now opens the main menu with looping uploaded menu music. Choose AI difficulty (Easy/Normal/Hard) or local two-player play, customize both players' characters/weapons, adjust music/effects/voice volume, or read Controls before starting. Selections and settings persist between launches. Character colors match health bars. Esc returns to the menu from battle. See [MENU_GUIDE.md](MENU_GUIDE.md) for editing scenes, AI profiles, saved settings, and weapon limitations.

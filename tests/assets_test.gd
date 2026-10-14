@@ -19,7 +19,7 @@ func run() -> void:
 			quit(1)
 			return
 		fighter.start_attack()
-		for frame in range(Fighter.ATTACKS[0].startup):
+		for frame in range(ceili(Fighter.ATTACKS[0].startup / GameSettings.ATTACK_SPEED)):
 			fighter.tick(1.0 / 60)
 		if not visual.effect.visible or visual.sword_grip.rotation != visual.base_sword_rotation:
 			push_error("Active sword pose did not follow combat timing")

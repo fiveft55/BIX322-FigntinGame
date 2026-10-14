@@ -17,7 +17,7 @@ Audio comes from the uploaded battle.zip and kenney_voiceover-pack-fighter.zip. 
 | Draw | it's_a_tie.ogg |
 | Timeout | time.ogg, then the result voice sequence |
 
-Music uses 331music-video-game-music-598332.mp3 by default. The alternate retro-bgm-chan-vs-robbot_vs-534622.mp3 is included and can be swapped in the scene. Original audio is not trimmed or modified. The supplied jump clip is a short musical cue rather than a physical jump sound; replace it in the Inspector if you prefer another effect. No menu/mode voiceovers are triggered because those modes do not exist.
+Music uses 331music-video-game-music-598332.mp3 by default. The alternate retro-bgm-chan-vs-robbot_vs-534622.mp3 is included and can be swapped in the scene. Original audio is not trimmed or modified. The supplied jump clip is a short musical cue rather than a physical jump sound; replace it in the Inspector if you prefer another effect. Unused announcer mode clips remain available; menu audio uses the separately supplied music and start cue.
 
 ## Editor configuration
 
@@ -30,3 +30,5 @@ Open Godot's Audio panel to adjust the Music, Voice, and SFX buses separately, o
 Fighter.combat_sound(event) emits sword, jump, hit, or block events. Arena connects both fighters to MatchAudio.on_combat_sound(). Countdown checkpoints select the numbered clips, and begin_battle() starts music/fight voice. finish_match() stops battle music/effects and queues the appropriate result clips; Announcer.finished advances the queue. Restart stops every old sound and begins a fresh countdown. _exit_tree() releases playback resources. The sound scene is created by the arena alongside the UI overlay.
 
 Run tests/audio_test.gd with the README commands. It checks count timing, loop flag/start/stop, audio buses, event routing, result voice order, and rematch cleanup. Other tests allow the audio mixer a short cleanup interval before exiting.
+
+Menu music and start cues are now supplied in assets/audio/menu and referenced by main_menu.tscn. The Settings menu applies saved Music/SFX/Voice bus gains to both menu and battle audio; individual player dB values remain the base mix. See MENU_GUIDE.md.

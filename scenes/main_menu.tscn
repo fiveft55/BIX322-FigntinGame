@@ -1,0 +1,359 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="script"]
+[ext_resource type="AudioStream" path="res://assets/audio/menu/mfcc-game-game-music-603130.mp3" id="music"]
+[ext_resource type="AudioStream" path="res://assets/audio/menu/freesound_community-game-start-6104.mp3" id="start"]
+[ext_resource type="Texture2D" path="res://assets/scribble/character_roundGreen.png" id="green"]
+[ext_resource type="Texture2D" path="res://assets/scribble/character_squarePurple.png" id="purple"]
+[ext_resource type="Texture2D" path="res://assets/scribble/background_cloudA.png" id="cloud"]
+[ext_resource type="Texture2D" path="res://assets/scribble/background_treeLarge.png" id="tree"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("script")
+
+[node name="Paper" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.973, 0.961, 0.922, 1)
+
+[node name="Green" type="Sprite2D" parent="."]
+position = Vector2(150, 460)
+texture = ExtResource("green")
+scale = Vector2(1.1, 1.5)
+
+[node name="Purple" type="Sprite2D" parent="."]
+position = Vector2(1000, 460)
+texture = ExtResource("purple")
+scale = Vector2(1.1, 1.5)
+
+[node name="Cloud" type="Sprite2D" parent="."]
+position = Vector2(180, 230)
+texture = ExtResource("cloud")
+
+[node name="Tree" type="Sprite2D" parent="."]
+position = Vector2(1000, 275)
+texture = ExtResource("tree")
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("music")
+volume_db = -17.721133
+bus = &"Music"
+
+[node name="StartSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("start")
+volume_db = -10.0
+bus = &"SFX"
+
+[node name="Title" type="Label" parent="."]
+offset_left = 250.0
+offset_top = 45.0
+offset_right = 902.0
+offset_bottom = 110.0
+text = "SCRIBBLE FIGHTERS"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 44
+theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
+
+[node name="Subtitle" type="Label" parent="."]
+offset_left = 250.0
+offset_top = 110.0
+offset_right = 902.0
+offset_bottom = 145.0
+text = "Swords up. Shields ready."
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.16, 0.2, 0.23, 1)
+
+[node name="Home" type="Panel" parent="."]
+offset_left = 330.0
+offset_top = 165.0
+offset_right = 822.0
+offset_bottom = 600.0
+
+
+[node name="DifficultyLabel" type="Label" parent="Home"]
+offset_left = 40.0
+offset_top = 20.0
+offset_right = 215.0
+offset_bottom = 50.0
+text = "AI difficulty"
+theme_override_font_sizes/font_size = 20
+
+[node name="Difficulty" type="OptionButton" parent="Home"]
+offset_left = 235.0
+offset_top = 15.0
+offset_right = 450.0
+offset_bottom = 55.0
+item_count = 3
+selected = 1
+popup/item_0/text = "Easy"
+popup/item_0/id = 0
+popup/item_1/text = "Normal"
+popup/item_1/id = 1
+popup/item_2/text = "Hard"
+popup/item_2/id = 2
+
+[node name="PlayAI" type="Button" parent="Home"]
+offset_left = 60.0
+offset_top = 80.0
+offset_right = 432.0
+offset_bottom = 125.0
+text = "Play vs AI"
+theme_override_font_sizes/font_size = 22
+
+[node name="PlayLocal" type="Button" parent="Home"]
+offset_left = 60.0
+offset_top = 135.0
+offset_right = 432.0
+offset_bottom = 180.0
+text = "Local Two Players"
+theme_override_font_sizes/font_size = 22
+
+[node name="SettingsButton" type="Button" parent="Home"]
+offset_left = 60.0
+offset_top = 190.0
+offset_right = 432.0
+offset_bottom = 235.0
+text = "Settings"
+theme_override_font_sizes/font_size = 22
+
+[node name="ControlsButton" type="Button" parent="Home"]
+offset_left = 60.0
+offset_top = 245.0
+offset_right = 432.0
+offset_bottom = 290.0
+text = "Controls"
+theme_override_font_sizes/font_size = 22
+
+[node name="Quit" type="Button" parent="Home"]
+offset_left = 60.0
+offset_top = 365.0
+offset_right = 432.0
+offset_bottom = 410.0
+text = "Quit"
+theme_override_font_sizes/font_size = 22
+
+[node name="Settings" type="Panel" parent="."]
+offset_left = 330.0
+offset_top = 165.0
+offset_right = 822.0
+offset_bottom = 600.0
+visible = false
+
+[node name="Heading" type="Label" parent="Settings"]
+offset_left = 30.0
+offset_top = 15.0
+offset_right = 462.0
+offset_bottom = 55.0
+text = "AUDIO SETTINGS"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+
+[node name="MusicLabel" type="Label" parent="Settings"]
+offset_left = 45.0
+offset_top = 75.0
+offset_right = 445.0
+offset_bottom = 105.0
+text = "Music"
+theme_override_font_sizes/font_size = 20
+
+[node name="MusicSlider" type="HSlider" parent="Settings"]
+offset_left = 45.0
+offset_top = 110.0
+offset_right = 445.0
+offset_bottom = 140.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="EffectsLabel" type="Label" parent="Settings"]
+offset_left = 45.0
+offset_top = 165.0
+offset_right = 445.0
+offset_bottom = 195.0
+text = "Effects"
+theme_override_font_sizes/font_size = 20
+
+[node name="EffectsSlider" type="HSlider" parent="Settings"]
+offset_left = 45.0
+offset_top = 200.0
+offset_right = 445.0
+offset_bottom = 230.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="VoiceLabel" type="Label" parent="Settings"]
+offset_left = 45.0
+offset_top = 255.0
+offset_right = 445.0
+offset_bottom = 285.0
+text = "Voice"
+theme_override_font_sizes/font_size = 20
+
+[node name="VoiceSlider" type="HSlider" parent="Settings"]
+offset_left = 45.0
+offset_top = 290.0
+offset_right = 445.0
+offset_bottom = 320.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="Back" type="Button" parent="Settings"]
+offset_left = 145.0
+offset_top = 365.0
+offset_right = 345.0
+offset_bottom = 410.0
+text = "Back"
+
+[node name="Controls" type="Panel" parent="."]
+offset_left = 220.0
+offset_top = 165.0
+offset_right = 932.0
+offset_bottom = 600.0
+visible = false
+
+[node name="Info" type="Label" parent="Controls"]
+offset_left = 30.0
+offset_top = 20.0
+offset_right = 682.0
+offset_bottom = 360.0
+theme_override_font_sizes/font_size = 18
+
+[node name="Back" type="Button" parent="Controls"]
+offset_left = 256.0
+offset_top = 365.0
+offset_right = 456.0
+offset_bottom = 410.0
+text = "Back"
+
+[node name="CharactersButton" type="Button" parent="Home"]
+offset_left = 60.0
+offset_top = 300.0
+offset_right = 432.0
+offset_bottom = 345.0
+text = "Characters & Weapons"
+theme_override_font_sizes/font_size = 22
+
+[node name="Characters" type="Panel" parent="."]
+visible = false
+offset_left = 220.0
+offset_top = 165.0
+offset_right = 932.0
+offset_bottom = 600.0
+
+[node name="Heading" type="Label" parent="Characters"]
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 692.0
+offset_bottom = 50.0
+text = "CHOOSE YOUR FIGHTERS"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+
+[node name="Back" type="Button" parent="Characters"]
+offset_left = 256.0
+offset_top = 365.0
+offset_right = 456.0
+offset_bottom = 410.0
+text = "Save & Back"
+
+[node name="Player1" type="Control" parent="Characters"]
+offset_left = 40.0
+offset_top = 50.0
+offset_right = 332.0
+offset_bottom = 350.0
+
+[node name="Name" type="Label" parent="Characters/Player1"]
+offset_top = 0.0
+offset_right = 292.0
+offset_bottom = 30.0
+text = "PLAYER 1"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="Character" type="OptionButton" parent="Characters/Player1"]
+offset_top = 195.0
+offset_right = 292.0
+offset_bottom = 235.0
+
+
+[node name="Weapon" type="OptionButton" parent="Characters/Player1"]
+offset_top = 245.0
+offset_right = 292.0
+offset_bottom = 285.0
+
+
+[node name="ColorBar" type="ColorRect" parent="Characters/Player1"]
+offset_top = 180.0
+offset_right = 292.0
+offset_bottom = 186.0
+mouse_filter = 2
+
+[node name="Preview" type="Node2D" parent="Characters/Player1"]
+position = Vector2(130, 100)
+
+[node name="Body" type="Sprite2D" parent="Characters/Player1/Preview"]
+scale = Vector2(0.6, 0.8)
+
+[node name="Hand" type="Sprite2D" parent="Characters/Player1/Preview"]
+position = Vector2(28, 0)
+scale = Vector2(0.5, 0.5)
+
+[node name="Weapon" type="Sprite2D" parent="Characters/Player1/Preview/Hand"]
+position = Vector2(30, -25)
+rotation = 0.5
+scale = Vector2(0.6, 0.8)
+
+[node name="Player2" type="Control" parent="Characters"]
+offset_left = 380.0
+offset_top = 50.0
+offset_right = 672.0
+offset_bottom = 350.0
+
+[node name="Name" type="Label" parent="Characters/Player2"]
+offset_top = 0.0
+offset_right = 292.0
+offset_bottom = 30.0
+text = "PLAYER 2"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="Character" type="OptionButton" parent="Characters/Player2"]
+offset_top = 195.0
+offset_right = 292.0
+offset_bottom = 235.0
+
+
+[node name="Weapon" type="OptionButton" parent="Characters/Player2"]
+offset_top = 245.0
+offset_right = 292.0
+offset_bottom = 285.0
+
+
+[node name="ColorBar" type="ColorRect" parent="Characters/Player2"]
+offset_top = 180.0
+offset_right = 292.0
+offset_bottom = 186.0
+mouse_filter = 2
+
+[node name="Preview" type="Node2D" parent="Characters/Player2"]
+position = Vector2(130, 100)
+
+[node name="Body" type="Sprite2D" parent="Characters/Player2/Preview"]
+scale = Vector2(0.6, 0.8)
+
+[node name="Hand" type="Sprite2D" parent="Characters/Player2/Preview"]
+position = Vector2(28, 0)
+scale = Vector2(0.5, 0.5)
+
+[node name="Weapon" type="Sprite2D" parent="Characters/Player2/Preview/Hand"]
+position = Vector2(30, -25)
+rotation = 0.5
+scale = Vector2(0.6, 0.8)

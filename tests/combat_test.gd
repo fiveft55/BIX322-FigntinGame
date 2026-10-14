@@ -30,19 +30,20 @@ func run() -> void:
 	a.reset_fighter(400)
 	b.reset_fighter(480)
 	a.start_attack()
-	for i in range(5):
+	for i in range(4):
 		a.tick(1.0 / 60)
 	check(a.hitbox == null, "No hitbox during startup")
 	a.tick(1.0 / 60)
 	check(is_instance_valid(a.hitbox), "Hitbox appears on active frame")
+	check(is_equal_approx(a.state_frame, 6.25), "Attack timeline advances 25 percent faster")
 	a.resolve_attack()
 	check(b.health == 92 and b.state == Fighter.State.HIT_STUN, "Active hit causes damage and hit stun")
 	a.resolve_attack()
 	check(b.health == 92, "One hit per target per attack")
-	for i in range(4):
+	for i in range(3):
 		a.tick(1.0 / 60)
 	check(a.hitbox == null, "Hitbox removed during recovery")
-	for i in range(7):
+	for i in range(5):
 		a.tick(1.0 / 60)
 	a.buffer.push(&"attack")
 	a.tick(1.0 / 60)
@@ -78,11 +79,19 @@ func run() -> void:
 		a._input(attack_event)
 	check(a.buffer.commands.size() == 3, "Rapid attack presses are captured individually")
 	a.tick(1.0 / 60)
-	for frame in range(17):
+	for frame in range(14):
 		a.tick(1.0 / 60)
 	check(a.combo == 1, "Early mash queues the second strike")
-	for frame in range(19):
+	for frame in range(16):
 		a.tick(1.0 / 60)
 	check(a.combo == 2, "Early mash queues the third strike")
+	a.reset_fighter(400)
+	Input.action_press("p1_right")
+	a.tick(1.0 / 60)
+	check(is_equal_approx(a.position.x, 405), "Ground speed increased to 300 pixels per second")
+	a.buffer.push(&"attack")
+	a.tick(1.0 / 60)
+	check(is_equal_approx(a.velocity.x, 150), "Attack movement increased by 25 percent")
+	Input.action_release("p1_right")
 	print("Combat checks: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

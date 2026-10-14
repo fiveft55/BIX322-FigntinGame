@@ -48,7 +48,7 @@ func run() -> void:
 		fighter.tick(1.0 / 60)
 	opponent.facing = -1
 	opponent.start_attack()
-	for frame in range(6):
+	for frame in range(ceili(Fighter.ATTACKS[0].startup / GameSettings.ATTACK_SPEED)):
 		opponent.tick(1.0 / 60)
 	opponent.resolve_attack()
 	check(fighter.health == GameSettings.MAX_HEALTH, "High jump avoids grounded attack by vertical hurtbox separation")

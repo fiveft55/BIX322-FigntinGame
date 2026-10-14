@@ -86,3 +86,11 @@ Open scenes/match_overlay.tscn to edit Clock, Victory panel, title/result labels
 Every new match and rematch starts with centered 3, 2, 1 text over three seconds. Each number fades, then FIGHT! appears and fades away over 0.5 seconds while combat begins. Controls and the 60-second match clock remain paused during the numeric countdown. Pre-fight attack/jump presses are ignored. Edit the Countdown label in scenes/match_overlay.tscn to change placement, font, outline, and size. Game-end results show only winner/draw and Knockout/Time Up, without remaining-health numbers.
 
 Audio is editable in scenes/match_audio.tscn. Select its root for effect/voice slots and the Music, Announcer, or Effects players for volume. See AUDIO_GUIDE.md.
+
+## Console diagnostics and faster combat
+
+Controls print once at startup in Godot's Output panel (or the terminal when launched from CLI). Player states print on transitions; AI/local mode changes also print. The on-screen state and control labels are removed, while health bars, match timer, countdown, and result screen remain.
+
+Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
+
+The game now starts at main_menu.tscn. Edit its Home/Settings/Controls/Characters panels directly. Saved character and weapon texture choices override default fighter scene textures at runtime, while your local transforms remain. See MENU_GUIDE.md for details.

@@ -2,7 +2,10 @@ config_version=5
 
 [application]
 config/name="Frame Fighters"
-run/main_scene="res://scenes/arena.tscn"
+run/main_scene="res://scenes/main_menu.tscn"
+
+[autoload]
+Preferences="*res://scripts/preferences.gd"
 
 [display]
 window/size/viewport_width=1152

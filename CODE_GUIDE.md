@@ -24,7 +24,7 @@ Edit **scripts/game_settings.gd**, save, then restart the game. Constants affect
 | HIT_PUSH / BLOCK_PUSH | Default unblocked travel distance / instant guarded shove, pixels |
 | HIT_JUMP_SPEED | Default upward launch speed on an unblocked hit, pixels per second |
 | AI_APPROACH_DISTANCE / AI_ATTACK_DISTANCE | Horizontal approach/attack thresholds, pixels |
-| AI_ATTACK_INTERVAL | Seconds between AI attack decisions |
+| AI_DIFFICULTIES | Per-level attack interval, speed, reaction, and guard settings |
 | Scene Player1/Player2 positions | Starting X coordinates, edited in arena.tscn |
 | ATTACKS | Ordered dictionaries defining combo strikes |
 | KEYS | Action names mapped to physical keyboard keys |
@@ -86,7 +86,7 @@ FightInputBuffer owns commands (command/time dictionaries) and a simulation cloc
 
 Runtime fields: state/state_frame track the FSM; health tracks damage; facing is ±1; combo selects attack data; stun_remaining counts stun frames. Inherited velocity is pixels/second. player_index selects action names; opponent references the other fighter. buffer stores commands; hurtbox/hitbox are Area2D nodes; victims stores already-hit IDs. enabled freezes combat after KO. use_ai/ai_timer drive decisions. debug_boxes controls collision overlays. Artwork paths are configured in GameSettings. Tune settings rather than runtime fields.
 
-AI guard timing remains in tick(): fmod(ai_timer, 1.5) < 0.65. Edit this expression for different simple guard behavior. Drawing coordinates in FighterVisual._draw() control art independently of collision size; adjust the art if you resize hurtboxes. Immediate rectangle checks use the same dimensions as collision nodes to avoid deferred physics overlap updates.
+AI guard timing in tick() uses the selected AI_DIFFICULTIES profile. Edit its reaction and guard values to tune behavior. Drawing coordinates in FighterVisual._draw() control art independently of collision size; adjust the art if you resize hurtboxes. Immediate rectangle checks use the same dimensions as collision nodes to avoid deferred physics overlap updates.
 
 ### scripts/arena.gd
 
@@ -140,3 +140,13 @@ update_countdown() advances the 180-tick pre-fight sequence and updates text opa
 ## Audio events
 
 Fighter.combat_sound is a custom signal emitted at actual sword active frames, jump launch, and hit/guard resolution. Arena connects it to MatchAudio.on_combat_sound. MatchAudio owns looping music, a sequential announcer queue advanced by AudioStreamPlayer.finished, and an eight-player effects pool. Source streams and volumes live in match_audio.tscn; independent Music/Voice/SFX buses live in default_bus_layout.tres. See AUDIO_GUIDE.md for every event mapping, controls, and test coverage.
+
+## Console diagnostics and faster combat
+
+Controls print once at startup in Godot's Output panel (or the terminal when launched from CLI). Player states print on transitions; AI/local mode changes also print. The on-screen state and control labels are removed, while health bars, match timer, countdown, and result screen remain.
+
+Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
+
+## Menu and saved preferences
+
+main_menu.gd connects scene button/slider/option signals, loads saved choices into widgets, generates current control text, updates character previews, and transitions to battle with a start cue. preferences.gd is an autoload that loads/saves ConfigFile data, validates ranges, and applies independent bus gains. AI profiles and character/weapon catalogs live in GameSettings. Fighter samples the selected AI profile for speed/attack/guard decisions and applies selected textures at initialization; arena chooses AI/local mode and palette-derived health bars. See MENU_GUIDE.md for editor configuration and menu_test.gd coverage.

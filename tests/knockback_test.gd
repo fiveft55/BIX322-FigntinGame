@@ -75,7 +75,7 @@ func run() -> void:
 	target.reset_fighter(500)
 	attacker.facing = 1
 	attacker.start_attack()
-	for frame in range(6):
+	for frame in range(ceili(Fighter.ATTACKS[0].startup / GameSettings.ATTACK_SPEED)):
 		attacker.tick(1.0 / 60)
 	target.facing = -1
 	target.change_state(Fighter.State.BLOCKING)

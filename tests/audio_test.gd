@@ -32,7 +32,7 @@ func run() -> void:
 		check(AudioServer.get_bus_index(bus) >= 0, "Separate volume bus exists: " + bus)
 	var fighter: Fighter = arena.fighters[0]
 	fighter.start_attack()
-	for tick in range(6):
+	for tick in range(ceili(Fighter.ATTACKS[0].startup / GameSettings.ATTACK_SPEED)):
 		fighter.tick(1.0 / 60)
 	check(audio.last_event == "sword", "Active sword frame emits effect")
 	fighter.reset_fighter(400)
