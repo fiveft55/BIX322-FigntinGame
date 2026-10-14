@@ -134,3 +134,9 @@ Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on 
 ## Match clock and results
 
 arena.gd.restart() resets the whole match and calls start_round(). start_round() restores fighters and initializes round_ticks_remaining to ROUND_SECONDS × 60. Each live physics tick subtracts one; stopped matches do not tick combat. finish_round() freezes both fighters, removes hitboxes, determines the winner by remaining health (equal is a draw), and displays match_overlay.tscn. update_match_hud() formats the clock and updates health bars. Victory/Rematch.pressed connects to restart(); Victory/Quit.pressed quits the tree. tests/match_test.gd runs a full timer, checks timeout/KO/draw, combat freezing, and button-driven rematch. No best-of-three scoring is implemented.
+
+update_countdown() advances the 180-tick pre-fight sequence and updates text opacity. start_round() disables fighters and resets it; the final countdown tick enables fighters and shows FIGHT!. fight_fade_ticks then fades the label over 30 live-combat ticks. Match time is decremented only after the numeric countdown completes. tests/match_test.gd verifies numbers, fade, frozen time/positions, exact start, and disappearance.
+
+## Audio events
+
+Fighter.combat_sound is a custom signal emitted at actual sword active frames, jump launch, and hit/guard resolution. Arena connects it to MatchAudio.on_combat_sound. MatchAudio owns looping music, a sequential announcer queue advanced by AudioStreamPlayer.finished, and an eight-player effects pool. Source streams and volumes live in match_audio.tscn; independent Music/Voice/SFX buses live in default_bus_layout.tres. See AUDIO_GUIDE.md for every event mapping, controls, and test coverage.

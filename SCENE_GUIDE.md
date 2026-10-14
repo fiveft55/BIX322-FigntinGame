@@ -80,3 +80,9 @@ Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on 
 ## Timer and result screen
 
 Open scenes/match_overlay.tscn to edit Clock, Victory panel, title/result labels, and Play Again/Quit buttons. The arena instantiates this CanvasLayer, so it appears over combat. Button pressed signals are connected by arena.gd. Match text and visibility update from gameplay; edit positions, theme, and sizes in the scene. ROUND_SECONDS in settings controls duration (60 by default). This is one match with no series scoring.
+
+## Pre-fight countdown
+
+Every new match and rematch starts with centered 3, 2, 1 text over three seconds. Each number fades, then FIGHT! appears and fades away over 0.5 seconds while combat begins. Controls and the 60-second match clock remain paused during the numeric countdown. Pre-fight attack/jump presses are ignored. Edit the Countdown label in scenes/match_overlay.tscn to change placement, font, outline, and size. Game-end results show only winner/draw and Knockout/Time Up, without remaining-health numbers.
+
+Audio is editable in scenes/match_audio.tscn. Select its root for effect/voice slots and the Music, Announcer, or Effects players for volume. See AUDIO_GUIDE.md.

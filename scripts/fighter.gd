@@ -3,6 +3,8 @@ extends CharacterBody2D
 ## Fighter FSM and frame-timed combat. Feet are the local origin.
 
 # Jumping is locomotion; hit stun can also occur in the air.
+signal combat_sound(event: StringName)
+
 enum State { IDLE, WALKING, ATTACKING, HIT_STUN, BLOCKING, JUMPING }
 const SPEED := GameSettings.MOVE_SPEED
 const FLOOR_Y := GameSettings.FLOOR_Y
@@ -124,6 +126,7 @@ func tick(delta: float) -> void:
 			velocity.x = direction * attack_speed
 			var attack: Dictionary = ATTACKS[combo]
 			if state_frame == attack.startup:
+				combat_sound.emit(&"sword")
 				hitbox = make_area(
 					Vector2(attack.reach, GameSettings.HITBOX_HEIGHT),
 					Vector2(facing * (GameSettings.BODY_WIDTH / 2 + attack.reach / 2), GameSettings.HITBOX_Y),
@@ -141,6 +144,7 @@ func tick(delta: float) -> void:
 				change_state(State.IDLE if is_grounded() else State.JUMPING)
 		_:
 			if buffer.consume(&"jump"):
+				combat_sound.emit(&"jump")
 				velocity.y = -GameSettings.JUMP_SPEED
 				velocity.x = direction * GameSettings.AIR_SPEED
 				change_state(State.JUMPING)
@@ -196,6 +200,7 @@ func resolve_attack() -> void:
 func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 	var front := signf(attacker.position.x - position.x) == facing
 	var guarded := state == State.BLOCKING and front
+	combat_sound.emit(&"block" if guarded else &"hit")
 	health = maxi(0, health - (GameSettings.BLOCK_DAMAGE if guarded else int(attack.damage)))
 	change_state(State.HIT_STUN)
 	guard_hit = guarded

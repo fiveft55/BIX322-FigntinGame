@@ -7,7 +7,10 @@ var bars: Array[ProgressBar] = []
 var round_over := false
 var match_over := false
 var round_ticks_remaining := 0
+var countdown_ticks := 0
+var fight_fade_ticks := 0
 var match_overlay: CanvasLayer
+var match_audio: MatchAudio
 var spawn_positions: Array[Vector2] = []
 
 func _ready() -> void:
@@ -17,6 +20,10 @@ func _ready() -> void:
 	fighters.assign([$Fighters/Player1, $Fighters/Player2])
 	for fighter in fighters:
 		spawn_positions.append(fighter.position)
+	match_audio = (load("res://scenes/match_audio.tscn") as PackedScene).instantiate()
+	add_child(match_audio)
+	for fighter in fighters:
+		fighter.combat_sound.connect(match_audio.on_combat_sound)
 	fighters[0].opponent = fighters[1]
 	fighters[1].opponent = fighters[0]
 	create_hud()
@@ -100,6 +107,15 @@ func start_round() -> void:
 	round_ticks_remaining = GameSettings.ROUND_SECONDS * 60
 	for i in range(fighters.size()):
 		fighters[i].reset_fighter(spawn_positions[i].x)
+		fighters[i].enabled = false
+	match_audio.reset_match()
+	match_audio.say(match_audio.countdown_three)
+	countdown_ticks = 180
+	fight_fade_ticks = 0
+	var countdown: Label = match_overlay.get_node("Countdown")
+	countdown.text = "3"
+	countdown.modulate.a = 1.0
+	countdown.show()
 	update_match_hud()
 
 
@@ -111,15 +127,16 @@ func finish_round() -> void:
 		fighter.enabled = false
 		fighter.remove_hitbox()
 	match_over = true
+	match_overlay.get_node("Countdown").hide()
 	var result := "DRAW!"
 	if fighters[0].health != fighters[1].health:
 		var winner := 1 if fighters[0].health > fighters[1].health else 2
 		result = "PLAYER %d WINS!" % winner
+	var winner_number := 0 if fighters[0].health == fighters[1].health else (1 if fighters[0].health > fighters[1].health else 2)
+	match_audio.finish_match(winner_number, round_ticks_remaining == 0)
 	match_overlay.get_node("Victory/Title").text = result
 	var reason := "TIME UP" if round_ticks_remaining == 0 else "KNOCKOUT"
-	match_overlay.get_node("Victory/Result").text = "%s · HEALTH %d — %d" % [
-		reason, fighters[0].health, fighters[1].health
-	]
+	match_overlay.get_node("Victory/Result").text = reason
 	match_overlay.get_node("Victory").show()
 	match_overlay.get_node("Victory/Rematch").grab_focus()
 	update_match_hud()
@@ -130,6 +147,27 @@ func update_match_hud() -> void:
 	match_overlay.get_node("Clock").text = "%02d:%02d" % [seconds / 60, seconds % 60]
 	for i in range(fighters.size()):
 		bars[i].value = fighters[i].health
+
+
+func update_countdown() -> void:
+	var label: Label = match_overlay.get_node("Countdown")
+	countdown_ticks -= 1
+	if countdown_ticks == 120:
+		match_audio.say(match_audio.countdown_two)
+	elif countdown_ticks == 60:
+		match_audio.say(match_audio.countdown_one)
+	if countdown_ticks > 0:
+		label.text = str(ceili(countdown_ticks / 60.0))
+		var elapsed_in_second := (180 - countdown_ticks) % 60
+		label.modulate.a = 1.0 - elapsed_in_second / 60.0
+	else:
+		match_audio.begin_battle()
+		label.text = "FIGHT!"
+		label.modulate.a = 1.0
+		fight_fade_ticks = 30
+		for fighter in fighters:
+			fighter.buffer.clear()
+			fighter.enabled = true
 
 
 func _physics_process(delta: float) -> void:
@@ -143,6 +181,15 @@ func _physics_process(delta: float) -> void:
 		fighters[1].buffer.clear()
 	if round_over:
 		return
+	if countdown_ticks > 0:
+		update_countdown()
+		return
+	if fight_fade_ticks > 0:
+		fight_fade_ticks -= 1
+		var countdown: Label = match_overlay.get_node("Countdown")
+		countdown.modulate.a = fight_fade_ticks / 30.0
+		if fight_fade_ticks == 0:
+			countdown.hide()
 	for fighter in fighters:
 		fighter.tick(delta)
 	var separation := fighters[1].position.x - fighters[0].position.x

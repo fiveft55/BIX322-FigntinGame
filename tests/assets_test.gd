@@ -7,6 +7,8 @@ func run() -> void:
 	var arena := (load("res://scenes/arena.tscn") as PackedScene).instantiate()
 	root.add_child(arena)
 	arena.set_physics_process(false)
+	for tick in range(180):
+		arena._physics_process(1.0 / 60)
 	for fighter in arena.fighters:
 		var visual: FighterVisual = fighter.visuals
 		var authored_position := visual.front_hand.position
@@ -57,5 +59,9 @@ func run() -> void:
 			push_error("Scenery texture failed to load")
 			quit(1)
 			return
+	arena.match_audio.reset_match()
+	await create_timer(0.15).timeout
+	arena.free()
+	await create_timer(0.15).timeout # Let the audio mixer release stopped playback.
 	print("Asset checks: PASS (both fighters, guard, effects, scenery)")
 	quit(0)

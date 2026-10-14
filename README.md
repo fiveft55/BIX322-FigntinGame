@@ -28,7 +28,7 @@ Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles 
 | 2 | 7 | 4 | 14 | 10 | 21 |
 | 3 | 10 | 5 | 22 | 16 | 24 |
 
-The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking, audio, or a full competitive fighting-game ruleset.
+The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking or a full competitive fighting-game ruleset.
 
 ## Validation
 
@@ -42,6 +42,7 @@ godot --headless --path . --script tests/jump_test.gd
 godot --headless --path . --script tests/assets_test.gd
 godot --headless --path . --script tests/knockback_test.gd
 godot --headless --path . --script tests/match_test.gd
+godot --headless --path . --script tests/audio_test.gd
 godot --headless --path . --quit-after 180
 ```
 
@@ -92,4 +93,12 @@ Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on 
 
 ## Single-round match
 
-Each match lasts 60 seconds. A knockout ends it early; timeout awards the win to the player with more remaining health. Equal health (including a double knockout) is a draw. A result screen shows winner and remaining health, with Play Again and Quit buttons. R restarts the whole match. There is no best-of-three scoring. Set ROUND_SECONDS in game_settings.gd to change duration; the clock counts 60 Hz simulation ticks.
+Each match lasts 60 seconds. A knockout ends it early; timeout awards the win to the player with more remaining health. Equal health (including a double knockout) is a draw. A result screen shows the winner and match-ending reason, with Play Again and Quit buttons. R restarts the whole match. There is no best-of-three scoring. Set ROUND_SECONDS in game_settings.gd to change duration; the clock counts 60 Hz simulation ticks.
+
+## Pre-fight countdown
+
+Every new match and rematch starts with centered 3, 2, 1 text over three seconds. Each number fades, then FIGHT! appears and fades away over 0.5 seconds while combat begins. Controls and the 60-second match clock remain paused during the numeric countdown. Pre-fight attack/jump presses are ignored. Edit the Countdown label in scenes/match_overlay.tscn to change placement, font, outline, and size. Game-end results show only winner/draw and Knockout/Time Up, without remaining-health numbers.
+
+## Audio
+
+Countdown and fight/result voiceovers, sword/block/hit/jump effects, and looping battle music are included. Open scenes/match_audio.tscn to swap audio and change player volumes, or use the Music/Voice/SFX buses. See [AUDIO_GUIDE.md](AUDIO_GUIDE.md) for the complete mapping and CC0 attribution notes. Desktop listening is recommended for final mix tuning.

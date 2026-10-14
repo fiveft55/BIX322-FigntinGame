@@ -1,0 +1,48 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scripts/match_audio.gd" id="script"]
+[ext_resource type="AudioStream" path="res://assets/audio/battle/oxidvideos-video-game-sword-swing-sfx-409364.mp3" id="sword_sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/battle/53439420-retro-hurt-sound-03-474780.mp3" id="hit_sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/battle/gargamel10-sword-slashing-game-sound-effect-2-379229.mp3" id="block_sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/battle/cartoon_music-kids-game-victory-504518.mp3" id="jump_sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/battle/soundreality-game-over-man-136233.mp3" id="game_over_sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/3.ogg" id="countdown_three"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/2.ogg" id="countdown_two"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/1.ogg" id="countdown_one"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/fight.ogg" id="fight_voice"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/player_1.ogg" id="player_one_voice"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/player_2.ogg" id="player_two_voice"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/winner.ogg" id="winner_voice"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/it's_a_tie.ogg" id="tie_voice"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/time.ogg" id="time_voice"]
+[ext_resource type="AudioStream" path="res://assets/audio/battle/331music-video-game-music-598332.mp3" id="music"]
+
+[node name="MatchAudio" type="Node"]
+script = ExtResource("script")
+sword_sound = ExtResource("sword_sound")
+hit_sound = ExtResource("hit_sound")
+block_sound = ExtResource("block_sound")
+jump_sound = ExtResource("jump_sound")
+game_over_sound = ExtResource("game_over_sound")
+countdown_three = ExtResource("countdown_three")
+countdown_two = ExtResource("countdown_two")
+countdown_one = ExtResource("countdown_one")
+fight_voice = ExtResource("fight_voice")
+player_one_voice = ExtResource("player_one_voice")
+player_two_voice = ExtResource("player_two_voice")
+winner_voice = ExtResource("winner_voice")
+tie_voice = ExtResource("tie_voice")
+time_voice = ExtResource("time_voice")
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("music")
+volume_db = -20.0
+bus = &"Music"
+
+[node name="Announcer" type="AudioStreamPlayer" parent="."]
+volume_db = -3.0
+bus = &"Voice"
+
+[node name="Effects" type="AudioStreamPlayer" parent="."]
+volume_db = -10.0
+bus = &"SFX"

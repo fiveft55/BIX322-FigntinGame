@@ -14,6 +14,8 @@ func run() -> void:
 	var arena := (load("res://scenes/arena.tscn") as PackedScene).instantiate()
 	root.add_child(arena)
 	arena.set_physics_process(false)
+	for tick in range(180):
+		arena._physics_process(1.0 / 60)
 	var fighter: Fighter = arena.fighters[0]
 	var opponent: Fighter = arena.fighters[1]
 	opponent.use_ai = false
@@ -59,5 +61,9 @@ func run() -> void:
 	fighter.tick(1.0 / 60)
 	arena.restart()
 	check(fighter.velocity == Vector2.ZERO and fighter.is_grounded(), "Restart clears jump momentum")
+	arena.match_audio.reset_match()
+	await create_timer(0.15).timeout
+	arena.free()
+	await create_timer(0.15).timeout # Let the audio mixer release stopped playback.
 	print("Jump checks: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)
