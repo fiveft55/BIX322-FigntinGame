@@ -21,7 +21,7 @@ Music uses 331music-video-game-music-598332.mp3 by default. The alternate retro-
 
 ## Editor configuration
 
-Open scenes/match_audio.tscn. Select MatchAudio to swap any exported effect or voice AudioStream by dragging a file into its Inspector field. Select Music to change the battle stream and Volume dB (default -20). Announcer has Volume dB -3; Effects has -10 and is used as the template for an eight-player effect pool. Lower dB means quieter. Voices are sequential; effects can overlap so simultaneous hits do not cut each other off.
+Open scenes/match_audio.tscn. Select MatchAudio to swap any exported effect or voice AudioStream by dragging a file into its Inspector field. Select Music to change the battle stream and Volume dB (default -17.72). Announcer has Volume dB -3; Effects has -10 and is used as the template for an eight-player effect pool. Lower dB means quieter. Voices are sequential; effects can overlap so simultaneous hits do not cut each other off.
 
 Open Godot's Audio panel to adjust the Music, Voice, and SFX buses separately, or edit default_bus_layout.tres. The Music stream is duplicated at runtime and its MP3 loop flag is enabled; it repeats the entire track until the result screen. Headless tests verify loop configuration and event routing, not audible mix quality or a seamless musical transition. Desktop listening is recommended to tune volume and the loop boundary.
 

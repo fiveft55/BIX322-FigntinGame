@@ -36,7 +36,7 @@ time_voice = ExtResource("time_voice")
 
 [node name="Music" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("music")
-volume_db = -20.0
+volume_db = -17.721133
 bus = &"Music"
 
 [node name="Announcer" type="AudioStreamPlayer" parent="."]
