@@ -127,6 +127,6 @@ RearHand/Shield is scene-authored. Fighter.guard_hit marks guarded HIT_STUN, res
 
 ## Shield size and block parries
 
-Shield scale is now reduced by 10% (90% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+Shield scale is now reduced by 20% (80% of its original size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.4 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
 
 Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.4). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.4 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.
