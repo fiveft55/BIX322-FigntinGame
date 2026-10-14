@@ -34,6 +34,8 @@ Run tests/menu_test.gd alongside the README suites. It checks looping menu music
 
 Characters now includes a hat selector for each player: No Hat, Cap, Top Hat, Helmet, and Modern Helmet from the original pack. GameSettings.HATS defines names and paths. Preferences.hats saves choices. Hat is a Sprite2D child of Body in each fighter scene and menu preview, so it follows body motion and facing. Edit its local position/scale in the scenes to adjust fit.
 
-MainMenu/Background uses the pack's original Sample.png via a full-size TextureRect with aspect-cover scaling; BackgroundWash provides a light readability overlay. Edit those scene nodes for placement/tint. The original unmodified sample retains Kenney's artwork and attribution.
+MainMenu/Background uses the pack's original Sample.png via a full-size TextureRect with aspect-cover scaling; Opaque cream panels and a TitleCard keep text legible without washing out the image. Edit Background/TitleCard for placement and menu_theme.tres for panel and button styling. The original unmodified sample retains Kenney's artwork and attribution.
 
 R, H, and Tab practice controls are ignored in matches launched with Local Two Players. AI practice matches allow them, including toggling the practice opponent temporarily to manual control and back. The match mode is captured at launch, so a local match cannot be converted to AI using Tab. Escape and result-screen Play Again/Main Menu remain available in either mode. Quit is removed from results and remains on the main menu.
+
+Menu styling uses solid cream cards, dark text, navy buttons, teal hover states, and gold keyboard-focus borders. The sample background has no full-screen transparency wash and remains visible at full contrast around the cards.

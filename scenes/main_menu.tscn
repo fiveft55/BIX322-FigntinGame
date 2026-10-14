@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="script"]
 [ext_resource type="AudioStream" path="res://assets/audio/menu/mfcc-game-game-music-603130.mp3" id="music"]
 [ext_resource type="AudioStream" path="res://assets/audio/menu/freesound_community-game-start-6104.mp3" id="start"]
 [ext_resource type="Texture2D" path="res://assets/scribble/Sample.png" id="sample"]
+
+[ext_resource type="Theme" path="res://scenes/menu_theme.tres" id="theme"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -11,6 +13,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("script")
+theme = ExtResource("theme")
 
 [node name="Background" type="TextureRect" parent="."]
 anchor_right = 1.0
@@ -20,11 +23,12 @@ texture = ExtResource("sample")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="BackgroundWash" type="ColorRect" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="TitleCard" type="Panel" parent="."]
 mouse_filter = 2
-color = Color(1, 1, 1, 0.38)
+offset_left = 260.0
+offset_top = 30.0
+offset_right = 892.0
+offset_bottom = 150.0
 
 [node name="Music" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("music")
