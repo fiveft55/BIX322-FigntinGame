@@ -1,16 +1,19 @@
 class_name FightInputBuffer
 extends RefCounted
 ## Commands expire after a short window, independent of render frame rate.
-const WINDOW := 0.22
+const WINDOW := GameSettings.INPUT_WINDOW
 var commands: Array[Dictionary] = []
 var clock := 0.0
 
 func advance(delta: float) -> void:
 	clock += delta
-	commands = commands.filter(func(c: Dictionary) -> bool: return clock - c.time <= WINDOW)
+	commands = commands.filter(
+		func(command: Dictionary) -> bool:
+			return clock - command.time <= WINDOW
+	)
 
 func push(command: StringName) -> void:
-	if commands.size() >= 8:
+	if commands.size() >= GameSettings.MAX_BUFFER_COMMANDS:
 		commands.pop_front()
 	commands.append({"command": command, "time": clock})
 

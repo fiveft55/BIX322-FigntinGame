@@ -11,7 +11,7 @@ func _initialize() -> void:
 	call_deferred("run")
 
 func run() -> void:
-	for action in ["p1_left", "p1_right", "p1_attack", "p1_block"]:
+	for action in ["p1_left", "p1_right", "p1_attack", "p1_block", "p1_jump"]:
 		InputMap.add_action(action)
 	var buffer := FightInputBuffer.new()
 	buffer.push(&"attack")

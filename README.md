@@ -9,6 +9,7 @@ Import `project.godot` in Godot 4.6 and press **F6** on the arena scene or **F5*
 | Action | Player 1 | Player 2 |
 | --- | --- | --- |
 | Move | A / D | Left / Right |
+| Jump | W | Up |
 | Attack / combo | F | K |
 | Hold guard | G | L |
 
@@ -16,7 +17,7 @@ Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles 
 
 ## Architecture for your project report
 
-- `scripts/fighter.gd`: explicit `IDLE`, `WALKING`, `ATTACKING`, `HIT_STUN`, and `BLOCKING` states. `change_state()` centralizes transitions and destroys attack hitboxes when interrupted. Idle/walking/blocking can start an attack; attacks finish or chain into the next strike; incoming hits interrupt with timed stun. Block stun uses the same stun state with a shorter duration.
+- `scripts/fighter.gd`: explicit `IDLE`, `WALKING`, `ATTACKING`, `HIT_STUN`, `BLOCKING`, and `JUMPING` states. `change_state()` centralizes transitions and destroys attack hitboxes when interrupted. Idle/walking/blocking can start an attack; attacks finish or chain into the next strike; incoming hits interrupt with timed stun. Block stun uses the same stun state with a shorter duration.
 - `scripts/input_buffer.gd`: a bounded queue of timestamped commands, expiring after 220 ms. Consumption removes a command exactly once. Up to eight presses are retained; hits clear pending commands. This tolerates early presses without indefinite delayed attacks.
 - Attacks use a fixed 60 Hz simulation timeline. Startup has no hitbox; active frames instantiate an `Area2D` with a separate rectangle; recovery destroys it. Persistent hurtboxes are separate `Area2D` nodes. Combat uses immediate rectangle intersection with identical dimensions, avoiding stale overlap lists when Godot defers physics updates. A per-attack victim list prevents repeated damage across active frames.
 - `scripts/arena.gd`: input mapping, both fighters' simulation, body separation, simultaneous hit collection, health UI, round outcome, and restart. Both attacks are collected before damage is applied so trades can occur.
@@ -27,7 +28,7 @@ Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles 
 | 2 | 7 | 4 | 14 | 10 | 21 |
 | 3 | 10 | 5 | 22 | 16 | 27 |
 
-The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking, jumping, audio, or a full competitive fighting-game ruleset.
+The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking, audio, or a full competitive fighting-game ruleset.
 
 ## Validation
 
@@ -37,6 +38,7 @@ Run from the project directory:
 godot --headless --path . --editor --import --quit
 godot --headless --path . --script tests/combat_test.gd
 godot --headless --path . --script tests/arena_test.gd
+godot --headless --path . --script tests/jump_test.gd
 godot --headless --path . --quit-after 180
 ```
 
@@ -52,3 +54,7 @@ mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
 ```
 
 For a Bachelor's submission, supplement the prototype with your own design rationale, FSM diagram, frame-data experiments, test results, evaluation, and disclosure of AI assistance according to your institution's rules. This project is a technical foundation, not a guarantee of an academic grade.
+
+## Customization
+
+Edit `scripts/game_settings.gd` for movement keys, speed, gravity, jump height, health, attack data, and buffering. See [CODE_GUIDE.md](CODE_GUIDE.md) for every script and function, variable units, examples, and jump rules. W/Up jumps; steer in the air with movement keys. Attacking and blocking are ground-only.

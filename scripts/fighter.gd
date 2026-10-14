@@ -1,18 +1,15 @@
 class_name Fighter
 extends CharacterBody2D
+## Fighter FSM and frame-timed combat. Feet are the local origin.
 
-enum State { IDLE, WALKING, ATTACKING, HIT_STUN, BLOCKING }
-const SPEED := 240.0
-const FLOOR_Y := 520.0
-# Fixed 60 Hz simulation frames: startup, active, recovery, damage, stun, reach.
-const ATTACKS := [
-	{"startup": 6, "active": 4, "recovery": 13, "damage": 8, "stun": 18, "reach": 64.0},
-	{"startup": 7, "active": 4, "recovery": 14, "damage": 10, "stun": 21, "reach": 72.0},
-	{"startup": 10, "active": 5, "recovery": 22, "damage": 16, "stun": 27, "reach": 90.0}
-]
+# Jumping is locomotion; hit stun can also occur in the air.
+enum State { IDLE, WALKING, ATTACKING, HIT_STUN, BLOCKING, JUMPING }
+const SPEED := GameSettings.MOVE_SPEED
+const FLOOR_Y := GameSettings.FLOOR_Y
+const ATTACKS := GameSettings.ATTACKS
 var state: State = State.IDLE
 var state_frame := 0
-var health := 100
+var health := GameSettings.MAX_HEALTH
 var facing := 1
 var combo := 0
 var stun_remaining := 0
@@ -22,7 +19,6 @@ var opponent: Fighter
 var buffer := FightInputBuffer.new()
 var hurtbox: Area2D
 var hitbox: Area2D
-var hit_shape: CollisionShape2D
 var victims: Array[int] = []
 var debug_boxes := true
 var enabled := true
@@ -30,7 +26,7 @@ var use_ai := false
 var ai_timer := 0.0
 
 func _ready() -> void:
-	hurtbox = make_area(Vector2(42, 104), Vector2(0, -54), 1, 0)
+	hurtbox = make_area(GameSettings.HURTBOX_SIZE, GameSettings.HURTBOX_CENTER, 1, 0)
 	hurtbox.set_meta("fighter", self)
 	set_physics_process(false) # Arena updates both fighters before resolving collisions.
 
@@ -70,41 +66,58 @@ func tick(delta: float) -> void:
 		queue_redraw()
 		return
 	var prefix := "p%d_" % player_index
+	# Human and AI commands feed the same FSM and input buffer.
 	var direction := Input.get_axis(prefix + "left", prefix + "right")
 	var blocking := Input.is_action_pressed(prefix + "block")
 	if use_ai:
 		ai_timer += delta
-		direction = signf(opponent.position.x - position.x) if absf(opponent.position.x - position.x) > 105 else 0.0
+		var distance := opponent.position.x - position.x
+		direction = signf(distance) if absf(distance) > GameSettings.AI_APPROACH_DISTANCE else 0.0
 		blocking = opponent.state == State.ATTACKING and fmod(ai_timer, 1.5) < 0.65
-		if ai_timer >= 0.6:
+		if ai_timer >= GameSettings.AI_ATTACK_INTERVAL:
 			ai_timer = 0.0
-			if absf(opponent.position.x - position.x) < 145:
+			if absf(opponent.position.x - position.x) < GameSettings.AI_ATTACK_DISTANCE:
 				buffer.push(&"attack")
-	elif Input.is_action_just_pressed(prefix + "attack"):
-		buffer.push(&"attack")
+	else:
+		if Input.is_action_just_pressed(prefix + "attack"):
+			buffer.push(&"attack")
+		if Input.is_action_just_pressed(prefix + "jump"):
+			buffer.push(&"jump")
 	if state != State.ATTACKING and state != State.HIT_STUN:
 		facing = 1 if opponent.position.x >= position.x else -1
 	state_frame += 1
-	velocity = Vector2.ZERO
+	velocity.x = 0.0
 	match state:
 		State.HIT_STUN:
 			stun_remaining -= 1
 			if stun_remaining <= 0:
-				change_state(State.IDLE)
+				change_state(State.IDLE if is_grounded() else State.JUMPING)
+		State.JUMPING:
+			velocity.x = direction * GameSettings.AIR_SPEED
 		State.ATTACKING:
 			var attack: Dictionary = ATTACKS[combo]
 			if state_frame == attack.startup:
-				hitbox = make_area(Vector2(attack.reach, 36), Vector2(facing * (22 + attack.reach / 2), -62), 0, 1)
+				hitbox = make_area(
+					Vector2(attack.reach, GameSettings.HITBOX_HEIGHT),
+					Vector2(facing * (GameSettings.BODY_WIDTH / 2 + attack.reach / 2), GameSettings.HITBOX_Y),
+					0, 1
+				)
 			if state_frame == attack.startup + attack.active:
 				remove_hitbox()
 			var total: int = attack.startup + attack.active + attack.recovery
 			# A buffered press can cancel the final six recovery frames into the next strike.
-			if combo < 2 and state_frame >= total - 6 and buffer.consume(&"attack"):
+			var can_chain := combo < ATTACKS.size() - 1
+			var in_cancel_window := state_frame >= total - GameSettings.COMBO_CANCEL_FRAMES
+			if can_chain and in_cancel_window and buffer.consume(&"attack"):
 				start_attack(combo + 1)
 			elif state_frame >= total:
 				change_state(State.IDLE)
 		_:
-			if blocking:
+			if buffer.consume(&"jump"):
+				velocity.y = -GameSettings.JUMP_SPEED
+				velocity.x = direction * GameSettings.AIR_SPEED
+				change_state(State.JUMPING)
+			elif blocking:
 				if state != State.BLOCKING:
 					change_state(State.BLOCKING)
 			elif buffer.consume(&"attack"):
@@ -114,17 +127,29 @@ func tick(delta: float) -> void:
 				if state != next:
 					change_state(next)
 				velocity.x = direction * SPEED
-	position.x = clampf(position.x + velocity.x * delta, 42, 1110)
-	position.y = FLOOR_Y
+	position.x = clampf(position.x + velocity.x * delta, GameSettings.LEFT_BOUND, GameSettings.RIGHT_BOUND)
+	# This arena uses an explicit floor plane, not move_and_slide() collisions.
+	# Keep vertical momentum during hit stun; only a landing cancels it.
+	if not is_grounded() or velocity.y < 0:
+		velocity.y += GameSettings.GRAVITY * delta
+		position.y += velocity.y * delta
+		if position.y >= FLOOR_Y:
+			position.y = FLOOR_Y
+			velocity.y = 0.0
+			if state == State.JUMPING:
+				change_state(State.IDLE)
 	queue_redraw()
+
+func is_grounded() -> bool:
+	return position.y >= FLOOR_Y and velocity.y >= 0
 
 func attack_rectangle() -> Rect2:
 	var attack: Dictionary = ATTACKS[combo]
-	var center := global_position + Vector2(facing * (22 + attack.reach / 2), -62)
-	return Rect2(center - Vector2(attack.reach, 36) / 2, Vector2(attack.reach, 36))
+	var center := global_position + Vector2(facing * (GameSettings.BODY_WIDTH / 2 + attack.reach / 2), GameSettings.HITBOX_Y)
+	return Rect2(center - Vector2(attack.reach, GameSettings.HITBOX_HEIGHT) / 2, Vector2(attack.reach, GameSettings.HITBOX_HEIGHT))
 
 func hurt_rectangle() -> Rect2:
-	return Rect2(global_position + Vector2(-21, -106), Vector2(42, 104))
+	return Rect2(global_position + GameSettings.HURTBOX_CENTER - GameSettings.HURTBOX_SIZE / 2, GameSettings.HURTBOX_SIZE)
 
 func resolve_attack() -> void:
 	# Resolve the same rectangles used by Area2D, avoiding deferred physics overlap
@@ -138,16 +163,22 @@ func resolve_attack() -> void:
 func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 	var front := signf(attacker.position.x - position.x) == facing
 	var guarded := state == State.BLOCKING and front
-	health = maxi(0, health - (1 if guarded else int(attack.damage)))
+	health = maxi(0, health - (GameSettings.BLOCK_DAMAGE if guarded else int(attack.damage)))
 	change_state(State.HIT_STUN)
-	stun_remaining = 8 if guarded else int(attack.stun)
+	stun_remaining = GameSettings.BLOCK_STUN_FRAMES if guarded else int(attack.stun)
 	buffer.clear()
-	position.x = clampf(position.x + attacker.facing * (8 if guarded else 18), 42, 1110)
+	var push_distance := GameSettings.BLOCK_PUSH if guarded else GameSettings.HIT_PUSH
+	position.x = clampf(
+		position.x + attacker.facing * push_distance,
+		GameSettings.LEFT_BOUND,
+		GameSettings.RIGHT_BOUND
+	)
 
 func reset_fighter(x: float) -> void:
 	change_state(State.IDLE)
-	health = 100
+	health = GameSettings.MAX_HEALTH
 	position = Vector2(x, FLOOR_Y)
+	velocity = Vector2.ZERO
 	buffer.clear()
 	enabled = true
 	ai_timer = 0
@@ -169,7 +200,7 @@ func _draw() -> void:
 	if state == State.BLOCKING:
 		draw_arc(Vector2(facing * 15, -65), 44, -PI / 2 if facing == 1 else PI / 2, PI / 2 if facing == 1 else PI * 1.5, 24, Color("ffd76d"), 5)
 	if debug_boxes:
-		draw_rect(Rect2(-21, -106, 42, 104), Color(0, 1, 0, 0.55), false, 2)
+		draw_rect(Rect2(GameSettings.HURTBOX_CENTER - GameSettings.HURTBOX_SIZE / 2, GameSettings.HURTBOX_SIZE), Color(0, 1, 0, 0.55), false, 2)
 		if is_instance_valid(hitbox):
 			var rect := attack_rectangle()
 			rect.position -= global_position
