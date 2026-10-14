@@ -8,12 +8,14 @@ var round_over := false
 
 func _ready() -> void:
 	Engine.physics_ticks_per_second = 60
+	var scenery := ArenaVisual.new()
+	scenery.z_index = -10
+	add_child(scenery)
 	for action in GameSettings.KEYS:
 		bind(action, GameSettings.KEYS[action])
 	for i in range(2):
 		var fighter := Fighter.new()
 		fighter.player_index = i + 1
-		fighter.tint = Color("55e0ee") if i == 0 else Color("fa7098")
 		add_child(fighter)
 		fighters.append(fighter)
 	fighters[0].opponent = fighters[1]
@@ -34,20 +36,32 @@ func create_hud() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	var title := Label.new()
-	title.text = "FRAME FIGHTERS"
-	title.position = Vector2(410, 20)
+	title.text = "SCRIBBLE FIGHTERS"
+	title.position = Vector2(400, 20)
 	title.add_theme_font_size_override("font_size", 32)
+	title.add_theme_color_override("font_color", Color("28333b"))
 	layer.add_child(title)
 	for i in range(2):
 		var bar := ProgressBar.new()
 		bar.position = Vector2(45 if i == 0 else 727, 85)
 		bar.size = Vector2(380, 26)
 		bar.max_value = GameSettings.MAX_HEALTH
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = Color("32b982") if i == 0 else Color("9464df")
+		fill.set_corner_radius_all(6)
+		bar.add_theme_stylebox_override("fill", fill)
+		var background := StyleBoxFlat.new()
+		background.bg_color = Color("e0ded7")
+		background.border_color = Color("28333b")
+		background.set_border_width_all(2)
+		background.set_corner_radius_all(6)
+		bar.add_theme_stylebox_override("background", background)
 		bar.show_percentage = false
 		layer.add_child(bar)
 		bars.append(bar)
 	info = Label.new()
 	info.position = Vector2(45, 125)
+	info.add_theme_color_override("font_color", Color("28333b"))
 	info.add_theme_font_size_override("font_size", 18)
 	layer.add_child(info)
 	var help := Label.new()
@@ -68,6 +82,7 @@ func create_hud() -> void:
 		GameSettings.key_label("boxes"),
 		GameSettings.key_label("restart"),
 	]
+	help.add_theme_color_override("font_color", Color("28333b"))
 	help.add_theme_font_size_override("font_size", 18)
 	layer.add_child(help)
 
@@ -124,9 +139,3 @@ func _physics_process(delta: float) -> void:
 		var winner := "DRAW" if fighters[0].health == fighters[1].health else "PLAYER %d WINS" % (1 if fighters[1].health == 0 else 2)
 		info.text += "\n%s — press %s to restart" % [winner, GameSettings.key_label("restart")]
 	queue_redraw()
-
-func _draw() -> void:
-	for x in range(0, 1152, 64):
-		draw_line(Vector2(x, 200), Vector2(x, GameSettings.FLOOR_Y), Color(0.12, 0.16, 0.25), 1)
-	draw_rect(Rect2(0, GameSettings.FLOOR_Y, 1152, 648 - GameSettings.FLOOR_Y), Color("121d33"))
-	draw_line(Vector2(0, GameSettings.FLOOR_Y + 1), Vector2(1152, GameSettings.FLOOR_Y + 1), Color("55e0ee"), 3)

@@ -44,3 +44,13 @@ const KEYS := {
 
 static func key_label(action: String) -> String:
 	return OS.get_keycode_string(KEYS[action])
+
+## Uploaded Kenney art. Arrays are indexed by player number minus one.
+const CHARACTER_TEXTURES := [
+	"res://assets/scribble/character_roundGreen.png",
+	"res://assets/scribble/character_squarePurple.png",
+]
+const HAND_TEXTURES := [
+	"res://assets/scribble/character_handGreen.png",
+	"res://assets/scribble/character_handPurple.png",
+]

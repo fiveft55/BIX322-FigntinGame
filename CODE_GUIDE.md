@@ -81,18 +81,17 @@ FightInputBuffer owns commands (command/time dictionaries) and a simulation cloc
 | resolve_attack | Resolve one attack for isolated tests; arena batches match hits |
 | receive_hit | Apply guard/damage/stun/push and clear inputs |
 | reset_fighter | Reset health, state, position, velocity, buffer, AI timer |
-| _draw | Draw procedural poses and optional collision visualization |
-| body_style | Create rounded torso appearance |
+| _draw | Draw optional collision visualization; FighterVisual draws artwork |
 
-Runtime fields: state/state_frame track the FSM; health tracks damage; facing is ±1; combo selects attack data; stun_remaining counts stun frames. Inherited velocity is pixels/second. player_index selects action names; opponent references the other fighter. buffer stores commands; hurtbox/hitbox are Area2D nodes; victims stores already-hit IDs. enabled freezes combat after KO. use_ai/ai_timer drive decisions. tint/debug_boxes control presentation. Tune settings rather than runtime fields.
+Runtime fields: state/state_frame track the FSM; health tracks damage; facing is ±1; combo selects attack data; stun_remaining counts stun frames. Inherited velocity is pixels/second. player_index selects action names; opponent references the other fighter. buffer stores commands; hurtbox/hitbox are Area2D nodes; victims stores already-hit IDs. enabled freezes combat after KO. use_ai/ai_timer drive decisions. debug_boxes controls collision overlays. Artwork paths are configured in GameSettings. Tune settings rather than runtime fields.
 
-AI guard timing remains in tick(): fmod(ai_timer, 1.5) < 0.65. Edit this expression for different simple guard behavior. Drawing coordinates in _draw() control art independently of collision size; adjust the art if you resize hurtboxes. Immediate rectangle checks use the same dimensions as collision nodes to avoid deferred physics overlap updates.
+AI guard timing remains in tick(): fmod(ai_timer, 1.5) < 0.65. Edit this expression for different simple guard behavior. Drawing coordinates in FighterVisual._draw() control art independently of collision size; adjust the art if you resize hurtboxes. Immediate rectangle checks use the same dimensions as collision nodes to avoid deferred physics overlap updates.
 
 ### scripts/arena.gd
 
-_ready() sets 60 Hz physics, binds keys, creates fighters/opponent references, enables default AI, builds HUD, and restarts. bind() replaces an action's runtime events with its configured physical key. create_hud() builds labels/health bars. restart() restores both fighters. _physics_process() handles match controls, ticks fighters, separates bodies, collects both hits before damage (allowing trades), handles KO, and updates HUD. _draw() draws arena/grid/floor.
+_ready() sets 60 Hz physics, binds keys, creates fighters/opponent references, enables default AI, builds HUD, and restarts. bind() replaces an action's runtime events with its configured physical key. create_hud() builds labels/health bars. restart() restores both fighters. _physics_process() handles match controls, ticks fighters, separates bodies, collects both hits before damage (allowing trades), handles KO, and updates HUD. ArenaVisual draws arena/grid/floor.
 
-fighters owns both fighters, info is the status label, bars holds health bars, and round_over tracks the match outcome. Change fighter.tint assignments for colors and use_ai initialization for default local play. UI positions/fonts are in create_hud(). For a different viewport, update project.godot, settings bounds/spawns, and arena UI/background coordinates together. Keep physics at 60 Hz unless intentionally changing frame-based combat timing.
+fighters owns both fighters, info is the status label, bars holds health bars, and round_over tracks the match outcome. Change CHARACTER_TEXTURES and HAND_TEXTURES in settings for character colors and use_ai initialization for default local play. UI positions/fonts are in create_hud(). For a different viewport, update project.godot, settings bounds/spawns, and arena UI/background coordinates together. Keep physics at 60 Hz unless intentionally changing frame-based combat timing.
 
 ### Other files
 
@@ -110,3 +109,9 @@ Tests extend SceneTree, schedule run(), and exit nonzero on failure. Run the REA
 Input events are collected individually in `Fighter._input()`, including presses arriving between physics ticks. Keyboard auto-repeat is ignored. Hold movement while attacking or blocking; attack movement uses `ATTACK_MOVE_SPEED` and guard movement uses `BLOCK_MOVE_SPEED`. Jump + attack + movement can execute together, and airborne attacks use air steering. Attack takes priority over guard: pressing attack while holding guard starts a strike, and guard resumes after recovery. You cannot guard an attack while striking or airborne. Left + right cancel to zero horizontal input.
 
 Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.
+
+## Asset presentation scripts
+
+`scripts/fighter_visual.gd` loads configured body/hand textures and shared shield/blast art in `_ready()`. Its `_draw()` reads the fighter state and frame counter for walking bob, jump lean, attack windup/extension/recovery, stun flash, and guarding. It mirrors artwork independently of collision. Fighter.tick() requests a visual redraw; presentation never applies damage or advances combat.
+
+`scripts/arena_visual.gd` loads scenery textures in `_ready()`, uses `stamp()` to draw texture rectangles, and draws the notebook background and decorative scenery in `_draw()`. Tiles align with FLOOR_Y. Trees/castles are decoration, not platforms. See ASSET_GUIDE.md for asset paths and sizing.

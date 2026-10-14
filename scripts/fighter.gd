@@ -14,7 +14,6 @@ var facing := 1
 var combo := 0
 var stun_remaining := 0
 var player_index := 1
-var tint := Color.CYAN
 var opponent: Fighter
 var buffer := FightInputBuffer.new()
 var hurtbox: Area2D
@@ -24,10 +23,14 @@ var debug_boxes := true
 var enabled := true
 var use_ai := false
 var ai_timer := 0.0
+var visuals: FighterVisual
 
 func _ready() -> void:
 	hurtbox = make_area(GameSettings.HURTBOX_SIZE, GameSettings.HURTBOX_CENTER, 1, 0)
 	hurtbox.set_meta("fighter", self)
+	visuals = FighterVisual.new()
+	visuals.z_index = -1 # Keep diagnostic collision boxes above the artwork.
+	add_child(visuals)
 	set_physics_process(false) # Arena updates both fighters before resolving collisions.
 
 func make_area(size: Vector2, center: Vector2, layer: int, mask: int) -> Area2D:
@@ -75,6 +78,8 @@ func tick(delta: float) -> void:
 	buffer.advance(delta)
 	if not enabled:
 		queue_redraw()
+		if is_instance_valid(visuals):
+			visuals.queue_redraw()
 		return
 	var prefix := "p%d_" % player_index
 	# Human and AI commands feed the same FSM and input buffer.
@@ -153,6 +158,8 @@ func tick(delta: float) -> void:
 			if state == State.JUMPING:
 				change_state(State.IDLE)
 	queue_redraw()
+	if is_instance_valid(visuals):
+		visuals.queue_redraw()
 
 func is_grounded() -> bool:
 	return position.y >= FLOOR_Y and velocity.y >= 0
@@ -198,30 +205,9 @@ func reset_fighter(x: float) -> void:
 	ai_timer = 0
 
 func _draw() -> void:
-	var color := tint
-	if state == State.HIT_STUN:
-		color = Color.WHITE
-	draw_line(Vector2(-13, -36), Vector2(-20, 0), color, 12)
-	draw_line(Vector2(13, -36), Vector2(20, 0), color, 12)
-	draw_style_box(body_style(color), Rect2(-22, -90, 44, 60))
-	draw_circle(Vector2(0, -111), 19, color)
-	draw_circle(Vector2(facing * 7, -114), 3, Color("10152b"))
-	var hand := Vector2(facing * 32, -65)
-	if state == State.ATTACKING:
-		hand.x = facing * (48 if hitbox == null else 82)
-	draw_line(Vector2(0, -78), hand, color, 12)
-	draw_circle(hand, 9, Color.WHITE)
-	if state == State.BLOCKING:
-		draw_arc(Vector2(facing * 15, -65), 44, -PI / 2 if facing == 1 else PI / 2, PI / 2 if facing == 1 else PI * 1.5, 24, Color("ffd76d"), 5)
 	if debug_boxes:
 		draw_rect(Rect2(GameSettings.HURTBOX_CENTER - GameSettings.HURTBOX_SIZE / 2, GameSettings.HURTBOX_SIZE), Color(0, 1, 0, 0.55), false, 2)
 		if is_instance_valid(hitbox):
 			var rect := attack_rectangle()
 			rect.position -= global_position
 			draw_rect(rect, Color(1, 0.2, 0.2, 0.45), true)
-
-func body_style(color: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = color.darkened(0.2)
-	style.set_corner_radius_all(8)
-	return style

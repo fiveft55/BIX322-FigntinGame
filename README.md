@@ -1,6 +1,6 @@
-# Frame Fighters — Godot fighting game prototype
+# Scribble Fighters — Godot fighting game prototype
 
-A self-contained Godot 4.6 project demonstrating finite state machines, frame-timed combat collision, and buffered combo input. All graphics are drawn in code; no external assets or plugins are required.
+A self-contained Godot 4.6 project demonstrating finite state machines, frame-timed combat collision, and buffered combo input. Graphics use the included Kenney Scribble Platformer assets (CC0), with procedural poses synchronized to combat frames. No external downloads or plugins are required.
 
 ## Run
 
@@ -39,6 +39,7 @@ godot --headless --path . --editor --import --quit
 godot --headless --path . --script tests/combat_test.gd
 godot --headless --path . --script tests/arena_test.gd
 godot --headless --path . --script tests/jump_test.gd
+godot --headless --path . --script tests/assets_test.gd
 godot --headless --path . --quit-after 180
 ```
 
@@ -64,3 +65,7 @@ Edit `scripts/game_settings.gd` for movement keys, speed, gravity, jump height, 
 Input events are collected individually in `Fighter._input()`, including presses arriving between physics ticks. Keyboard auto-repeat is ignored. Hold movement while attacking or blocking; attack movement uses `ATTACK_MOVE_SPEED` and guard movement uses `BLOCK_MOVE_SPEED`. Jump + attack + movement can execute together, and airborne attacks use air steering. Attack takes priority over guard: pressing attack while holding guard starts a strike, and guard resumes after recovery. You cannot guard an attack while striking or airborne. Left + right cancel to zero horizontal input.
 
 Attack presses remain queued for `ATTACK_INPUT_WINDOW` (0.75 seconds), while jump presses expire after `INPUT_WINDOW` (0.22 seconds). Rapid taps can queue successive combo strikes without timing every cancel window. Each tap is consumed once; enough extra taps can start another chain after the final strike if they have not expired. Queue capacity remains bounded; hits, restart, and AI toggles clear queued commands. Holding attack is not auto-fire. The keyboard hardware must support the chosen simultaneous keys; software cannot recover keys suppressed by keyboard ghosting.
+
+## Included artwork
+
+The uploaded Kenney Scribble Platformer pack provides green/purple fighters, hands, shields, punch effects, trees, clouds, and ground tiles. See [ASSET_GUIDE.md](ASSET_GUIDE.md) for file mappings and replacement instructions. The pack has static PNGs, not animation sheets or audio; poses are animated in code. Original CC0 license: [assets/scribble/License.txt](assets/scribble/License.txt).
