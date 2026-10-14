@@ -36,7 +36,7 @@ texture = ExtResource("hand")
 [node name="Shield" type="Sprite2D" parent="Visuals/Rig/RearHand"]
 z_index = 5
 position = Vector2(0, 0)
-scale = Vector2(0.35, 0.39375)
+scale = Vector2(0.9, 1.0125)
 texture = ExtResource("shield")
 
 [node name="PunchEffect" type="Sprite2D" parent="Visuals/Rig"]
