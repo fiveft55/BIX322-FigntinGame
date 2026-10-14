@@ -38,18 +38,11 @@ theme_override_font_sizes/font_size = 22
 horizontal_alignment = 1
 
 [node name="Rematch" type="Button" parent="Victory"]
-offset_left = 110.0
+offset_left = 175.0
 offset_top = 195.0
-offset_right = 275.0
+offset_right = 375.0
 offset_bottom = 245.0
 text = "Play Again"
-
-[node name="Quit" type="Button" parent="Victory"]
-offset_left = 295.0
-offset_top = 195.0
-offset_right = 440.0
-offset_bottom = 245.0
-text = "Quit"
 
 [node name="Countdown" type="Label" parent="."]
 mouse_filter = 2

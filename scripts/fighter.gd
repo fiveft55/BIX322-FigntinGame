@@ -47,6 +47,10 @@ func _ready() -> void:
 		visuals.front_hand.texture = load(character.hand)
 		visuals.rear_hand.texture = load(character.hand)
 		visuals.sword.texture = load(GameSettings.WEAPONS[preferences.weapons[slot]].texture)
+		var hat: Sprite2D = visuals.body.get_node("Hat")
+		var hat_path: String = GameSettings.HATS[preferences.hats[slot]].texture
+		hat.visible = not hat_path.is_empty()
+		hat.texture = load(hat_path) if hat.visible else null
 	# Isolated combat tests can instantiate Fighter without a presentation scene.
 	set_physics_process(false) # Arena updates both fighters before resolving collisions.
 

@@ -6,6 +6,7 @@ var difficulty := 1
 var local_mode := false
 var characters: Array[int] = [0, 5]
 var weapons: Array[int] = [0, 0]
+var hats: Array[int] = [0, 0]
 var music_volume := 1.0
 var effects_volume := 1.0
 var voice_volume := 1.0
@@ -24,6 +25,7 @@ func load_settings(path: String = "") -> void:
 	for player in range(2):
 		characters[player] = clampi(int(config.get_value("players", "character_%d" % player, characters[player])), 0, GameSettings.CHARACTERS.size() - 1)
 		weapons[player] = clampi(int(config.get_value("players", "weapon_%d" % player, 0)), 0, GameSettings.WEAPONS.size() - 1)
+		hats[player] = clampi(int(config.get_value("players", "hat_%d" % player, 0)), 0, GameSettings.HATS.size() - 1)
 	music_volume = clampf(float(config.get_value("audio", "music", 1.0)), 0, 1)
 	effects_volume = clampf(float(config.get_value("audio", "effects", 1.0)), 0, 1)
 	voice_volume = clampf(float(config.get_value("audio", "voice", 1.0)), 0, 1)
@@ -39,6 +41,7 @@ func save_settings(path: String = "") -> Error:
 	for player in range(2):
 		config.set_value("players", "character_%d" % player, characters[player])
 		config.set_value("players", "weapon_%d" % player, weapons[player])
+		config.set_value("players", "hat_%d" % player, hats[player])
 	return config.save(path)
 
 func apply_volumes() -> void:

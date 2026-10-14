@@ -13,12 +13,13 @@ func _initialize() -> void:
 func run() -> void:
 	var preferences := root.get_node("Preferences")
 	var saved := [preferences.difficulty, preferences.music_volume, preferences.effects_volume,
-		preferences.voice_volume, preferences.characters.duplicate(), preferences.weapons.duplicate()]
+		preferences.voice_volume, preferences.characters.duplicate(), preferences.weapons.duplicate(), preferences.hats.duplicate()]
 	preferences.settings_path = "user://menu-test-settings.cfg"
 	var menu := (load("res://scenes/main_menu.tscn") as PackedScene).instantiate()
 	root.add_child(menu)
 	current_scene = menu
 	check(menu.music.playing and menu.music.stream.loop, "Menu music starts and loops")
+	check(menu.get_node("Background").texture.resource_path.ends_with("Sample.png"), "Menu uses original Kenney sample background")
 	menu.get_node("Home/SettingsButton").pressed.emit()
 	check(menu.options.visible and not menu.home.visible, "Settings button opens settings page")
 	menu.get_node("Settings/MusicSlider").value = 0
@@ -30,11 +31,15 @@ func run() -> void:
 	menu.choose_character(1, 7)
 	menu.choose_weapon(0, 1)
 	menu.choose_weapon(1, 3)
+	menu.choose_hat(0, 2)
+	menu.choose_hat(1, 3)
 	preferences.difficulty = 0
 	preferences.characters.assign([0, 5])
 	preferences.weapons.assign([0, 0])
+	preferences.hats.assign([0, 0])
 	preferences.load_settings()
 	check(preferences.difficulty == 2 and preferences.characters == [2, 7], "Difficulty and characters persist")
+	check(preferences.hats == [2, 3], "Hat choices persist")
 	check(preferences.weapons == [1, 3] and preferences.music_volume == 0, "Weapons and audio volumes persist")
 	menu.show_page(menu.controls)
 	check(menu.get_node("Controls/Info").text.contains("Hold shield"), "Controls page explains combat keys")
@@ -43,6 +48,21 @@ func run() -> void:
 	var arena := current_scene
 	arena.set_physics_process(false)
 	check(not arena.fighters[1].use_ai, "Local mode starts without AI")
+	check(not arena.ai_practice_mode, "Local match disables practice shortcuts")
+	for tick in range(180):
+		arena._physics_process(1.0 / 60)
+	arena.fighters[0].health = 80
+	for action in ["restart", "boxes", "ai"]:
+		Input.action_press(action)
+	await physics_frame
+	arena._physics_process(1.0 / 60)
+	check(arena.fighters[0].health == 80 and arena.countdown_ticks == 0, "Reset key cannot restart a local match")
+	check(not arena.fighters[0].debug_boxes and not arena.fighters[1].use_ai, "Collision and AI toggle keys ignored in local matches")
+	for action in ["restart", "boxes", "ai"]:
+		Input.action_release(action)
+	await physics_frame
+	check(not arena.match_overlay.has_node("Victory/Quit"), "Result screen has no Quit button")
+	check(arena.fighters[0].visuals.body.get_node("Hat").texture.resource_path.ends_with("item_hatTop.png"), "Selected hat reaches fighter scene")
 	check(arena.fighters[0].visuals.body.texture.resource_path.ends_with("character_roundRed.png"), "Chosen player one character reaches fight")
 	check(arena.fighters[1].visuals.sword.texture.resource_path.ends_with("item_pencil.png"), "Chosen player two weapon reaches fight")
 	check(arena.bars[0].get_theme_stylebox("fill").bg_color == GameSettings.CHARACTERS[2].color, "Health bar matches character color")
@@ -55,6 +75,21 @@ func run() -> void:
 	arena = current_scene
 	arena.set_physics_process(false)
 	check(arena.fighters[1].use_ai, "AI mode starts with opponent AI")
+	check(arena.ai_practice_mode, "AI match enables practice shortcuts")
+	Input.action_press("boxes")
+	Input.action_press("ai")
+	await physics_frame
+	arena._physics_process(1.0 / 60)
+	check(arena.fighters[0].debug_boxes and not arena.fighters[1].use_ai, "Practice shortcuts work in AI mode")
+	Input.action_release("boxes")
+	Input.action_release("ai")
+	await physics_frame
+	arena.fighters[0].health = 80
+	Input.action_press("restart")
+	await physics_frame
+	arena._physics_process(1.0 / 60)
+	check(arena.fighters[0].health == 100 and arena.countdown_ticks > 0, "Reset shortcut works in AI practice")
+	Input.action_release("restart")
 	arena.match_audio.reset_match()
 	await create_timer(0.15).timeout
 	arena.free()
@@ -99,6 +134,7 @@ func run() -> void:
 	preferences.voice_volume = saved[3]
 	preferences.characters.assign(saved[4])
 	preferences.weapons.assign(saved[5])
+	preferences.hats.assign(saved[6])
 	preferences.local_mode = false
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(preferences.settings_path))
 	preferences.settings_path = preferences.SAVE_PATH

@@ -11,7 +11,7 @@ Arena
 │   ├── Clouds
 │   ├── Trees
 │   ├── Decorations
-│   └── Ground (Grass01–18, Brick01–18)
+│   └── Ground (Top01–18, Block01–18)
 └── Fighters
     ├── Player1 (fighter_green.tscn instance)
     └── Player2 (fighter_purple.tscn instance)
@@ -19,7 +19,7 @@ Arena
 
 Select any scenery Sprite2D and drag it with the move tool (W), or edit Inspector → Transform → Position/Scale/Rotation. Replace artwork by dragging a PNG from assets/scribble onto its Texture field. Ctrl+D duplicates a selected node. Rename new nodes meaningfully and keep them inside the matching group. Scenery is decorative, not collidable.
 
-Ground is positioned at Y = 520. Grass tiles are 64 × 64 on screen; centers are X = 32, 96, 160, etc. The node group position controls the whole ground. If you change its height, also change GameSettings.FLOOR_Y and tree/decor positions so feet and scenery align. The simulation floor is a mathematical plane, not these sprites. Adjust arena bounds if changing arena width.
+Ground is positioned at Y = 520. Top tiles are 64 × 64 on screen; centers are X = 32, 96, 160, etc. The node group position controls the whole ground. If you change its height, also change GameSettings.FLOOR_Y and tree/decor positions so feet and scenery align. The simulation floor is a mathematical plane, not these sprites. Adjust arena bounds if changing arena width.
 
 Move Player1/Player2 horizontally in the editor to change their spawn positions; restart now uses their initial scene X positions. Keep their scene Y at FLOOR_Y. Their Inspector exposes Player Index and Use Ai; Player2 defaults to AI. Do not give both the same player index.
 
@@ -94,3 +94,7 @@ Controls print once at startup in Godot's Output panel (or the terminal when lau
 Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard movement 112.5 pixels/second. ATTACK_SPEED = 1.25 advances the attack timeline 25% faster without changing frame-data values. Startup, active, recovery, and combo windows accelerate together; threshold-crossing checks preserve hitbox activation even when a simulation tick advances more than one attack frame. Sword poses and sword audio follow that accelerated timeline. Jump launch, gravity, knockback, stun, and the match timer retain their existing timing. Edit these constants in game_settings.gd to tune speed.
 
 The game now starts at main_menu.tscn. Edit its Home/Settings/Controls/Characters panels directly. Saved character and weapon texture choices override default fighter scene textures at runtime, while your local transforms remain. See MENU_GUIDE.md for details.
+
+Hats are editable Body/Hat Sprite2D nodes in each fighter scene, populated by the character menu selection. The menu Background TextureRect references Kenney Sample.png. Result buttons are now Play Again and Main Menu; Quit is only in the main menu.
+
+Arena ground now uses tile_top.png and tile_block.png, with tile_bushHalf.png replacing both bushes. Existing placement and collision floor remain unchanged.

@@ -94,7 +94,7 @@ Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on 
 
 ## Single-round match
 
-Each match lasts 60 seconds. A knockout ends it early; timeout awards the win to the player with more remaining health. Equal health (including a double knockout) is a draw. A result screen shows the winner and match-ending reason, with Play Again and Quit buttons. R restarts the whole match. There is no best-of-three scoring. Set ROUND_SECONDS in game_settings.gd to change duration; the clock counts 60 Hz simulation ticks.
+Each match lasts 60 seconds. A knockout ends it early; timeout awards the win to the player with more remaining health. Equal health (including a double knockout) is a draw. A result screen shows the winner and match-ending reason, with Play Again and Main Menu buttons. R restarts the whole match. There is no best-of-three scoring. Set ROUND_SECONDS in game_settings.gd to change duration; the clock counts 60 Hz simulation ticks.
 
 ## Pre-fight countdown
 
@@ -113,3 +113,5 @@ Movement is 25% faster: ground 300, air 262.5, attack movement 150, and guard mo
 ## Main menu and customization
 
 F5 now opens the main menu with looping uploaded menu music. Choose AI difficulty (Easy/Normal/Hard) or local two-player play, customize both players' characters/weapons, adjust music/effects/voice volume, or read Controls before starting. Selections and settings persist between launches. Character colors match health bars. Esc returns to the menu from battle. See [MENU_GUIDE.md](MENU_GUIDE.md) for editing scenes, AI profiles, saved settings, and weapon limitations.
+
+Local two-player matches ignore R/reset, H/collision overlays, and Tab/AI toggle. These practice shortcuts are available only when a match was launched via Play vs AI. The menu now uses the original Kenney Sample.png background. Each player can select No Hat, Cap, Top Hat, Helmet, or Modern Helmet; choices are saved and appear in the preview and battle. The result screen offers Play Again and Main Menu, with Quit available only on the main menu.

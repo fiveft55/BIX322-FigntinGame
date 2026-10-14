@@ -53,3 +53,8 @@ rotation = 1.5707963
 position = Vector2(0, -40)
 scale = Vector2(0.75, 1.2)
 texture = ExtResource("sword")
+
+[node name="Hat" type="Sprite2D" parent="Visuals/Rig/Body"]
+visible = false
+position = Vector2(0, -58)
+scale = Vector2(1, 0.65)

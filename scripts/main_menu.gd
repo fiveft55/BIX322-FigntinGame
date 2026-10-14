@@ -62,7 +62,7 @@ func update_controls() -> void:
 			player.to_upper(), GameSettings.key_label(player + "_left"),
 			GameSettings.key_label(player + "_right"), GameSettings.key_label(player + "_jump"),
 			GameSettings.key_label(player + "_attack"), GameSettings.key_label(player + "_block")]
-	text += "%s — Restart match     %s — AI/local toggle\n%s — Collision diagnostics     Esc — Main menu\n\nMove + jump + attack can combine. Front blocks parry.\nMatches last 60 seconds; greater health wins on timeout." % [
+	text += "AI matches only: %s restart · %s AI toggle\nAI matches only: %s collision diagnostics     Esc — Main menu\n\nMove + jump + attack can combine. Front blocks parry.\nMatches last 60 seconds; greater health wins on timeout." % [
 		GameSettings.key_label("restart"), GameSettings.key_label("ai"), GameSettings.key_label("boxes")]
 	$Controls/Info.text = text
 
@@ -92,10 +92,15 @@ func configure_characters() -> void:
 		var column := character_page.get_node("Player%d" % (slot + 1))
 		var character_choice: OptionButton = column.get_node("Character")
 		var weapon_choice: OptionButton = column.get_node("Weapon")
+		var hat_choice: OptionButton = column.get_node("Hat")
 		for character in GameSettings.CHARACTERS:
 			character_choice.add_item(character.name)
 		for weapon in GameSettings.WEAPONS:
 			weapon_choice.add_item(weapon.name)
+		for hat in GameSettings.HATS:
+			hat_choice.add_item(hat.name)
+		hat_choice.select(Preferences.hats[slot])
+		hat_choice.item_selected.connect(func(index: int) -> void: choose_hat(slot, index))
 		character_choice.select(Preferences.characters[slot])
 		weapon_choice.select(Preferences.weapons[slot])
 		character_choice.item_selected.connect(func(index: int) -> void: choose_character(slot, index))
@@ -119,3 +124,12 @@ func update_preview(slot: int) -> void:
 	column.get_node("Preview/Hand").texture = load(character.hand)
 	column.get_node("Preview/Hand/Weapon").texture = load(GameSettings.WEAPONS[Preferences.weapons[slot]].texture)
 	column.get_node("ColorBar").color = character.color
+	var hat: Sprite2D = column.get_node("Preview/Body/Hat")
+	var path: String = GameSettings.HATS[Preferences.hats[slot]].texture
+	hat.visible = not path.is_empty()
+	hat.texture = load(path) if hat.visible else null
+
+func choose_hat(slot: int, index: int) -> void:
+	Preferences.hats[slot] = index
+	Preferences.save_settings()
+	update_preview(slot)

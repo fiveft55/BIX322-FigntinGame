@@ -74,3 +74,11 @@ const WEAPONS := [
 	{"name": "Rod", "texture": "res://assets/scribble/item_rod.png"},
 	{"name": "Pencil", "texture": "res://assets/scribble/item_pencil.png"},
 ]
+
+const HATS := [
+	{"name": "No hat", "texture": ""},
+	{"name": "Cap", "texture": "res://assets/scribble/item_hat.png"},
+	{"name": "Top Hat", "texture": "res://assets/scribble/item_hatTop.png"},
+	{"name": "Helmet", "texture": "res://assets/scribble/item_helmet.png"},
+	{"name": "Modern Helmet", "texture": "res://assets/scribble/item_helmetModern.png"},
+]

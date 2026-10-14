@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" path="res://assets/scribble/background_cloudB.png" id="background_cloudB"]
 [ext_resource type="Texture2D" path="res://assets/scribble/background_tree.png" id="background_tree"]
 [ext_resource type="Texture2D" path="res://assets/scribble/background_treeLarge.png" id="background_treeLarge"]
-[ext_resource type="Texture2D" path="res://assets/scribble/tile_grass.png" id="tile_grass"]
-[ext_resource type="Texture2D" path="res://assets/scribble/tile_brick.png" id="tile_brick"]
-[ext_resource type="Texture2D" path="res://assets/scribble/tile_bush.png" id="tile_bush"]
+[ext_resource type="Texture2D" path="res://assets/scribble/tile_top.png" id="tile_top"]
+[ext_resource type="Texture2D" path="res://assets/scribble/tile_block.png" id="tile_block"]
+[ext_resource type="Texture2D" path="res://assets/scribble/tile_bushHalf.png" id="tile_bushHalf"]
 [ext_resource type="Texture2D" path="res://assets/scribble/tile_castle.png" id="tile_castle"]
 
 [node name="Arena" type="Node2D"]
@@ -71,229 +71,229 @@ texture = ExtResource("tile_castle")
 position = Vector2(335.0, 494.0)
 scale = Vector2(0.703125, 0.40310077519379844)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_bush")
+texture = ExtResource("tile_bushHalf")
 
 [node name="BushRight" type="Sprite2D" parent="Scenery/Decorations"]
 position = Vector2(825.0, 494.0)
 scale = Vector2(0.703125, 0.40310077519379844)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_bush")
+texture = ExtResource("tile_bushHalf")
 
-[node name="Grass01" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top01" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(32.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick01" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block01" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(32.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass02" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top02" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(96.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick02" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block02" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(96.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass03" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top03" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(160.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick03" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block03" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(160.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass04" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top04" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(224.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick04" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block04" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(224.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass05" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top05" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(288.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick05" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block05" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(288.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass06" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top06" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(352.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick06" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block06" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(352.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass07" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top07" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(416.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick07" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block07" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(416.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass08" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top08" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(480.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick08" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block08" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(480.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass09" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top09" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(544.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick09" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block09" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(544.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass10" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top10" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(608.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick10" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block10" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(608.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass11" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top11" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(672.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick11" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block11" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(672.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass12" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top12" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(736.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick12" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block12" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(736.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass13" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top13" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(800.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick13" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block13" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(800.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass14" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top14" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(864.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick14" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block14" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(864.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass15" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top15" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(928.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick15" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block15" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(928.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass16" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top16" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(992.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick16" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block16" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(992.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass17" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top17" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(1056.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick17" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block17" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(1056.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
-[node name="Grass18" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Top18" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(1120.0, 32.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_grass")
+texture = ExtResource("tile_top")
 
-[node name="Brick18" type="Sprite2D" parent="Scenery/Ground"]
+[node name="Block18" type="Sprite2D" parent="Scenery/Ground"]
 position = Vector2(1120.0, 96.0)
 scale = Vector2(0.5, 0.5)
 modulate = Color(1, 1, 1, 1)
-texture = ExtResource("tile_brick")
+texture = ExtResource("tile_block")
 
 [node name="Fighters" type="Node2D" parent="."]
 

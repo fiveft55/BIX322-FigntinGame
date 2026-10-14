@@ -22,10 +22,18 @@ GameSettings.CHARACTERS defines names, body/hand textures, and health-bar colors
 
 Settings has Music, Effects, and Voice sliders (0–100%). They apply instantly to separate AudioServer buses. Music affects both menu and battle tracks; Effects includes jump, attacks, hits, and the start cue; Voice controls the announcer. Zero mutes the bus. Player-specific Volume dB in the audio scenes remains the base mix, multiplied by the bus slider value.
 
-Preferences is an autoload from scripts/preferences.gd. It saves difficulty, character/weapon choices, and volumes to user://settings.cfg. Missing files use defaults; loaded values are clamped to supported ranges. The chosen local/AI play mode is a runtime choice. On desktop, user:// is Godot's application-data directory; in the cloud it follows the documented XDG_DATA_HOME. Tests use a separate settings file so they do not overwrite user preferences.
+Preferences is an autoload from scripts/preferences.gd. It saves difficulty, character/weapon/hat choices, and volumes to user://settings.cfg. Missing files use defaults; loaded values are clamped to supported ranges. The chosen local/AI play mode is a runtime choice. On desktop, user:// is Godot's application-data directory; in the cloud it follows the documented XDG_DATA_HOME. Tests use a separate settings file so they do not overwrite user preferences.
 
 Menu sound filenames from the uploaded menu.zip are preserved under assets/audio/menu: mfcc-game-game-music-603130.mp3 and freesound_community-game-start-6104.mp3. The project owner's CC0 declaration is recorded there. Select Music/StartSound in main_menu.tscn to swap files or change base volume.
 
 ## Verification
 
 Run tests/menu_test.gd alongside the README suites. It checks looping menu music, opening settings, live bus mute/volume, saved options, character/weapon application, health color, both play modes, menu return, and actual Easy/Hard AI behavior. Headless tests cannot evaluate how the music sounds or visual spacing; desktop playtesting is recommended.
+
+## Hats, background, and practice-only shortcuts
+
+Characters now includes a hat selector for each player: No Hat, Cap, Top Hat, Helmet, and Modern Helmet from the original pack. GameSettings.HATS defines names and paths. Preferences.hats saves choices. Hat is a Sprite2D child of Body in each fighter scene and menu preview, so it follows body motion and facing. Edit its local position/scale in the scenes to adjust fit.
+
+MainMenu/Background uses the pack's original Sample.png via a full-size TextureRect with aspect-cover scaling; BackgroundWash provides a light readability overlay. Edit those scene nodes for placement/tint. The original unmodified sample retains Kenney's artwork and attribution.
+
+R, H, and Tab practice controls are ignored in matches launched with Local Two Players. AI practice matches allow them, including toggling the practice opponent temporarily to manual control and back. The match mode is captured at launch, so a local match cannot be converted to AI using Tab. Escape and result-screen Play Again/Main Menu remain available in either mode. Quit is removed from results and remains on the main menu.

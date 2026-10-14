@@ -4,6 +4,7 @@ extends Node2D
 var fighters: Array[Fighter] = []
 var bars: Array[ProgressBar] = []
 var round_over := false
+var ai_practice_mode := true
 var match_over := false
 var round_ticks_remaining := 0
 var countdown_ticks := 0
@@ -17,7 +18,8 @@ func _ready() -> void:
 	for action in GameSettings.KEYS:
 		bind(action, GameSettings.KEYS[action])
 	fighters.assign([$Fighters/Player1, $Fighters/Player2])
-	fighters[1].use_ai = not Preferences.local_mode
+	ai_practice_mode = not Preferences.local_mode
+	fighters[1].use_ai = ai_practice_mode
 	for fighter in fighters:
 		spawn_positions.append(fighter.position)
 	match_audio = (load("res://scenes/match_audio.tscn") as PackedScene).instantiate()
@@ -30,7 +32,6 @@ func _ready() -> void:
 	match_overlay = (load("res://scenes/match_overlay.tscn") as PackedScene).instantiate()
 	add_child(match_overlay)
 	match_overlay.get_node("Victory/Rematch").pressed.connect(restart)
-	match_overlay.get_node("Victory/Quit").pressed.connect(func() -> void: get_tree().quit())
 	match_overlay.get_node("Victory/MainMenu").pressed.connect(return_to_menu)
 	restart()
 
@@ -80,7 +81,7 @@ func create_hud() -> void:
 			GameSettings.key_label(player + "_block"),
 		])
 	print(" | ".join(control_labels))
-	print("%s AI/local · %s hitboxes · %s restart" % [
+	print("AI practice only: %s AI toggle · %s hitboxes · %s restart" % [
 		GameSettings.key_label("ai"),
 		GameSettings.key_label("boxes"),
 		GameSettings.key_label("restart"),
@@ -163,12 +164,12 @@ func update_countdown() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if Input.is_action_just_pressed("restart"):
+	if ai_practice_mode and Input.is_action_just_pressed("restart"):
 		restart()
-	if Input.is_action_just_pressed("boxes"):
+	if ai_practice_mode and Input.is_action_just_pressed("boxes"):
 		for fighter in fighters:
 			fighter.debug_boxes = not fighter.debug_boxes
-	if Input.is_action_just_pressed("ai"):
+	if ai_practice_mode and Input.is_action_just_pressed("ai"):
 		fighters[1].use_ai = not fighters[1].use_ai
 		fighters[1].buffer.clear()
 		print("Player 2 mode: ", "AI" if fighters[1].use_ai else "LOCAL")
