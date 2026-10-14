@@ -5,7 +5,13 @@ extends Node2D
 @onready var rig: Node2D = $Rig
 @onready var body: Sprite2D = $Rig/Body
 @onready var front_hand: Sprite2D = $Rig/FrontHand
-@onready var shield: Sprite2D = $Rig/Shield
+@onready var rear_hand: Sprite2D = $Rig/RearHand
+@onready var shield: Sprite2D = $Rig/RearHand/Shield
+## Tune the shield-hand guard pose in the Visuals Inspector.
+@export var guard_hand_offset := Vector2(48, -18)
+@export_range(1, 30, 1) var guard_raise_frames := 6
+@export var guard_recoil_offset := Vector2(-10, 4)
+var base_rear_rotation := 0.0
 @onready var effect: Sprite2D = $Rig/PunchEffect
 @onready var sword: Sprite2D = $Rig/FrontHand/SwordGrip/Sword
 var base_positions: Dictionary = {}
@@ -14,8 +20,9 @@ var base_body_rotation := 0.0
 var base_sword_rotation := 0.0
 
 func _ready() -> void:
-	for node in [body, front_hand, effect]:
+	for node in [body, front_hand, rear_hand, effect]:
 		base_positions[node] = node.position
+	base_rear_rotation = rear_hand.rotation
 	base_body_rotation = body.rotation
 	base_sword_rotation = sword_grip.rotation
 	update_pose()
@@ -52,9 +59,20 @@ func update_pose() -> void:
 	rig.scale.x = fighter.facing
 	body.position = base_positions[body] + Vector2(0, bob)
 	body.rotation = base_body_rotation + tilt
-	body.modulate = Color(1, 0.65, 0.65) if fighter.state == Fighter.State.HIT_STUN else Color.WHITE
+	body.modulate = Color(1, 0.65, 0.65) if fighter.state == Fighter.State.HIT_STUN and not fighter.guard_hit else Color.WHITE
 	front_hand.position = base_positions[front_hand] + Vector2(extension, bob)
 	sword_grip.rotation = base_sword_rotation + swing
 	effect.position = base_positions[effect] + Vector2(Fighter.ATTACKS[fighter.combo].reach - 24, 0)
 	effect.visible = active
-	shield.visible = fighter.state == Fighter.State.BLOCKING
+	# Shield is a child of the free hand, so it follows every hand transform.
+	var guard_amount := 0.0
+	var recoil := 0.0
+	if fighter.state == Fighter.State.BLOCKING:
+		guard_amount = clampf(float(fighter.state_frame) / guard_raise_frames, 0, 1)
+	elif fighter.state == Fighter.State.HIT_STUN and fighter.guard_hit:
+		guard_amount = 1.0
+		recoil = maxf(0, 1 - float(fighter.state_frame) / GameSettings.BLOCK_STUN_FRAMES)
+	rear_hand.position = base_positions[rear_hand] + Vector2(0, bob)
+	rear_hand.position += guard_hand_offset * guard_amount + guard_recoil_offset * recoil
+	rear_hand.rotation = base_rear_rotation - 0.15 * guard_amount + 0.2 * recoil
+	shield.visible = true

@@ -51,5 +51,25 @@ func run() -> void:
 	check(target.position.x == GameSettings.RIGHT_BOUND, "Arena wall limits knockback")
 	target.reset_fighter(500)
 	check(target.velocity == Vector2.ZERO and target.knockback_remaining == 0, "Reset clears knockback momentum")
+	target.hit_push_distance = GameSettings.HIT_PUSH
+	target.receive_hit(GameSettings.ATTACKS[0], attacker)
+	check(target.stun_remaining == 60, "Default stun lasts one second at 60 Hz")
+	Input.action_press("p1_left")
+	target.buffer.push(&"attack")
+	target.buffer.push(&"jump")
+	for frame in range(18):
+		target.tick(1.0 / 60)
+	check(is_equal_approx(target.position.x, 680), "Stronger default knockback travels 180 pixels")
+	for frame in range(41):
+		target.tick(1.0 / 60)
+	check(target.state == Fighter.State.HIT_STUN and target.stun_remaining == 1, "Movement, attack, and jump cannot interrupt one-second stun")
+	check(is_equal_approx(target.position.x, 680), "Knockback stops while stun remains")
+	target.tick(1.0 / 60)
+	check(target.state == Fighter.State.IDLE, "Stun ends after the sixtieth tick")
+	Input.action_release("p1_left")
+	target.reset_fighter(500)
+	target.hit_stun_seconds = 0.5
+	target.receive_hit(GameSettings.ATTACKS[0], attacker)
+	check(target.stun_remaining == 30, "Inspector stun duration is editable")
 	print("Knockback checks: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

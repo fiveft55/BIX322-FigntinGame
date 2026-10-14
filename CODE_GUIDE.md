@@ -117,4 +117,10 @@ All texture references and placement now live in arena.tscn and fighter_green/pu
 
 ## Hit reaction movement
 
-Fighter exposes hit_push_distance and hit_jump_speed as Inspector properties. receive_hit() launches upward and stores signed knockback_remaining and knockback_speed. The HIT_STUN branch of tick() moves that distance over the configured stun duration, while existing gravity integrates the hop. Direction is away from the attacker's position; walls clamp travel. Guard keeps a small immediate shove instead. reset_fighter() clears remaining displacement and speed. tests/knockback_test.gd checks editable values, both directions, landing, guard, walls, and restart.
+Fighter exposes hit_push_distance, hit_jump_speed, and hit_stun_seconds as Inspector properties. receive_hit() launches upward and stores signed knockback_remaining and knockback_speed. The HIT_STUN branch of tick() moves that distance over KNOCKBACK_SECONDS (capped to the stun duration), while existing gravity integrates the hop. Direction is away from the attacker's position; walls clamp travel. Guard keeps a small immediate shove instead. reset_fighter() clears remaining displacement and speed. tests/knockback_test.gd checks editable values, both directions, landing, guard, walls, and restart.
+
+HIT_STUN_SECONDS sets the default minimum unblocked stun (1 second); KNOCKBACK_SECONDS controls travel time (0.3 seconds). The effective hit stun is the larger of the per-character minimum converted to frames and the attack dictionary stun value. Default hit travel is 180 pixels. After travel finishes, HIT_STUN still ignores actions until the timer expires. Wall limits and repeat hits still apply.
+
+## Shield reactions
+
+RearHand/Shield is scene-authored. Fighter.guard_hit marks guarded HIT_STUN, resets on state transitions, and lets presentation distinguish guard recoil from full damage. FighterVisual.update_pose() blends the hand to guard_hand_offset over guard_raise_frames, applies guard_recoil_offset during guard stun, and restores the authored resting pose afterward. These pose settings are exported on Visuals. The shield stays visible at rest; gameplay protection still depends on BLOCKING and facing.

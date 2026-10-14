@@ -28,6 +28,30 @@ func run() -> void:
 				push_error("Fighter texture failed to load")
 				quit(1)
 				return
+		fighter.change_state(Fighter.State.BLOCKING)
+		fighter.state_frame = visual.guard_raise_frames
+		visual.update_pose()
+		var raised_position := visual.rear_hand.position
+		if visual.shield.get_parent() != visual.rear_hand or not visual.shield.visible:
+			push_error("Shield must stay attached to the free hand")
+			quit(1)
+			return
+		if raised_position != visual.base_positions[visual.rear_hand] + visual.guard_hand_offset:
+			push_error("Guard did not raise the shield hand")
+			quit(1)
+			return
+		fighter.facing = 1 if fighter.opponent.position.x > fighter.position.x else -1
+		fighter.receive_hit(Fighter.ATTACKS[0], fighter.opponent)
+		if not fighter.guard_hit or visual.rear_hand.position != raised_position + visual.guard_recoil_offset:
+			push_error("Blocked attack did not recoil the raised shield hand")
+			quit(1)
+			return
+		fighter.change_state(Fighter.State.IDLE)
+		visual.update_pose()
+		if visual.rear_hand.position != visual.base_positions[visual.rear_hand] or fighter.guard_hit:
+			push_error("Idle did not restore shield hand and clear guard reaction")
+			quit(1)
+			return
 	for sprite in arena.get_node("Scenery").find_children("*", "Sprite2D", true, false):
 		if sprite.texture == null:
 			push_error("Scenery texture failed to load")

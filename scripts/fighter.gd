@@ -13,9 +13,11 @@ var health := GameSettings.MAX_HEALTH
 var facing := 1
 var combo := 0
 var stun_remaining := 0
+var guard_hit := false # Distinguishes guard recoil from an unblocked hit.
 ## Per-character tuning is available in the scene Inspector.
 @export_range(0, 500, 1) var hit_push_distance: float = GameSettings.HIT_PUSH
 @export_range(0, 1000, 1) var hit_jump_speed: float = GameSettings.HIT_JUMP_SPEED
+@export_range(0, 3, 0.05) var hit_stun_seconds: float = GameSettings.HIT_STUN_SECONDS
 var knockback_remaining := 0.0
 var knockback_speed := 0.0
 @export_range(1, 2) var player_index := 1
@@ -24,7 +26,7 @@ var buffer := FightInputBuffer.new()
 var hurtbox: Area2D
 var hitbox: Area2D
 var victims: Array[int] = []
-var debug_boxes := true
+var debug_boxes := false # H toggles diagnostic collision overlays when needed.
 var enabled := true
 @export var use_ai := false
 var ai_timer := 0.0
@@ -55,6 +57,7 @@ func change_state(next: State) -> void:
 		remove_hitbox()
 	state = next
 	state_frame = 0
+	guard_hit = false
 
 func start_attack(next_combo: int = 0) -> void:
 	change_state(State.ATTACKING)
@@ -104,7 +107,7 @@ func tick(delta: float) -> void:
 	velocity.x = 0.0
 	match state:
 		State.HIT_STUN:
-			# Spread the configured distance over stun instead of teleporting.
+			# Travel finishes quickly; the remaining stun locks out player actions.
 			var step := minf(absf(knockback_remaining), knockback_speed * delta)
 			velocity.x = signf(knockback_remaining) * step / delta
 			knockback_remaining -= velocity.x * delta
@@ -194,7 +197,10 @@ func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 	var guarded := state == State.BLOCKING and front
 	health = maxi(0, health - (GameSettings.BLOCK_DAMAGE if guarded else int(attack.damage)))
 	change_state(State.HIT_STUN)
+	guard_hit = guarded
 	stun_remaining = GameSettings.BLOCK_STUN_FRAMES if guarded else int(attack.stun)
+	if not guarded:
+		stun_remaining = maxi(stun_remaining, ceili(hit_stun_seconds * 60.0))
 	buffer.clear()
 	var away := signf(position.x - attacker.position.x)
 	if away == 0:
@@ -209,8 +215,11 @@ func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 		)
 	else:
 		knockback_remaining = away * hit_push_distance
-		knockback_speed = hit_push_distance / (maxi(1, stun_remaining) / 60.0)
+		var travel_seconds := minf(GameSettings.KNOCKBACK_SECONDS, maxi(1, stun_remaining) / 60.0)
+		knockback_speed = hit_push_distance / travel_seconds
 		velocity.y = -hit_jump_speed
+	if is_instance_valid(visuals):
+		visuals.update_pose()
 
 func reset_fighter(x: float) -> void:
 	change_state(State.IDLE)

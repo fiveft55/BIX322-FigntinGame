@@ -76,3 +76,9 @@ The uploaded Kenney Scribble Platformer pack provides green/purple fighters, han
 Open scenes/arena.tscn for organized scenery and fighter instances. Open scenes/fighter_green.tscn or scenes/fighter_purple.tscn to edit body, hands, swords, shields, and effects directly in the Inspector. Both fighters now swing swords using the timed attack hitboxes. See [SCENE_GUIDE.md](SCENE_GUIDE.md) for step-by-step placement and replacement instructions.
 
 Unblocked hits now launch fighters upward and backward. Select the Fighter root in either fighter scene to edit **Hit Push Distance** (pixels) and **Hit Jump Speed** (pixels/second). See SCENE_GUIDE.md for tuning and scene overrides.
+
+Default unblocked hits now push 180 pixels over 0.3 seconds and stun for 1 second. **Hit Stun Seconds** joins the editable Fighter Inspector settings. Attack frame-data stun values are lower bounds; the per-character 60-frame default minimum takes precedence. Blocking keeps its short guard stun.
+
+Collision outlines are hidden by default. Press H to toggle green hurtboxes and red attack hitboxes for debugging.
+
+Both fighters hold shields in their free hands. Guard raises that hand; a blocked hit briefly recoils it. Tune the guard hand pose on the Visuals node in either fighter scene.

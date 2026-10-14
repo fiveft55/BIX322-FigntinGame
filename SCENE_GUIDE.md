@@ -33,10 +33,10 @@ Fighter (CharacterBody2D, fighter.gd)
     └── Rig
         ├── Body (Sprite2D)
         ├── RearHand (Sprite2D)
+        │   └── Shield (Sprite2D, always held)
         ├── FrontHand (Sprite2D)
         │   └── SwordGrip (Node2D)
         │       └── Sword (Sprite2D)
-        ├── Shield (Sprite2D, hidden initially)
         └── PunchEffect (Sprite2D, hidden initially)
 ```
 
@@ -44,7 +44,7 @@ Select Body/Hand/Sword nodes to replace textures or edit their local transforms.
 
 SwordGrip pivots the sword around the hand. Sword points upward in its PNG; the grip's 90° baseline turns it forward. Position/scale the Sword child to line up its hilt with the hand; change SwordGrip baseline rotation for the resting orientation. Attack startup draws the sword back, active frames swing forward, and recovery retracts it. Both fighters use the same timing logic and mirror toward their opponent.
 
-Temporarily enable Shield or PunchEffect visibility in the Inspector to place them, then disable it again before saving. Runtime visibility is automatic. The effect retains its scene position as a baseline and shifts toward the attack reach.
+Shield is visible at rest and follows RearHand. Temporarily enable PunchEffect visibility to place it, then disable the effect again before saving. Runtime effect visibility is automatic. The effect retains its scene position as a baseline and shifts toward the attack reach.
 
 ## Collision and animation
 
@@ -58,7 +58,15 @@ Run the README tests after changes. A desktop playtest is needed to judge the fi
 
 Open fighter_green.tscn or fighter_purple.tscn and select the Fighter root. In Inspector → Script Variables:
 
-- **Hit Push Distance**: horizontal travel in pixels on an unblocked hit (default 90). Try 150 for stronger knockback or 0 to disable horizontal push.
+- **Hit Push Distance**: horizontal travel in pixels on an unblocked hit (default 180). Try 240 for stronger knockback or 0 to disable horizontal push.
 - **Hit Jump Speed**: upward launch magnitude in pixels/second (default 260). Try 350 for a higher hit hop or 0 for no upward launch.
 
-These values are per character and can also be overridden on Player1/Player2 scene instances. Project-wide defaults are HIT_PUSH and HIT_JUMP_SPEED in game_settings.gd; explicitly saved Inspector overrides take precedence. Distance is spread across hit stun; arena walls can shorten actual travel. Gravity controls landing. A new hit replaces the previous knockback. Guarded hits use BLOCK_PUSH and do not launch upward. Restart clears all knockback momentum.
+These values are per character and can also be overridden on Player1/Player2 scene instances. Project-wide defaults are HIT_PUSH and HIT_JUMP_SPEED in game_settings.gd; explicitly saved Inspector overrides take precedence. Distance is delivered over KNOCKBACK_SECONDS (default 0.3 seconds), followed by a stationary stun; arena walls can shorten actual travel. Gravity controls landing. A new hit replaces the previous knockback. Guarded hits use BLOCK_PUSH and do not launch upward. Restart clears all knockback momentum.
+
+**Hit Stun Seconds** is also editable on the Fighter root (default 1.0). Unblocked hits prevent movement, attacks, jumping, and blocking for at least this duration. Attack data can specify longer stun. The default is 60 simulation ticks; guard still uses the shorter BLOCK_STUN_FRAMES. New hits restart stun. Change KNOCKBACK_SECONDS in game_settings.gd to tune travel speed without changing total distance or stun duration.
+
+## Shield hand animation
+
+Both fighters always hold their shield in RearHand, the hand without the sword. Shield is a child Sprite2D, so repositioning/scaling the hand also moves the shield. Its child scale compensates for the hand's 0.5 scale.
+
+Select Visuals in either fighter scene to edit **Guard Hand Offset** (default 48, -18), **Guard Raise Frames** (6 frames), and **Guard Recoil Offset** (-10, 4). Holding guard raises the hand forward and upward over those frames. A front blocked hit keeps the shield raised and nudges the hand back; it returns as the brief guard stun expires. Releasing guard restores the resting hand position. Rig mirrors the whole arrangement for either facing. Shield artwork alone does not add protection: normal front-facing guard rules still determine damage.
