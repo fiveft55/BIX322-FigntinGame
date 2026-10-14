@@ -77,8 +77,14 @@ Open scenes/arena.tscn for organized scenery and fighter instances. Open scenes/
 
 Unblocked hits now launch fighters upward and backward. Select the Fighter root in either fighter scene to edit **Hit Push Distance** (pixels) and **Hit Jump Speed** (pixels/second). See SCENE_GUIDE.md for tuning and scene overrides.
 
-Default unblocked hits now push 180 pixels over 0.3 seconds and stun for 1 second. **Hit Stun Seconds** joins the editable Fighter Inspector settings. Attack frame-data stun values are lower bounds; the per-character 60-frame default minimum takes precedence. Blocking keeps its short guard stun.
+Default unblocked hits now push 180 pixels over 0.3 seconds and stun for 0.5 seconds. **Hit Stun Seconds** joins the editable Fighter Inspector settings. Attack frame-data stun values are lower bounds; the per-character 30-frame default minimum takes precedence. Blocking keeps its short guard stun.
 
 Collision outlines are hidden by default. Press H to toggle green hurtboxes and red attack hitboxes for debugging.
 
 Both fighters hold shields in their free hands. Guard raises that hand; a blocked hit briefly recoils it. Tune the guard hand pose on the Visuals node in either fighter scene.
+
+## Shield size and block parries
+
+Shield scale is now reduced by 65% (35% of the previous size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.5 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+
+Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.5). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.5 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.

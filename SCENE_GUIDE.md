@@ -63,10 +63,16 @@ Open fighter_green.tscn or fighter_purple.tscn and select the Fighter root. In I
 
 These values are per character and can also be overridden on Player1/Player2 scene instances. Project-wide defaults are HIT_PUSH and HIT_JUMP_SPEED in game_settings.gd; explicitly saved Inspector overrides take precedence. Distance is delivered over KNOCKBACK_SECONDS (default 0.3 seconds), followed by a stationary stun; arena walls can shorten actual travel. Gravity controls landing. A new hit replaces the previous knockback. Guarded hits use BLOCK_PUSH and do not launch upward. Restart clears all knockback momentum.
 
-**Hit Stun Seconds** is also editable on the Fighter root (default 1.0). Unblocked hits prevent movement, attacks, jumping, and blocking for at least this duration. Attack data can specify longer stun. The default is 60 simulation ticks; guard still uses the shorter BLOCK_STUN_FRAMES. New hits restart stun. Change KNOCKBACK_SECONDS in game_settings.gd to tune travel speed without changing total distance or stun duration.
+**Hit Stun Seconds** is also editable on the Fighter root (default 0.5). Unblocked hits prevent movement, attacks, jumping, and blocking for at least this duration. Attack data can specify longer stun. The default is 30 simulation ticks; guard still uses the shorter BLOCK_STUN_FRAMES. New hits restart stun. Change KNOCKBACK_SECONDS in game_settings.gd to tune travel speed without changing total distance or stun duration.
 
 ## Shield hand animation
 
 Both fighters always hold their shield in RearHand, the hand without the sword. Shield is a child Sprite2D, so repositioning/scaling the hand also moves the shield. Its child scale compensates for the hand's 0.5 scale.
 
 Select Visuals in either fighter scene to edit **Guard Hand Offset** (default 48, -18), **Guard Raise Frames** (6 frames), and **Guard Recoil Offset** (-10, 4). Holding guard raises the hand forward and upward over those frames. A front blocked hit keeps the shield raised and nudges the hand back; it returns as the brief guard stun expires. Releasing guard restores the resting hand position. Rig mirrors the whole arrangement for either facing. Shield artwork alone does not add protection: normal front-facing guard rules still determine damage.
+
+## Shield size and block parries
+
+Shield scale is now reduced by 65% (35% of the previous size) and its Z Index is 5 so it draws over the sword. Edit RearHand/Shield in either fighter scene to adjust scale or layering. Every successful front-facing block acts as a parry: it cancels the attack, applies no damage to the attacker, and pushes the attacker backward while stunning them for 0.5 seconds. Rear hits do not parry. Guard chip damage and the defender's brief guard stun still apply.
+
+Select the Fighter root to edit **Parry Push Distance** (default 120 pixels, on the attacking character). `PARRY_STUN_SECONDS` in game_settings.gd controls parry recovery (default 0.5). `HIT_STUN_SECONDS` and the Fighter's **Hit Stun Seconds** now default to 0.5 seconds for unblocked hits. Attack data may specify longer hit stun. Arena walls limit push distance.

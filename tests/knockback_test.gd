@@ -53,23 +53,43 @@ func run() -> void:
 	check(target.velocity == Vector2.ZERO and target.knockback_remaining == 0, "Reset clears knockback momentum")
 	target.hit_push_distance = GameSettings.HIT_PUSH
 	target.receive_hit(GameSettings.ATTACKS[0], attacker)
-	check(target.stun_remaining == 60, "Default stun lasts one second at 60 Hz")
+	check(target.stun_remaining == 30, "Default stun lasts half a second at 60 Hz")
 	Input.action_press("p1_left")
 	target.buffer.push(&"attack")
 	target.buffer.push(&"jump")
 	for frame in range(18):
 		target.tick(1.0 / 60)
 	check(is_equal_approx(target.position.x, 680), "Stronger default knockback travels 180 pixels")
-	for frame in range(41):
+	for frame in range(11):
 		target.tick(1.0 / 60)
-	check(target.state == Fighter.State.HIT_STUN and target.stun_remaining == 1, "Movement, attack, and jump cannot interrupt one-second stun")
+	check(target.state == Fighter.State.HIT_STUN and target.stun_remaining == 1, "Movement, attack, and jump cannot interrupt half-second stun")
 	check(is_equal_approx(target.position.x, 680), "Knockback stops while stun remains")
 	target.tick(1.0 / 60)
-	check(target.state == Fighter.State.IDLE, "Stun ends after the sixtieth tick")
+	check(target.state == Fighter.State.IDLE, "Stun ends after the thirtieth tick")
 	Input.action_release("p1_left")
 	target.reset_fighter(500)
-	target.hit_stun_seconds = 0.5
+	target.hit_stun_seconds = 0.75
 	target.receive_hit(GameSettings.ATTACKS[0], attacker)
-	check(target.stun_remaining == 30, "Inspector stun duration is editable")
+	check(target.stun_remaining == 45, "Inspector stun duration is editable")
+	attacker.reset_fighter(400)
+	target.reset_fighter(500)
+	attacker.facing = 1
+	attacker.start_attack()
+	for frame in range(6):
+		attacker.tick(1.0 / 60)
+	target.facing = -1
+	target.change_state(Fighter.State.BLOCKING)
+	target.receive_hit(GameSettings.ATTACKS[0], attacker)
+	check(attacker.state == Fighter.State.HIT_STUN and attacker.hitbox == null, "Front block parries and interrupts the attacker")
+	check(attacker.health == GameSettings.MAX_HEALTH and attacker.stun_remaining == 30, "Parry deals no damage and stuns for half a second")
+	for frame in range(18):
+		attacker.tick(1.0 / 60)
+	check(is_equal_approx(attacker.position.x, 280), "Parry pushes attacker away by editable distance")
+	attacker.reset_fighter(600)
+	target.reset_fighter(500)
+	target.facing = -1
+	target.change_state(Fighter.State.BLOCKING)
+	target.receive_hit(GameSettings.ATTACKS[0], attacker)
+	check(attacker.state == Fighter.State.IDLE, "Rear hit cannot trigger a parry")
 	print("Knockback checks: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

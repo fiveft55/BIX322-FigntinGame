@@ -18,6 +18,7 @@ var guard_hit := false # Distinguishes guard recoil from an unblocked hit.
 @export_range(0, 500, 1) var hit_push_distance: float = GameSettings.HIT_PUSH
 @export_range(0, 1000, 1) var hit_jump_speed: float = GameSettings.HIT_JUMP_SPEED
 @export_range(0, 3, 0.05) var hit_stun_seconds: float = GameSettings.HIT_STUN_SECONDS
+@export_range(0, 500, 1) var parry_push_distance: float = GameSettings.PARRY_PUSH
 var knockback_remaining := 0.0
 var knockback_speed := 0.0
 @export_range(1, 2) var player_index := 1
@@ -208,6 +209,7 @@ func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 	knockback_remaining = 0.0
 	knockback_speed = 0.0
 	if guarded:
+		attacker.receive_parry(self)
 		# A successful guard keeps the fighter grounded with a small shove.
 		position.x = clampf(
 			position.x + away * GameSettings.BLOCK_PUSH,
@@ -220,6 +222,21 @@ func receive_hit(attack: Dictionary, attacker: Fighter) -> void:
 		velocity.y = -hit_jump_speed
 	if is_instance_valid(visuals):
 		visuals.update_pose()
+
+func receive_parry(defender: Fighter) -> void:
+	# Every successful front block parries: cancel the swing without dealing damage.
+	change_state(State.HIT_STUN)
+	stun_remaining = maxi(1, ceili(GameSettings.PARRY_STUN_SECONDS * 60.0))
+	buffer.clear()
+	var away := signf(position.x - defender.position.x)
+	if away == 0:
+		away = -facing
+	knockback_remaining = away * parry_push_distance
+	var travel_seconds := minf(GameSettings.KNOCKBACK_SECONDS, stun_remaining / 60.0)
+	knockback_speed = parry_push_distance / travel_seconds
+	if is_instance_valid(visuals):
+		visuals.update_pose()
+
 
 func reset_fighter(x: float) -> void:
 	change_state(State.IDLE)
