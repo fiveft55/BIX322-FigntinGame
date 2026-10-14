@@ -95,10 +95,10 @@ theme_override_font_sizes/font_size = 18
 
 [node name="Difficulty" type="OptionButton" parent="Home"]
 visible = false
-offset_left = 240.0
-offset_top = 15.0
-offset_right = 400.0
-offset_bottom = 60.0
+offset_left = 15.0
+offset_top = 75.0
+offset_right = 225.0
+offset_bottom = 120.0
 tooltip_text = "Choose AI difficulty"
 item_count = 3
 selected = 1
@@ -112,9 +112,9 @@ theme_override_font_sizes/font_size = 18
 
 [node name="StartAI" type="Button" parent="Home"]
 visible = false
-offset_left = 415.0
+offset_left = 15.0
 offset_top = 15.0
-offset_right = 527.0
+offset_right = 225.0
 offset_bottom = 60.0
 text = "Play"
 theme_override_font_sizes/font_size = 18
@@ -425,3 +425,12 @@ mouse_filter = 2
 texture = ExtResource("cross")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="AIBack" type="Button" parent="Home"]
+visible = false
+offset_left = 15.0
+offset_top = 135.0
+offset_right = 225.0
+offset_bottom = 180.0
+text = "Main Menu"
+theme_override_font_sizes/font_size = 18

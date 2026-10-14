@@ -51,3 +51,5 @@ The title uses Balsamiq Sans Bold from Google Fonts' official repository, downlo
 The title is now 36 px with a 480 × 90 card; its subtitle is 16 px. Home buttons have 15 px vertical spacing and inner padding. The AI dropdown and Play button retain 15 px horizontal spacing.
 
 Menu buttons and dropdowns use 18 px text, page headings 24 px, and the title 36 px to fit the compact cards.
+
+Player vs AI now toggles the same compact card to Play, Difficulty, and Main Menu in the three original rows. Original menu buttons hide while this submenu is open; Main Menu or Escape restores them. No wider panel is needed.

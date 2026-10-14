@@ -7,6 +7,7 @@ extends Control
 @onready var character_page: Panel = $Characters
 @onready var controls: Panel = $Controls
 var starting := false
+var ai_menu := false
 
 func _ready() -> void:
 	music.stream = music.stream.duplicate()
@@ -15,6 +16,7 @@ func _ready() -> void:
 	$Home/Difficulty.select(Preferences.difficulty)
 	$Home/Difficulty.item_selected.connect(set_difficulty)
 	$Home/PlayAI.pressed.connect(select_ai_mode)
+	$Home/AIBack.pressed.connect(reset_home)
 	$Home/StartAI.pressed.connect(func() -> void: start_game(false))
 	$Home/PlayLocal.pressed.connect(func() -> void: start_game(true))
 	$Toolbar/SettingsButton.pressed.connect(func() -> void: show_page(options))
@@ -52,7 +54,10 @@ func show_page(page: Panel) -> void:
 	controls.visible = page == controls
 	character_page.visible = page == character_page
 	if page == home:
-		$Home/PlayAI.grab_focus()
+		if ai_menu:
+			$Home/StartAI.grab_focus()
+		else:
+			$Home/PlayAI.grab_focus()
 	else:
 		page.get_node("Back").grab_focus()
 
@@ -84,7 +89,10 @@ func start_game(local: bool) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and not starting:
-		show_page(options if controls.visible else home)
+		if home.visible and ai_menu:
+			reset_home()
+		else:
+			show_page(options if controls.visible else home)
 
 func _exit_tree() -> void:
 	music.stop()
@@ -138,9 +146,18 @@ func choose_hat(slot: int, index: int) -> void:
 	update_preview(slot)
 
 func select_ai_mode() -> void:
-	# Expand only when the additional AI controls are needed.
-	home.offset_left = 305
-	home.offset_right = 847
-	$Home/Difficulty.show()
-	$Home/StartAI.show()
-	$Home/Difficulty.grab_focus()
+	ai_menu = true
+	set_home_buttons()
+	$Home/StartAI.grab_focus()
+
+func reset_home() -> void:
+	ai_menu = false
+	set_home_buttons()
+	show_page(home)
+
+func set_home_buttons() -> void:
+	# Both views occupy the same compact card and three button positions.
+	for name in ["PlayAI", "PlayLocal", "CharactersButton"]:
+		home.get_node(name).visible = not ai_menu
+	for name in ["StartAI", "Difficulty", "AIBack"]:
+		home.get_node(name).visible = ai_menu
