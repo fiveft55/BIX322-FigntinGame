@@ -1,2 +1,54 @@
-# BIX322-FigntinGame
-Just a simple tech demo of using AI to create game
+# Frame Fighters — Godot fighting game prototype
+
+A self-contained Godot 4.6 project demonstrating finite state machines, frame-timed combat collision, and buffered combo input. All graphics are drawn in code; no external assets or plugins are required.
+
+## Run
+
+Import `project.godot` in Godot 4.6 and press **F6** on the arena scene or **F5** to play the project. Alternatively run `godot --path .` from this directory on a machine with a display.
+
+| Action | Player 1 | Player 2 |
+| --- | --- | --- |
+| Move | A / D | Left / Right |
+| Attack / combo | F | K |
+| Hold guard | G | L |
+
+Player 2 starts as an AI opponent. **Tab** toggles AI/local play, **H** toggles collision visualization, and **R** restarts. Close the window to exit. Approach your opponent, then press attack repeatedly with short pauses to chain three strikes. An input entered during late recovery is retained until the cancel window opens. Guard protects the front and applies reduced damage and stun.
+
+## Architecture for your project report
+
+- `scripts/fighter.gd`: explicit `IDLE`, `WALKING`, `ATTACKING`, `HIT_STUN`, and `BLOCKING` states. `change_state()` centralizes transitions and destroys attack hitboxes when interrupted. Idle/walking/blocking can start an attack; attacks finish or chain into the next strike; incoming hits interrupt with timed stun. Block stun uses the same stun state with a shorter duration.
+- `scripts/input_buffer.gd`: a bounded queue of timestamped commands, expiring after 220 ms. Consumption removes a command exactly once. Up to eight presses are retained; hits clear pending commands. This tolerates early presses without indefinite delayed attacks.
+- Attacks use a fixed 60 Hz simulation timeline. Startup has no hitbox; active frames instantiate an `Area2D` with a separate rectangle; recovery destroys it. Persistent hurtboxes are separate `Area2D` nodes. Combat uses immediate rectangle intersection with identical dimensions, avoiding stale overlap lists when Godot defers physics updates. A per-attack victim list prevents repeated damage across active frames.
+- `scripts/arena.gd`: input mapping, both fighters' simulation, body separation, simultaneous hit collection, health UI, round outcome, and restart. Both attacks are collected before damage is applied so trades can occur.
+
+| Strike | Startup frames | Active frames | Recovery frames | Damage | Hit stun frames |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 6 | 4 | 13 | 8 | 18 |
+| 2 | 7 | 4 | 14 | 10 | 21 |
+| 3 | 10 | 5 | 22 | 16 | 27 |
+
+The final six recovery frames of strikes 1 and 2 allow a buffered attack to cancel into the next strike. These are simulation frames, with procedural attack poses driven by the same timeline; there are no imported sprite animation frames. This demo has one ground attack chain, local play, and a simple rule-based AI. It does not implement networking, jumping, audio, or a full competitive fighting-game ruleset.
+
+## Validation
+
+Run from the project directory:
+
+```sh
+godot --headless --path . --editor --import --quit
+godot --headless --path . --script tests/combat_test.gd
+godot --headless --path . --script tests/arena_test.gd
+godot --headless --path . --quit-after 180
+```
+
+The combat test checks input expiration and single consumption, startup/active/recovery hitbox timing, damage, stun, single-hit protection, buffered combo cancellation, and front/rear blocking. The last command smoke-tests the main scene. Interactive controls and appearance still need a visual playtest on a desktop.
+
+In the cloud sandbox, set writable runtime directories before these commands:
+
+```sh
+export XDG_DATA_HOME=/workspace/godot-runtime/data
+export XDG_CONFIG_HOME=/workspace/godot-runtime/config
+export XDG_CACHE_HOME=/workspace/godot-runtime/cache
+mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
+```
+
+For a Bachelor's submission, supplement the prototype with your own design rationale, FSM diagram, frame-data experiments, test results, evaluation, and disclosure of AI assistance according to your institution's rules. This project is a technical foundation, not a guarantee of an academic grade.

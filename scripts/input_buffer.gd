@@ -1,0 +1,25 @@
+class_name FightInputBuffer
+extends RefCounted
+## Commands expire after a short window, independent of render frame rate.
+const WINDOW := 0.22
+var commands: Array[Dictionary] = []
+var clock := 0.0
+
+func advance(delta: float) -> void:
+	clock += delta
+	commands = commands.filter(func(c: Dictionary) -> bool: return clock - c.time <= WINDOW)
+
+func push(command: StringName) -> void:
+	if commands.size() >= 8:
+		commands.pop_front()
+	commands.append({"command": command, "time": clock})
+
+func consume(command: StringName) -> bool:
+	for i in range(commands.size()):
+		if commands[i].command == command:
+			commands.remove_at(i)
+			return true
+	return false
+
+func clear() -> void:
+	commands.clear()
