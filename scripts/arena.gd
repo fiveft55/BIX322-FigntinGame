@@ -53,7 +53,7 @@ func create_hud() -> void:
 	add_child(layer)
 	var title := Label.new()
 	title.text = "SCRIBBLE FIGHTERS"
-	title.position = Vector2(400, 20)
+	title.position = Vector2(424, 20)
 	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", Color("28333b"))
 	layer.add_child(title)
