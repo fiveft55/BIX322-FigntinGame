@@ -9,6 +9,7 @@ const AIR_SPEED := 210.0 # Horizontal control while jumping.
 const JUMP_SPEED := 620.0 # Positive magnitude; applied upward as negative Y.
 const GRAVITY := 1800.0 # Downward pixels per second squared.
 const MAX_HEALTH := 100
+const ROUND_SECONDS := 60
 const FLOOR_Y := 520.0 # Fighter foot position when grounded.
 const LEFT_BOUND := 42.0
 const RIGHT_BOUND := 1110.0

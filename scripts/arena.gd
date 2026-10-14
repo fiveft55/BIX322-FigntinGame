@@ -5,6 +5,9 @@ var fighters: Array[Fighter] = []
 var info: Label
 var bars: Array[ProgressBar] = []
 var round_over := false
+var match_over := false
+var round_ticks_remaining := 0
+var match_overlay: CanvasLayer
 var spawn_positions: Array[Vector2] = []
 
 func _ready() -> void:
@@ -17,6 +20,10 @@ func _ready() -> void:
 	fighters[0].opponent = fighters[1]
 	fighters[1].opponent = fighters[0]
 	create_hud()
+	match_overlay = (load("res://scenes/match_overlay.tscn") as PackedScene).instantiate()
+	add_child(match_overlay)
+	match_overlay.get_node("Victory/Rematch").pressed.connect(restart)
+	match_overlay.get_node("Victory/Quit").pressed.connect(func() -> void: get_tree().quit())
 	restart()
 
 func bind(action: String, key: Key) -> void:
@@ -82,9 +89,48 @@ func create_hud() -> void:
 	layer.add_child(help)
 
 func restart() -> void:
+	# R and Play Again restart the entire match, not just the current round.
+	match_over = false
+	match_overlay.get_node("Victory").hide()
+	start_round()
+
+
+func start_round() -> void:
 	round_over = false
+	round_ticks_remaining = GameSettings.ROUND_SECONDS * 60
 	for i in range(fighters.size()):
 		fighters[i].reset_fighter(spawn_positions[i].x)
+	update_match_hud()
+
+
+func finish_round() -> void:
+	if round_over:
+		return # Resolve a match exactly once.
+	round_over = true
+	for fighter in fighters:
+		fighter.enabled = false
+		fighter.remove_hitbox()
+	match_over = true
+	var result := "DRAW!"
+	if fighters[0].health != fighters[1].health:
+		var winner := 1 if fighters[0].health > fighters[1].health else 2
+		result = "PLAYER %d WINS!" % winner
+	match_overlay.get_node("Victory/Title").text = result
+	var reason := "TIME UP" if round_ticks_remaining == 0 else "KNOCKOUT"
+	match_overlay.get_node("Victory/Result").text = "%s · HEALTH %d — %d" % [
+		reason, fighters[0].health, fighters[1].health
+	]
+	match_overlay.get_node("Victory").show()
+	match_overlay.get_node("Victory/Rematch").grab_focus()
+	update_match_hud()
+
+
+func update_match_hud() -> void:
+	var seconds := ceili(round_ticks_remaining / 60.0)
+	match_overlay.get_node("Clock").text = "%02d:%02d" % [seconds / 60, seconds % 60]
+	for i in range(fighters.size()):
+		bars[i].value = fighters[i].health
+
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("restart"):
@@ -95,6 +141,8 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("ai"):
 		fighters[1].use_ai = not fighters[1].use_ai
 		fighters[1].buffer.clear()
+	if round_over:
+		return
 	for fighter in fighters:
 		fighter.tick(delta)
 	var separation := fighters[1].position.x - fighters[0].position.x
@@ -116,13 +164,10 @@ func _physics_process(delta: float) -> void:
 				hits.append({"attacker": fighter, "target": fighter.opponent, "attack": Fighter.ATTACKS[fighter.combo]})
 	for hit in hits:
 		hit.target.receive_hit(hit.attack, hit.attacker)
-	if not round_over and (fighters[0].health == 0 or fighters[1].health == 0):
-		round_over = true
-		for fighter in fighters:
-			fighter.enabled = false
-			fighter.remove_hitbox()
-	for i in range(2):
-		bars[i].value = fighters[i].health
+	round_ticks_remaining = maxi(0, round_ticks_remaining - 1)
+	if fighters[0].health == 0 or fighters[1].health == 0 or round_ticks_remaining == 0:
+		finish_round()
+	update_match_hud()
 	info.text = "P1: %s   |   P2: %s (%s)\nGreen: hurtbox · Red: active attack · Buffer: %d / %d" % [
 		Fighter.State.keys()[fighters[0].state],
 		Fighter.State.keys()[fighters[1].state],
@@ -130,7 +175,3 @@ func _physics_process(delta: float) -> void:
 		fighters[0].buffer.commands.size(),
 		fighters[1].buffer.commands.size(),
 	]
-	if round_over:
-		var winner := "DRAW" if fighters[0].health == fighters[1].health else "PLAYER %d WINS" % (1 if fighters[1].health == 0 else 2)
-		info.text += "\n%s — press %s to restart" % [winner, GameSettings.key_label("restart")]
-	queue_redraw()
