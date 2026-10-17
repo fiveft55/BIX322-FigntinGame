@@ -1,0 +1,292 @@
+AI-USE DISCLOSURE AND DEVELOPMENT TIMELINE
+Scribble Fighters — Godot project
+
+PURPOSE AND SCOPE
+This document records AI-assisted development of Scribble Fighters before the request to create this disclosure. It is a retrospective summary reconstructed from the conversation and repository history, not a verbatim chat export. Requests are paraphrased. Entries follow conversation order; individual message timestamps were not available reliably enough to assign dates to each step. Prepared on 17 October 2026 (Australia/Sydney).
+
+STUDENT DETAILS TO COMPLETE
+Student name: ____________________
+Student ID: ____________________
+Course / unit: ____________________
+Assessment title: ____________________
+Institution AI-use policy / disclosure form: ____________________
+
+TWO ROLES, NOT TWO AI AGENTS
+Role 1 — Human student/requester: specified the project requirements, supplied artwork/audio archives, revised behavior and visual preferences, requested Git actions, and reported independent repository edits.
+Role 2 — AI coding assistant: OpenAI Codex, used through this conversation to generate/edit code, scenes, tests and documentation, execute development commands, and perform requested Git operations.
+No second independent AI agent or delegated sub-agent is evidenced in this conversation. The two columns below separate human requests from AI actions; they must not be represented as two independently collaborating AI systems. The exact underlying model identifier is not independently established by this record.
+
+EXTENT OF AI ASSISTANCE
+AI assistance was substantial: the assistant generated the initial playable implementation and many later gameplay, presentation, UI, audio, test, and documentation changes. This was not limited to grammar checking or isolated suggestions. The student retained requirement-setting and acceptance decisions. The record does not establish how much independent student code review, testing, or rewriting occurred outside the conversation.
+
+PROJECT AND EVIDENCE BOUNDARY
+Repository: https://github.com/fiveft55/BIX322-FigntinGame
+Latest documented delivery before this disclosure: 557a5e7 (milestone archive). Later source changes are outside this timeline unless explicitly referenced here. The present disclosure itself and any commit storing it are not counted as prior development work. Commit IDs identify reviewable snapshots; commits sometimes combine several earlier requests.
+
+CHRONOLOGICAL TWO-ROLE TIMELINE
+Each entry distinguishes the human request from the AI action. Requests are paraphrases, not exact quotations.
+
+01. Environment setup
+ROLE 1 — HUMAN REQUEST: Requested cloud setup for fiveft55/BIX322-FigntinGame on main.
+ROLE 2 — AI ACTION: Inspected the repository and cloud tools; found only README/LICENSE and no application. Verified Git read access. Reported that no dependency/build workflow existed yet.
+EVIDENCE / NOTE: No application implementation at this point.
+
+02. First implementation
+ROLE 1 — HUMAN REQUEST: Requested a Godot fighting game for a bachelor project, specifically an FSM, frame-timed hitboxes/hurtboxes, and an input queue.
+ROLE 2 — AI ACTION: Generated the Godot project, arena scene, fighter FSM, timed attacks, command buffer, AI/local control, procedural drawings, health UI, restart, tests, and initial documentation.
+EVIDENCE / NOTE: 6a6b20b
+
+03. Version control
+ROLE 1 — HUMAN REQUEST: Requested commit, then push of the first implementation.
+ROLE 2 — AI ACTION: Committed the generated project and pushed it to GitHub main, checking the remote commit and working tree.
+EVIDENCE / NOTE: 6a6b20b
+
+04. Jump and readability
+ROLE 1 — HUMAN REQUEST: Requested jumping; documentation showing where variables and movement keys can change; more human-readable code. Also requested commit/push.
+ROLE 2 — AI ACTION: Added gravity, launch, air steering, landing, and jump tests; centralized tuning/key constants; reformatted and commented scripts; wrote the code guide.
+EVIDENCE / NOTE: cdd4679
+
+05. Simultaneous input
+ROLE 1 — HUMAN REQUEST: Requested the ability to press/mash multiple inputs together, then commit/push.
+ROLE 2 — AI ACTION: Captured individual input events, allowed movement with attacks/guard and aerial attacks, lengthened attack buffering, added combo/simultaneous-input checks, and updated documentation.
+EVIDENCE / NOTE: 8ef82c8
+
+06. Push confirmations
+ROLE 1 — HUMAN REQUEST: Repeatedly requested pushes and confirmation of GitHub synchronization.
+ROLE 2 — AI ACTION: Executed normal pushes and compared local/remote SHAs; where there were no new commits, reported Everything up-to-date.
+EVIDENCE / NOTE: No additional feature implied by repeated push checks.
+
+07. Asset integration request
+ROLE 1 — HUMAN REQUEST: Asked whether an uploaded asset ZIP could be used to reconfigure the game.
+ROLE 2 — AI ACTION: Explained the intended asset-inspection/integration workflow and requested the actual archive.
+EVIDENCE / NOTE: Planning response; no archive had been supplied at that point.
+
+08. Kenney artwork supplied
+ROLE 1 — HUMAN REQUEST: Uploaded kenney_scribble-platformer.zip following the integration request.
+ROLE 2 — AI ACTION: Inspected archive contents, sample artwork and CC0 license; imported Retina PNGs; replaced procedural character/scenery art with uploaded characters, hands, shields, effects, and tiles; added asset documentation/tests.
+EVIDENCE / NOTE: ff93042
+
+09. Editable scenes and swords
+ROLE 1 — HUMAN REQUEST: Requested editor-placeable assets or a placement guide, then asked for sword attacks.
+ROLE 2 — AI ACTION: Moved art into arena/fighter scene nodes, introduced editable sprite rigs and sword pivots, preserved frame-timed combat, and created a scene guide.
+EVIDENCE / NOTE: 290e03c
+
+10. First knockback
+ROLE 1 — HUMAN REQUEST: Requested players to jump backward on hit, with an editable push distance.
+ROLE 2 — AI ACTION: Added upward launch and horizontal travel over stun, Inspector properties for push distance/launch speed, reset cleanup, tests, and documentation.
+EVIDENCE / NOTE: 290e03c
+
+11. Stronger push and stun
+ROLE 1 — HUMAN REQUEST: Requested more knockback and about one second of stun; requested removal of green player outlines.
+ROLE 2 — AI ACTION: Raised default travel to 180 pixels, added a one-second minimum hit-stun setting, kept guard shove separate, hid collision overlays by default, and documented editable settings.
+EVIDENCE / NOTE: 97778e0
+
+12. Shield-hand movement
+ROLE 1 — HUMAN REQUEST: Requested shields in the empty hands and moving hands during blocks, then commit/push.
+ROLE 2 — AI ACTION: Parented shields to the free hands, animated guard raise/recoil, distinguished guard stun visually, and verified restoration of resting poses.
+EVIDENCE / NOTE: 97778e0
+
+13. Shield layering/parry
+ROLE 1 — HUMAN REQUEST: Requested shield overlap in front of sword, shield 65% smaller, attacker pushback on successful block, and stun reduced to 0.5 seconds.
+ROLE 2 — AI ACTION: Adjusted render ordering/scale, implemented front-block parry cancellation and attacker recoil without damage, and reduced hit/parry stun defaults to 0.5 seconds.
+EVIDENCE / NOTE: c3b143f
+
+14. Shield size revision
+ROLE 1 — HUMAN REQUEST: Revised shield size to only 10% smaller than original; requested commit/push.
+ROLE 2 — AI ACTION: Set both shields to 90% original size and updated relevant guides.
+EVIDENCE / NOTE: 792126e
+
+15. Stun/size revision
+ROLE 1 — HUMAN REQUEST: Requested 0.4-second stun and later shields 20% smaller than original, with commit/push.
+ROLE 2 — AI ACTION: Set hit/parry stun defaults to 0.4 seconds, adjusted the longest attack base stun to match, and set shield size to 80% of original.
+EVIDENCE / NOTE: b49ca6f; 8ad15be
+
+16. Next improvements
+ROLE 1 — HUMAN REQUEST: Asked how to improve the game and chose sounds after receiving suggestions.
+ROLE 2 — AI ACTION: Suggested combat feedback, match loop, menus, and difficulty. Waited for supplied audio rather than inventing a sound pack.
+EVIDENCE / NOTE: Discussion, not all suggestions were implemented.
+
+17. Timer and match format
+ROLE 1 — HUMAN REQUEST: Requested a one-minute round timer, best-of-three, and victory screen; immediately corrected the request to avoid best-of-three.
+ROLE 2 — AI ACTION: Implemented a single 60-second match with KO/timeout/draw decisions and Play Again/Quit result controls at that stage. Removed the provisional series-scoring implementation before delivery.
+EVIDENCE / NOTE: aa6a216
+
+18. Result health removal
+ROLE 1 — HUMAN REQUEST: Requested removal of health values specifically on the game-end screen.
+ROLE 2 — AI ACTION: Removed remaining-health numbers from the result text while retaining health-based winner calculation and in-game health bars.
+EVIDENCE / NOTE: Included with 732e9e1
+
+19. Countdown
+ROLE 1 — HUMAN REQUEST: Requested a three-second centered countdown, FIGHT text, and fading.
+ROLE 2 — AI ACTION: Added 3/2/1 fades, FIGHT fade, disabled pre-fight player input, and kept the live match clock paused until combat began; added countdown checks.
+EVIDENCE / NOTE: 732e9e1
+
+20. Audio supplied
+ROLE 1 — HUMAN REQUEST: Uploaded Kenney fighter voiceovers, battle.rar and replacement battle.zip; clarified the voice pack was for the counter and stated all supplied packs were CC0. Requested commit/push.
+ROLE 2 — AI ACTION: Inspected archives and filenames, retained source audio/licenses, wired numbered/fight/result voices, sword/block/hit/jump sounds, and looping battle music; added separate buses and audio tests.
+EVIDENCE / NOTE: 732e9e1
+
+21. Music gain
+ROLE 1 — HUMAN REQUEST: Requested battle music volume +30%, then commit/push.
+ROLE 2 — AI ACTION: Converted +30% linear gain to approximately +2.279 dB; changed music base volume and checked audio behavior.
+EVIDENCE / NOTE: da36df6
+
+22. Console and speed
+ROLE 1 — HUMAN REQUEST: Requested state/control diagnostics in console and movement/attack speed +25%.
+ROLE 2 — AI ACTION: Removed diagnostic HUD labels, printed controls/state changes, increased movement constants, advanced attack timelines by 1.25 per tick, and preserved hitbox threshold crossings.
+EVIDENCE / NOTE: Included with 7bd3dac
+
+23. Main menu and settings
+ROLE 1 — HUMAN REQUEST: Uploaded menu.zip; requested main menu/music, AI difficulty, volume settings, and control information.
+ROLE 2 — AI ACTION: Created menu scenes/navigation, looping menu music/start cue, Easy/Normal/Hard rule-based AI profiles, persistent music/effects/voice sliders, and controls page.
+EVIDENCE / NOTE: 7bd3dac
+
+24. Customization
+ROLE 1 — HUMAN REQUEST: Requested customization of both players before play, matching health-bar colors, and alternate weapons from the original pack.
+ROLE 2 — AI ACTION: Added body/color and weapon dropdowns/live previews, applied choices to fighter sprites and health bars, saved choices, and documented that weapon variants share melee rules.
+EVIDENCE / NOTE: 7bd3dac
+
+25. Local PvP restrictions
+ROLE 1 — HUMAN REQUEST: Requested reset/collision/Tab only for AI matches, Kenney sample background, hats, and removal of Quit from results.
+ROLE 2 — AI ACTION: Gated practice shortcuts by launch mode, added original sample menu background, per-player hats, saved previews/selections, and result navigation without Quit.
+EVIDENCE / NOTE: 542ef71
+
+26. Arena tiles
+ROLE 1 — HUMAN REQUEST: Requested top/block tiles instead of grass/brick and half bushes, then commit/push of everything.
+ROLE 2 — AI ACTION: Replaced arena textures while preserving placement and mathematical floor; committed together with the pending menu/hats/restriction changes.
+EVIDENCE / NOTE: 542ef71
+
+27. Readable solid menus
+ROLE 1 — HUMAN REQUEST: Requested better readability without a full-screen transparency wash while keeping background visible; requested commit/push.
+ROLE 2 — AI ACTION: Added solid cream menu cards, high-contrast buttons/text, hover/focus styling, and removed the background wash.
+EVIDENCE / NOTE: 8dcb4c5
+
+28. Toolbar/menu reorganization
+ROLE 1 — HUMAN REQUEST: Requested retention of solid title but removal of lower backing, cog/cross icons top-right with 40-pixel outer margins/15-pixel gap, Controls in Settings, Customize label, and AI difficulty after selecting AI.
+ROLE 2 — AI ACTION: Reorganized menus and navigation, added asset icons, moved controls access, exposed difficulty/Play for AI selection, and checked layout/navigation.
+EVIDENCE / NOTE: Included with 9750bf5
+
+29. Playful font
+ROLE 1 — HUMAN REQUEST: Requested a playful Google Font downloaded into the project.
+ROLE 2 — AI ACTION: Downloaded Balsamiq Sans Bold from the official Google Fonts repository, included SIL OFL, applied it to title, and checked title fit.
+EVIDENCE / NOTE: 9750bf5
+
+30. Translucent results
+ROLE 1 — HUMAN REQUEST: Requested a more transparent game-over panel with solid buttons.
+ROLE 2 — AI ACTION: Used a 28%-opacity result-panel style while keeping buttons opaque and outlining text for readability.
+EVIDENCE / NOTE: 9750bf5
+
+31. README rewrite
+ROLE 1 — HUMAN REQUEST: Requested comprehensive README documentation, wording using this project rather than your project, then commit/push.
+ROLE 2 — AI ACTION: Rewrote setup, controls, architecture, customization, tests, and credits; included pending UI/font/result changes in the commit.
+EVIDENCE / NOTE: 9750bf5
+
+32. Compact menu revision
+ROLE 1 — HUMAN REQUEST: Reconsidered layout: requested smaller solid menu/title cards, 15-pixel spacing, smaller title and menu fonts; requested commit/push.
+ROLE 2 — AI ACTION: Restored compact Home backing, reduced title/card and button/dropdown/heading sizes, maintained spacing, and ran menu checks.
+EVIDENCE / NOTE: dc001ec
+
+33. AI submenu revision
+ROLE 1 — HUMAN REQUEST: Requested original buttons to disappear when AI is selected and be replaced by Play, Difficulty, Main Menu until returning; requested commit/push.
+ROLE 2 — AI ACTION: Implemented a same-card three-row toggle with back/Escape restoration rather than a wider menu.
+EVIDENCE / NOTE: 9e6742d
+
+34. Student repository changes
+ROLE 1 — HUMAN REQUEST: Reported making and committing a menu layout adjustment; asked assistant to use it as reference.
+ROLE 2 — AI ACTION: Fetched and fast-forwarded to reported commit 0acf6c0. Observed that this commit had no file-content difference from its parent and explicitly reported that limitation.
+EVIDENCE / NOTE: 0acf6c0 was a user-reported repository commit, not an assistant-authored feature.
+
+35. Clouds and KO cinematic
+ROLE 1 — HUMAN REQUEST: Requested slowly moving clouds and slow-motion final blow with helmet flight before game-over text.
+ROLE 2 — AI ACTION: Added cloud drift/wrapping, 1.4-second knockout presentation at 25% simulation speed, equipped-headgear flight, delayed results, cleanup, and cinematic tests.
+EVIDENCE / NOTE: ed70c04
+
+36. Losing-player audio
+ROLE 1 — HUMAN REQUEST: Uploaded yarzur_ofc-sfx13-boss_damage2-324519.mp3 and requested a hurt sound for the losing player; requested commit/push.
+ROLE 2 — AI ACTION: Added a dedicated SFX player triggered at cinematic start, retaining normal hit sounds and allowing the hurt cue to finish through the result transition.
+EVIDENCE / NOTE: ed70c04
+
+37. Full documentation and equipment flight
+ROLE 1 — HUMAN REQUEST: Requested whole-project documentation; then requested weapon/shield to fly off in cinematic and commit/push everything.
+ROLE 2 — AI ACTION: Consolidated code, scene, menu, asset, and audio guides; created architecture/FSM/signal documentation; detached weapon/shield with independent arcs and restored them on reset.
+EVIDENCE / NOTE: 1c24057
+
+38. Historical versions
+ROLE 1 — HUMAN REQUEST: Requested one ZIP containing first hard-coded, first asset, first sound, and first menu iterations.
+ROLE 2 — AI ACTION: Created four independent git-archive snapshots plus START_HERE, VERSION_INFO, and a JSON manifest; verified ZIP CRC and every tracked file against the corresponding commit.
+EVIDENCE / NOTE: 6a6b20b; ff93042; 732e9e1; 7bd3dac
+
+39. Initial archive push blocker
+ROLE 1 — HUMAN REQUEST: Requested archive commit/push; the execution environment failed to start. Later requested only a downloadable ZIP.
+ROLE 2 — AI ACTION: Reported inability to push during environment failure. Subsequently supplied a workspace-path link, which did not provide a usable chat download.
+EVIDENCE / NOTE: Important limitation: the initial download-link approach was unsuccessful.
+
+40. Download correction
+ROLE 1 — HUMAN REQUEST: Asked why the file could not be downloaded.
+ROLE 2 — AI ACTION: Acknowledged that a local workspace link was not a download attachment. Verified archive still existed, fetched newer user-side commits, and pushed the ZIP plus milestone index to GitHub, supplying a real download URL.
+EVIDENCE / NOTE: 557a5e7
+
+EVIDENCE AND VERIFICATION LIMITS
+The assistant reported running meaningful headless Godot suites for combat, arena flow, jumping, asset loading/poses, knockback/parries, match rules, audio routing, menu/persistence, and cinematics; the final feature update reported nine passing suites. These are automated implementation checks, not an independent academic audit. Headless checks do not establish visual quality, audible mix quality, keyboard ergonomics, or successful desktop export. A desktop playtest remained recommended. ZIP integrity was verified separately; every historical milestone was not freshly playtested during packaging.
+
+HUMAN-SUPPLIED MATERIALS AND EXTERNAL RESOURCES
+The student supplied kenney_scribble-platformer.zip; Kenney fighter voiceover ZIPs; battle.rar and battle.zip; menu.zip; and the separately uploaded knockout MP3. The assistant used artwork/audio rather than creating all assets. Kenney artwork/voice licenses were retained. The student declared the supplied packs CC0; the separate knockout upload had no accompanying license document in the record. Balsamiq Sans Bold was downloaded from the official Google Fonts repository under its included SIL Open Font License. Asset-license compliance is distinct from academic AI-use disclosure.
+
+INDEPENDENT EDITS AND PRESERVATION
+The student reported independent menu edits, but this document does not infer their exact authorship or scope solely from generic upload commit messages. The assistant observed later remote commits 8e197c9, ffd80ae and 4d12b20 and fast-forwarded before adding the archive. Those edits were preserved; they are not claimed here as AI-authored work. The assistant initially could not push because the environment failed, and later corrected a non-downloadable workspace link by publishing the archive in the repository.
+
+SUGGESTED STUDENT DISCLOSURE — REVIEW BEFORE USE
+I used OpenAI Codex as a coding assistant to help develop Scribble Fighters in Godot. I provided requirements, asset/audio packs and iterative feedback. The assistant generated substantial gameplay code, scene configuration, UI/audio integration, automated tests and technical documentation, and executed Git commits/pushes when requested. I am disclosing this assistance rather than claiming that all implementation was independently written by me.
+
+Complete this honestly: I personally reviewed/modified ____________________; I independently tested ____________________; I can explain ____________________; unresolved limitations include ____________________.
+
+Do not submit those blank statements as verified facts. Replace them with the work actually performed.
+
+STUDENT REVIEW CHECKLIST
+1. Compare this summary with the retained conversation and repository commits.
+2. Add any independent work or other AI tools used outside this conversation.
+3. Fill in name, unit, assessment and actual review/testing details.
+4. Follow the institution’s required format, citation style and permission rules.
+5. Retain the full chat/export if the assessor requires primary evidence.
+6. Verify the licenses for submitted third-party assets.
+7. Remove or correct any statement that does not match personal experience.
+This document records usage; it does not certify compliance or guarantee an assessment outcome.
+
+REFERENCES
+Project: https://github.com/fiveft55/BIX322-FigntinGame
+Source documentation: https://github.com/fiveft55/BIX322-FigntinGame/blob/main/README.md
+Architecture: https://github.com/fiveft55/BIX322-FigntinGame/blob/main/ARCHITECTURE.md
+Historical package: https://github.com/fiveft55/BIX322-FigntinGame/tree/main/milestones
+Google Fonts source: https://github.com/google/fonts/tree/main/ofl/balsamiqsans
+Institution policy: [student to supply]
+
+COMMIT EVIDENCE INDEX
+Commit messages below are repository records, not proof of independent authorship.
+
+8a33f83 | Initial commit
+6a6b20b | Add Godot fighting game with state machine and buffered combos
+cdd4679 | Add jumping and document configurable controls and gameplay
+8ef82c8 | Support simultaneous combat inputs and buffered attack mashing
+ff93042 | Integrate Kenney Scribble Platformer assets and animated combat visuals
+290e03c | Add editable fighter scenes, swords, and configurable hit knockback
+97778e0 | Improve knockback and stun with animated free-hand shields
+c3b143f | Add block parry recoil and reduce shield size and stun duration
+792126e | Resize shields to ninety percent of original size
+b49ca6f | Reduce hit and parry stun to 0.4 seconds
+8ad15be | Resize shields to eighty percent of original size
+aa6a216 | Add sixty-second single match and victory screen
+732e9e1 | Add voiced fight countdown, combat sounds, and looping battle music
+da36df6 | Increase battle music volume by thirty percent
+7bd3dac | Add main menu, character selection, saved settings, and AI difficulty
+542ef71 | Add hats, sample menu background, PvP restrictions, and new arena tiles
+8dcb4c5 | Improve menu readability with solid cards and high-contrast controls
+9750bf5 | Refine menu layout and result styling with complete project documentation
+dc001ec | Compact menu panels and reduce text sizes
+9e6742d | Toggle AI setup controls in compact main menu
+0acf6c0 | Add files via upload
+ed70c04 | Add drifting clouds and slow-motion knockout with hurt audio
+1c24057 | Document full project and add weapon and shield knockout flight
+8e197c9 | Add files via upload
+ffd80ae | Add files via upload
+4d12b20 | Update arena.gd
+557a5e7 | Add downloadable archive of four historical project milestones
